@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, make_response
+from flask_cors import CORS
 from transcribe_utils import transcribe_audio
 import os
 from werkzeug.utils import secure_filename
@@ -24,7 +25,7 @@ print(f"APIキー：{api_key}")  # 動作確認用（あとで削除してOK）
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.register_blueprint(youtube_bp)
-
+CORS(app) # Enable CORS
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # === ルート画面 ===
@@ -73,7 +74,7 @@ def read_aloud():
 @app.route('/youtube')
 def youtube_ui():
     return render_template('youtube.html')
-    
+
 @app.route('/evaluate_youtube', methods=['POST'])
 def evaluate_youtube():
     from openai import OpenAI
@@ -121,7 +122,7 @@ def submit():
     # 🔄 static にコピー（上書き）
     static_path = os.path.join("static", "recorded.webm")
     shutil.copy(filepath, static_path)  # ← 変更ポイント！
-    
+
     # 🔍 Whisperで文字起こし
     transcript = transcribe_audio(filepath)
 
@@ -157,7 +158,7 @@ def submit():
     with open(log_path, "w", encoding="utf-8") as f:
         json.dump(logs, f, indent=2, ensure_ascii=False)
 
-    
+
     # 結果を表示
     # 結果ページに必要な情報を渡す
     return render_template(
@@ -173,7 +174,7 @@ def submit():
         word_count=word_count,
         diff_result=diff_result
     )
-    
+
 
 
 @app.route("/check_subtitles", methods=["GET"])
@@ -190,7 +191,7 @@ def check_subtitles():
         "video_id": video_id,
         "has_subtitles": result
     })
-    
+
 @app.route('/evaluate_read_aloud', methods=['POST'])
 def evaluate_read_aloud():
     from openai import OpenAI
@@ -276,6 +277,5 @@ def evaluate_shadowing():
 
 # === アプリ実行（Replitでは不要、ローカル用） ===
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Heroku用ポート
+    port = int(os.environ.get("PORT", 443))  # Heroku用ポート, changed to 443 for HTTPS
     app.run(host="0.0.0.0", port=port, debug=True)
-
