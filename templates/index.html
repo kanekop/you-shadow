@@ -1,60 +1,17 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>シャドウイング評価</title>
-  <script src="https://www.youtube.com/iframe_api"></script>
-
+  <meta charset="UTF-8">
+  <title>シャドウイング支援ツール</title>
 </head>
-
 <body>
-  <h2>音声シャドウイング評価フォーム</h2>
-  <hr>
-  <p><a href="/youtube">▶️ YouTube専用ページはこちら</a></p>
-  <p><a href="/shorts">🎧 短動画専用ページはこちら</a></p>
-
-  <form id="shadowForm" method="POST" enctype="multipart/form-data" action="/submit">
-    <label>名前（任意）:</label>
-    <input type="text" name="user_id" placeholder="名前を入力" required><br><br>
-
-    <label>正解スクリプト:</label><br>
-    <textarea id="script" name="script" rows="2" cols="60" required>
-    </textarea><br><br>
-
-    <div id="youtube-container" style="margin-top: 1em;">
-      <iframe id="youtube-player" width="560" height="315"
-              src="" frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen>
-      </iframe>
-    </div>
-
-
-    
-    <button type="button" id="startBoth">▶️ 再生しながら録音開始</button>
-    <button type="button" id="stopBtn" disabled>■ 録音停止</button><br><br>
-    <button type="button" onclick="testYouTubePlay()">▶️ YouTube再生テスト</button>
-
-    <input type="file" name="audio" id="audioBlobInput" hidden>
-
-    <button type="submit">送信する</button>
-  </form>
-  <hr>
-  <p><b>自分の録音:</b></p>
-  <audio id="recordedAudio" controls></audio>
-  <hr>
-  <p><b>音声教材:</b></p>
-  <audio id="audioPlayer" controls>
-    <source src="{{ url_for('static', filename='correct_audio.mp3') }}" type="audio/mp3">
-    ブラウザがaudioタグに対応していません。
-  </audio>
-
-  <!-- ✅ JSは最後に読み込む -->
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
-  
-  <label for="youtube-url">YouTube URL:</label>
-  <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
-  <button type="button" onclick="fetchTranscriptFromURL(); setYouTubeVideo();">字幕を取得</button>
-
+  <h1>シャドウイング支援ツール</h1>
+  <ul>
+    <li><a href="/read-aloud">📘 音読の精度チェック (Reading Accuracy Check)</a></li>
+    <li><a href="/shadowing">🎧 シャドウイングの精度チェック (Shadowing Accuracy Check)</a></li>
+<!--
+    <li><a href="/youtube">🎥 YouTubeシャドウイングと精度チェック (YouTube Shadowing - Experimental)</a></li>
+-->
+  </ul>
 </body>
 </html>

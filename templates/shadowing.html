@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>シャドウイング精度チェック</title>
+  <script defer>
+    let recorder;
+    let chunks = [];
+    let originalAudioBlob = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("audioFileInput").addEventListener("change", handleAudioLoad);
+      document.getElementById("startBtn").addEventListener("click", startRecording);
+      document.getElementById("stopBtn").addEventListener("click", stopRecording);
+      document.getElementById("submitBtn").addEventListener("click", submitRecording);
+    });
+
+    function handleAudioLoad(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      originalAudioBlob = file;
+      const audioUrl = URL.createObjectURL(file);
+      document.getElementById("originalAudio").src = audioUrl;
+      document.getElementById("audioLoadedBox").style.display = "block";
+    }
+
+    function startRecording() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          recorder = new MediaRecorder(stream);
+          chunks = [];
+          recorder.ondataavailable = e => chunks.push(e.data);
+          recorder.onstop = handleStop;
+          recorder.start();
+
+          document.getElementById("startBtn").disabled = true;
+          document.getElementById("stopBtn").disabled = false;
+
+          // 同時再生
+          document.getElementById("originalAudio").currentTime = 0;
+          document.getElementById("originalAudio").play();
+        })
+        .catch(err => {
+          alert("マイクの使用が許可されていません。");
+          console.error(err);
+        });
+    }
+
+    function stopRecording() {
+      if (recorder && recorder.state === "recording") {
+        recorder.stop();
+        document.getElementById("startBtn").disabled = false;
+        document.getElementById("stopBtn").disabled = true;
+        document.getElementById("submitBtn").disabled = false;
+      }
+    }
+
+    function handleStop() {
+      const recordedBlob = new Blob(chunks, { type: 'audio/webm' });
+      document.getElementById("recordedAudio").src = URL.createObjectURL(recordedBlob);
+      document.recordedBlob = recordedBlob;
+    }
+
+    function submitRecording() {
+      if (!originalAudioBlob || !document.recordedBlob) {
+        alert("元音声と録音音声の両方が必要です。");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("original_audio", originalAudioBlob);
+      formData.append("recorded_audio", document.recordedBlob);
+
+      fetch("/evaluate_shadowing", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById("resultBox").innerText = "❌ エラー: " + data.error;
+        } else {
+          document.getElementById("resultBox").innerHTML = `
+            ✅ WER: ${data.wer}%<br>
+            <hr>
+            🔍 Diff:<br>${data.diff_html}<br>
+            <hr>
+            📜 Original Transcription:<br>${data.original_transcribed}<br>
+            <hr>
+            🗣️ Your Transcription:<br>${data.user_transcribed}
+          `;
+        }
+      })
+      .catch(err => {
+        console.error("提出時エラー:", err);
+        document.getElementById("resultBox").innerText = "❌ 提出失敗";
+      });
+    }
+  </script>
+</head>
+<body>
+  <h2>🎧 シャドウイング精度チェック</h2>
+
+  <p>元の音声ファイルをアップロードしてください：</p>
+  <input type="file" id="audioFileInput" accept="audio/*">
+
+  <div id="audioLoadedBox" style="display:none; margin-top:1em;">
+    <p>🔊 再生しながら録音してください：</p>
+    <audio id="originalAudio" controls></audio><br><br>
+
+    <button id="startBtn">▶️ 録音開始</button>
+    <button id="stopBtn" disabled>⏹ 停止</button>
+    <button id="submitBtn" disabled>📝 提出して評価</button>
+
+    <h3>録音音声：</h3>
+    <audio id="recordedAudio" controls></audio>
+
+    <div id="resultBox" style="margin-top: 2em;"></div>
+  </div>
+</body>
+</html>

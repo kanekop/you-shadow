@@ -3,6 +3,33 @@
 from flask import Blueprint, request, jsonify
 from youtube_transcript_api import YouTubeTranscriptApi
 import re
+from googleapiclient.discovery import build
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+API_KEY = os.environ.get("YOUTUBE_API_KEY")
+
+def check_captions(video_id):
+    youtube = build('youtube', 'v3', developerKey=API_KEY)
+
+    try:
+        response = youtube.captions().list(
+            part='snippet',
+            videoId=video_id
+        ).execute()
+
+        for caption in response.get("items", []):
+            if caption["snippet"]["trackKind"] != "ASR":
+                return True
+        return False
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
+
+
 
 youtube_bp = Blueprint('youtube', __name__)
 

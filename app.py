@@ -9,12 +9,21 @@ from datetime import datetime
 import shutil  # ファイルコピー用のモジュールを追加
 from youtube_utils import get_transcript
 from youtube_utils import youtube_bp
+from youtube_utils import check_captions
 from diff_viewer import diff_html
+from dotenv import load_dotenv
+
+load_dotenv()  # .env ファイルの読み込み
+
+api_key = os.environ.get("YOUTUBE_API_KEY")
+print(f"APIキー：{api_key}")  # 動作確認用（あとで削除してOK）
+
+
 
 # === Flask設定 ===
 app = Flask(__name__)
-app.register_blueprint(youtube_bp)
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.register_blueprint(youtube_bp)
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -26,6 +35,40 @@ def index():
 @app.route('/shorts')
 def shorts_ui():
     return render_template('shorts.html')
+
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
+# ...他のimport省略
+
+@app.route("/read-aloud", methods=["GET", "POST"])
+def read_aloud():
+    if request.method == "GET":
+        return render_template("read_aloud.html")
+
+    # === 正解テキストの取得 ===
+    reference_text = request.form.get("reference_text", "").strip()
+    reference_file = request.files.get("reference_file")
+    if reference_file and reference_file.filename.endswith(".txt"):
+        reference_text = reference_file.read().decode("utf-8").strip()
+
+    # === 音声ファイルの取得 ===
+    audio_file = request.files["audio_file"]
+    audio_path = os.path.join(app.config["UPLOAD_FOLDER"], secure_filename(audio_file.filename))
+    audio_file.save(audio_path)
+
+    # === 音声の文字起こし ===
+    recognized_text = transcribe_audio(audio_path)
+
+    # === 精度チェック（WER & 差分） ===
+    wer_score = wer(reference_text, recognized_text)
+    diff_result = diff_html(reference_text, recognized_text)
+
+    # === 結果ページに渡す ===
+    return render_template("result.html",
+                           ref_text=reference_text,
+                           hyp_text=recognized_text,
+                           wer_score=wer_score,
+                           diff_result=diff_result)
+
 
 @app.route('/youtube')
 def youtube_ui():
@@ -133,7 +176,106 @@ def submit():
     
 
 
+@app.route("/check_subtitles", methods=["GET"])
+def check_subtitles():
+    video_id = request.args.get("video_id")
+    if not video_id:
+        return jsonify({"error": "Missing video_id"}), 400
+
+    result = check_captions(video_id)
+    if result is None:
+        return jsonify({"error": "Failed to check captions"}), 500
+
+    return jsonify({
+        "video_id": video_id,
+        "has_subtitles": result
+    })
+    
+@app.route('/evaluate_read_aloud', methods=['POST'])
+def evaluate_read_aloud():
+    from openai import OpenAI
+    import tempfile
+    from wer_utils import calculate_wer
+
+    audio_file = request.files['audio']
+    transcript_text = request.form['transcript']
+
+    client = OpenAI()
+
+    # 一時ファイルに保存
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
+        audio_file.save(tmp.name)
+        with open(tmp.name, "rb") as f:
+            response = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=f
+            )
+        transcribed = response.text
+
+    # WER計算
+    wer_score = calculate_wer(transcript_text, transcribed)
+
+    # 差分をHTMLで生成
+    diff_result = diff_html(transcript_text, transcribed)
+
+    return jsonify({
+        "transcribed": transcribed,
+        "wer": round(wer_score * 100, 2),
+        "diff_html": diff_result
+    })
+
+@app.route('/shadowing')
+def shadowing_ui():
+    return render_template('shadowing.html')
+
+
+@app.route('/evaluate_shadowing', methods=['POST'])
+def evaluate_shadowing():
+    from openai import OpenAI
+    import tempfile
+    from wer_utils import calculate_wer
+
+    original_audio = request.files['original_audio']
+    recorded_audio = request.files['recorded_audio']
+
+    client = OpenAI()
+
+    # === 元音声の文字起こし ===
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_original:
+        original_audio.save(tmp_original.name)
+        with open(tmp_original.name, "rb") as f:
+            original_result = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=f
+            )
+        original_transcribed = original_result.text
+
+    # === ユーザー音声の文字起こし ===
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_user:
+        recorded_audio.save(tmp_user.name)
+        with open(tmp_user.name, "rb") as f:
+            user_result = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=f
+            )
+        user_transcribed = user_result.text
+
+    # === 精度評価
+    wer_score = calculate_wer(original_transcribed, user_transcribed)
+    diff_result = diff_html(original_transcribed, user_transcribed)
+
+    return jsonify({
+        "original_transcribed": original_transcribed,
+        "user_transcribed": user_transcribed,
+        "wer": round(wer_score * 100, 2),
+        "diff_html": diff_result
+    })
+
+
+
+
 # === アプリ実行（Replitでは不要、ローカル用） ===
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Heroku用ポート
     app.run(host="0.0.0.0", port=port, debug=True)
+

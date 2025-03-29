@@ -142,3 +142,36 @@ function testYouTubePlay() {
     alert("YouTube プレイヤーがまだ準備できていません");
   }
 }
+
+async function checkSubtitles() {
+  const videoId = document.getElementById('videoIdInput').value.trim();
+  const resultMessage = document.getElementById('resultMessage');
+
+  if (!videoId) {
+    resultMessage.textContent = '⚠️ 動画IDを入力してください';
+    resultMessage.style.color = 'orange';
+    return;
+  }
+
+  try {
+    const response = await fetch(`/check_subtitles?video_id=${videoId}`);
+    const data = await response.json();
+
+    if (data.error) {
+      resultMessage.textContent = `❌ エラー: ${data.error}`;
+      resultMessage.style.color = 'red';
+    } else if (data.has_subtitles === true) {
+      resultMessage.textContent = '✅ 字幕あり（自動生成ではない）';
+      resultMessage.style.color = 'green';
+    } else if (data.has_subtitles === false) {
+      resultMessage.textContent = '❌ 字幕なし、または自動生成のみ（ASR）';
+      resultMessage.style.color = 'gray';
+    } else {
+      resultMessage.textContent = '❓ 結果が不明です';
+      resultMessage.style.color = 'orange';
+    }
+  } catch (err) {
+    resultMessage.textContent = '❌ 通信エラーが発生しました';
+    resultMessage.style.color = 'red';
+  }
+}
