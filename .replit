@@ -11,8 +11,12 @@ language = "python3"
 requiredFiles = [".replit", "replit.nix"]
 
 [deployment]
-run = ["sh", "-c", "python3 app.py"]
+run = ["sh", "-c", "gunicorn -b 0.0.0.0:443 app:app"]
 deploymentTarget = "cloudrun"
+
+[[ports]]
+localPort = 443
+externalPort = 3000
 
 [[ports]]
 localPort = 5000
