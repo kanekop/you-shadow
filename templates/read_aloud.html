@@ -51,28 +51,38 @@
         return;
       }
 
-      const constraints = {
-        audio: {
-          echoCancellation: false,
-          autoGainControl: false,
-          noiseSuppression: false
-        }
-      };
-
-      if (isIOSSafari()) {
-        constraints.audio = true; // iOS Safariではシンプルな設定を使用
-      }
+      // Safari on iOS requires simple audio constraints
+      const constraints = { audio: true };
 
       navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
-          const options = {
-            mimeType: isIOSSafari() ? 'audio/mp4' : 'audio/webm'
-          };
+          let options = {};
           
-          try {
-            recorder = new MediaRecorder(stream, options);
-          } catch(e) {
-            // フォールバック：オプションなしで試行
+          // Try different MIME types based on browser support
+          const tryMimeTypes = [
+            'audio/mp4',
+            'audio/aac',
+            'audio/webm;codecs=opus',
+            'audio/webm',
+            ''  // Last resort: let browser choose
+          ];
+          
+          for (let mimeType of tryMimeTypes) {
+            try {
+              if (!mimeType || MediaRecorder.isTypeSupported(mimeType)) {
+                options = mimeType ? { mimeType, audioBitsPerSecond: 128000 } : {};
+                recorder = new MediaRecorder(stream, options);
+                console.log('Using MIME type:', mimeType || 'browser default');
+                break;
+              }
+            } catch(e) {
+              console.warn('Failed to use MIME type:', mimeType, e);
+              continue;
+            }
+          }
+          
+          if (!recorder) {
+            console.warn('No supported MIME types found, trying without options');
             recorder = new MediaRecorder(stream);
           }
           
