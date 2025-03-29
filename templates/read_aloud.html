@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -76,9 +75,25 @@
     }
 
     function handleStop() {
-      const audioBlob = new Blob(chunks, { type: 'audio/webm' });
-      document.getElementById("recordedAudio").src = URL.createObjectURL(audioBlob);
-      document.recordedBlob = audioBlob;
+      if (chunks.length === 0) {
+        showMessage("録音データが取得できませんでした。もう一度お試しください。", "error");
+        return;
+      }
+
+      const recordedBlob = new Blob(chunks, { type: 'audio/webm' });
+      const recordedAudio = document.getElementById("recordedAudio");
+      recordedAudio.src = URL.createObjectURL(recordedBlob);
+
+      // Add error handling for audio playback
+      recordedAudio.onerror = function() {
+        showMessage("録音音声の再生に失敗しました。もう一度録音してください。", "error");
+        recordedAudio.src = '';
+      };
+
+      // Enable submit button only if recording is successful
+      document.getElementById("submitBtn").disabled = false;
+      document.recordedBlob = recordedBlob;
+      showMessage("録音が完了しました", "success");
     }
 
     function submitRecording() {
@@ -139,7 +154,7 @@
     </div>
   </div>
   <div class="container">
-    
+
     <div id="message" class="message"></div>
 
     <textarea id="referenceInput" rows="8" placeholder="ここに音読用の正解テキストを貼り付けてください"></textarea>
