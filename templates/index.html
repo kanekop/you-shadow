@@ -1,17 +1,31 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>シャドウイング支援ツール</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <h1>シャドウイング支援ツール</h1>
-  <ul>
-    <li><a href="/read-aloud">📘 音読の精度チェック (Reading Accuracy Check)</a></li>
-    <li><a href="/shadowing">🎧 シャドウイングの精度チェック (Shadowing Accuracy Check)</a></li>
-<!--
-    <li><a href="/youtube">🎥 YouTubeシャドウイングと精度チェック (YouTube Shadowing - Experimental)</a></li>
--->
-  </ul>
+  <div class="nav-header">
+    <h1>シャドウイング支援ツール</h1>
+  </div>
+  
+  <div class="container">
+    <div class="card">
+      <a href="/read-aloud" class="feature-link">
+        <h2>📘 音読の精度チェック</h2>
+        <p>Reading Accuracy Check</p>
+      </a>
+    </div>
+    
+    <div class="card">
+      <a href="/shadowing" class="feature-link">
+        <h2>🎧 シャドウイングの精度チェック</h2>
+        <p>Shadowing Accuracy Check</p>
+      </a>
+    </div>
+  </div>
 </body>
 </html>
