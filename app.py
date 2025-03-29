@@ -10,11 +10,14 @@ import shutil  # ファイルコピー用のモジュールを追加
 from youtube_utils import get_transcript
 from youtube_utils import youtube_bp
 from diff_viewer import diff_html
+from youtube_utils import youtube_bp
 
 # === Flask設定 ===
 app = Flask(__name__)
 app.register_blueprint(youtube_bp)
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.register_blueprint(youtube_bp)
+
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # === ルート画面 ===
