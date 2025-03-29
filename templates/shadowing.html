@@ -82,13 +82,24 @@
           document.getElementById("resultBox").innerText = "❌ エラー: " + data.error;
         } else {
           document.getElementById("resultBox").innerHTML = `
-            ✅ WER: ${data.wer}%<br>
-            <hr>
-            🔍 Diff:<br>${data.diff_html}<br>
-            <hr>
-            📜 Original Transcription:<br>${data.original_transcribed}<br>
-            <hr>
-            🗣️ Your Transcription:<br>${data.user_transcribed}
+            <div class="result-box">
+              <h3 class="success">✅ WER: ${data.wer}%</h3>
+              <hr>
+              <div class="diff-section">
+                <h4>🔍 Diff:</h4>
+                ${data.diff_html}
+              </div>
+              <hr>
+              <div class="text-section">
+                <h4>📜 Original Transcription:</h4>
+                <div class="display-text">${data.original_transcribed}</div>
+              </div>
+              <hr>
+              <div class="text-section">
+                <h4>🗣️ Your Transcription:</h4>
+                <div class="display-text">${data.user_transcribed}</div>
+              </div>
+            </div>
           `;
         }
       })
@@ -107,22 +118,32 @@
     </div>
   </div>
   <div class="container">
+    <div class="card">
+      <h3>1. 元の音声をアップロード</h3>
+      <input type="file" id="audioFileInput" accept="audio/*">
+    </div>
 
-  <p>元の音声ファイルをアップロードしてください：</p>
-  <input type="file" id="audioFileInput" accept="audio/*">
+    <div id="audioLoadedBox" style="display:none">
+      <div class="card">
+        <h3>2. シャドウイング録音</h3>
+        <p>🔊 再生しながら録音してください：</p>
+        <audio id="originalAudio" controls></audio>
+        
+        <div class="button-group">
+          <button id="startBtn">▶️ 録音開始</button>
+          <button id="stopBtn" disabled>⏹ 停止</button>
+          <button id="submitBtn" disabled>📝 提出して評価</button>
+        </div>
 
-  <div id="audioLoadedBox" style="display:none; margin-top:1em;">
-    <p>🔊 再生しながら録音してください：</p>
-    <audio id="originalAudio" controls></audio><br><br>
+        <h4>録音音声：</h4>
+        <audio id="recordedAudio" controls></audio>
+      </div>
 
-    <button id="startBtn">▶️ 録音開始</button>
-    <button id="stopBtn" disabled>⏹ 停止</button>
-    <button id="submitBtn" disabled>📝 提出して評価</button>
-
-    <h3>録音音声：</h3>
-    <audio id="recordedAudio" controls></audio>
-
-    <div id="resultBox" style="margin-top: 2em;"></div>
+      <div class="card">
+        <h3>3. 評価結果</h3>
+        <div id="resultBox"></div>
+      </div>
+    </div>
   </div>
 </body>
 </html>
