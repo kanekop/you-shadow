@@ -277,5 +277,5 @@ def evaluate_shadowing():
 
 # === アプリ実行（Replitでは不要、ローカル用） ===
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 443))  # Heroku用ポート, changed to 443 for HTTPS
+    port = int(os.environ.get("PORT", 5000))  # Use port 5000 for development
     app.run(host="0.0.0.0", port=port, debug=True)
