@@ -1,11 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>音読精度チェック</title>
-  <link rel="stylesheet" href="/static/style.css">
   <script defer>
     let recorder;
     let chunks = [];
@@ -21,19 +18,11 @@
     function loadText() {
       referenceText = document.getElementById("referenceInput").value.trim();
       if (!referenceText) {
-        showMessage("正解テキストを入力してください。", "error");
+        alert("正解テキストを入力してください。");
         return;
       }
       document.getElementById("displayText").innerText = referenceText;
       document.getElementById("textLoaded").style.display = "block";
-      showMessage("テキストを読み込みました", "success");
-    }
-
-    function showMessage(text, type) {
-      const message = document.getElementById("message");
-      message.textContent = text;
-      message.className = type;
-      setTimeout(() => message.textContent = "", 3000);
     }
 
     function startRecording() {
@@ -47,10 +36,9 @@
 
           document.getElementById("startBtn").disabled = true;
           document.getElementById("stopBtn").disabled = false;
-          showMessage("録音中...", "success");
         })
         .catch(err => {
-          showMessage("マイクへのアクセスに失敗しました。", "error");
+          alert("マイクへのアクセスに失敗しました。");
           console.error(err);
         });
     }
@@ -61,7 +49,6 @@
         document.getElementById("startBtn").disabled = false;
         document.getElementById("stopBtn").disabled = true;
         document.getElementById("submitBtn").disabled = false;
-        showMessage("録音を停止しました", "success");
       }
     }
 
@@ -73,15 +60,13 @@
 
     function submitRecording() {
       if (!referenceText || !document.recordedBlob) {
-        showMessage("正解テキストと録音音声の両方が必要です。", "error");
+        alert("正解テキストと録音音声の両方が必要です。");
         return;
       }
 
       const formData = new FormData();
       formData.append("audio", document.recordedBlob);
       formData.append("transcript", referenceText);
-
-      document.getElementById("resultBox").innerHTML = '<div class="loading">評価中...</div>';
 
       fetch("/evaluate_read_aloud", {
         method: "POST",
@@ -90,60 +75,43 @@
       .then(res => res.json())
       .then(data => {
         if (data.error) {
-          document.getElementById("resultBox").innerHTML = `<div class="error">❌ エラー: ${data.error}</div>`;
+          document.getElementById("resultBox").innerText = "❌ エラー: " + data.error;
         } else {
           document.getElementById("resultBox").innerHTML = `
-            <div class="result-box">
-              <h3 class="success">✅ WER: ${data.wer}%</h3>
-              <hr>
-              <div class="diff-section">
-                <h4>🔍 Diff:</h4>
-                ${data.diff_html}
-              </div>
-              <hr>
-              <div class="text-section">
-                <h4>📜 Original Text:</h4>
-                <div class="display-text">${referenceText}</div>
-              </div>
-              <hr>
-              <div class="text-section">
-                <h4>🗣️ Your Transcription:</h4>
-                <div class="display-text">${data.transcribed}</div>
-              </div>
-            </div>
+            ✅ WER: ${data.wer}%<br>
+            <hr>
+            🔍 Diff:<br>${data.diff_html}<br>
+            <hr>
+            📜 Original Text:<br>${referenceText}<br>
+            <hr>
+            🗣️ Your Transcription:<br>${data.transcribed}
           `;
         }
       })
       .catch(err => {
         console.error("評価エラー:", err);
-        document.getElementById("resultBox").innerHTML = '<div class="error">❌ 提出エラー</div>';
+        document.getElementById("resultBox").innerText = "❌ 提出エラー";
       });
     }
   </script>
 </head>
 <body>
-  <div class="container">
-    <h2>📘 音読の精度チェック</h2>
-    
-    <div id="message" class="message"></div>
+  <h2>📘 音読の精度チェック</h2>
 
-    <textarea id="referenceInput" rows="8" placeholder="ここに音読用の正解テキストを貼り付けてください"></textarea>
-    <button id="loadTextBtn" class="primary">テキストを読み込む</button>
+  <textarea id="referenceInput" rows="8" cols="80" placeholder="ここに音読用の正解テキストを貼り付けてください"></textarea><br>
+  <button id="loadTextBtn">テキストを読み込む</button>
 
-    <div id="textLoaded" style="display: none">
-      <h3>音読するテキスト：</h3>
-      <div id="displayText" class="display-text"></div>
+  <div id="textLoaded" style="display: none; margin-top: 1em;">
+    <h3>音読するテキスト：</h3>
+    <p id="displayText" style="white-space: pre-wrap; border: 1px solid #ccc; padding: 1em;"></p>
 
-      <div class="button-group">
-        <button id="startBtn">▶️ 録音開始</button>
-        <button id="stopBtn" disabled>⏹ 停止</button>
-        <button id="submitBtn" disabled>📝 提出して評価</button>
-      </div>
+    <button id="startBtn">▶️ 録音開始</button>
+    <button id="stopBtn" disabled>⏹ 停止</button>
+    <button id="submitBtn" disabled>📝 提出して評価</button>
 
-      <audio id="recordedAudio" controls></audio>
+    <audio id="recordedAudio" controls style="margin-top: 1em;"></audio>
 
-      <div id="resultBox"></div>
-    </div>
+    <div id="resultBox" style="margin-top: 2em;"></div>
   </div>
 </body>
 </html>
