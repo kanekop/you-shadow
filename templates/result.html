@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>シャドウイング結果</title>
+</head>
+<body>
+  <h3>受信完了：{{ user_id }} さんの音声（{{ filename }}）</h3>
+
+  <p><b>正解スクリプト：</b> {{ script }}</p>
+  <p><b>文字起こし結果：</b> {{ transcript }}</p>
+  <p><b>WER評価：</b> {{ wer_score }}% （置換: {{ subs }}, 削除: {{ dels }}, 挿入: {{ ins }}, 単語数: {{ word_count }}）</p>
+
+  <hr>
+  <p><b>差分表示（Meld風）：</b></p>
+  <p style="font-family: monospace; font-size: 1.1em;">{{ diff_result | safe }}</p>
+
+  <hr>
+  <p><b>教材音声：</b></p>
+  <audio controls>
+    <source src="{{ url_for('static', filename='correct_audio.mp3') }}" type="audio/mp3">
+    ブラウザがaudioタグに対応していません。
+  </audio>
+
+  <p><b>あなたの録音：</b></p>
+  <audio controls>
+    <source src="{{ url_for('static', filename='recorded.webm') }}" type="audio/webm">
+    ブラウザがaudioタグに対応していません。
+  </audio>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube シャドウイング評価</title>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="{{ url_for('static', filename='youtube.js') }}" defer></script>
+</head>
+<body>
+  <h2>YouTube動画 シャドウイング評価</h2>
+
+  <label for="youtube-url">YouTube URL:</label>
+  <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+  <button onclick="embedYouTubeAndStart()">字幕取得 & 埋め込み</button>
+
+
+
+  <div id="youtube-container" style="margin-top: 1em;">
+    <div id="youtube-player"></div>
+  </div>
+
+  <div style="margin-top: 1em;">
+    <button id="startBtn">▶️ 再生 & 録音</button>
+    <button id="stopBtn" disabled>⏹ 停止</button>
+  <button id="submitBtn" disabled>📝 提出して評価</button>
+  <div id="resultBox" style="margin-top: 1em;"></div>
+</div>
+
+  <audio id="recordedAudio" controls style="margin-top: 1em;"></audio>
+  <input type="file" id="audioBlobInput" name="audio" style="display:none">
+</body>
+</html>

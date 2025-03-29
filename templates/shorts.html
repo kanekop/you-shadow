@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Shorts シャドウイング</title>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="{{ url_for('static', filename='shorts.js') }}"></script>
+</head>
+<body>
+  <h2>ショート動画 シャドウイング評価フォーム</h2>
+
+  <label for="youtube-url">YouTube Shorts URL:</label>
+  <input type="text" id="youtube-url" placeholder="https://www.youtube.com/shorts/...">
+  <button onclick="fetchTranscriptAndEmbedShort()">字幕取得 & 埋め込み</button>
+
+  <div id="youtube-container" style="margin-top: 1em;">
+    <div id="youtube-player"></div>
+  </div>
+
+  <label for="script">字幕（取得済）:</label>
+  <textarea id="script" rows="4" cols="50"></textarea>
+
+  <div>
+    <button id="startShort">▶️ 再生 & 録音</button>
+    <button id="stopShort" disabled>⏹ 停止</button>
+  </div>
+
+  <audio id="recordedAudio" controls></audio>
+  <input type="file" id="audioBlobInput" name="audio" style="display:none">
+</body>
+</html>
