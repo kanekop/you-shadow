@@ -2,7 +2,61 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>シャドウイング精度チェック</title>
+  <style>
+    .container {
+      padding: 15px;
+    }
+    
+    .card {
+      margin: 15px 0;
+      padding: 15px;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .button-group button {
+      flex: 1;
+      min-width: 120px;
+    }
+    
+    audio {
+      width: 100%;
+      margin: 10px 0;
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .card {
+        padding: 12px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      h3 {
+        font-size: 1.2rem;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+      
+      .button-group button {
+        width: 100%;
+      }
+    }
+  </style>
   <script defer>
     let recorder;
     let chunks = [];
