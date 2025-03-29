@@ -36,7 +36,17 @@
       setTimeout(() => message.textContent = "", 3000);
     }
 
+    function isIOSChrome() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      return /crios/.test(userAgent) || (/iphone|ipad/.test(userAgent) && /chrome/.test(userAgent));
+    }
+
     function startRecording() {
+      if (isIOSChrome()) {
+        showMessage("iOS版Chromeでは録音機能が制限されています。Safariブラウザをご利用ください。", "error");
+        return;
+      }
+
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
           recorder = new MediaRecorder(stream);
