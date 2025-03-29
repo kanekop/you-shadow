@@ -11,16 +11,18 @@ def get_transcript():
     data = request.get_json()
     url = data.get('url', '')
 
-    # YouTube動画IDを抽出
     video_id_match = re.search(r"(?:v=|youtu.be/)([a-zA-Z0-9_-]{11})", url)
     if not video_id_match:
+        print("Invalid URL:", url)  # ログ出力
         return jsonify({'error': 'Invalid YouTube URL'}), 400
 
     video_id = video_id_match.group(1)
+    print("Video ID extracted:", video_id)
 
     try:
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         full_text = " ".join([line['text'] for line in transcript])
         return jsonify({'transcript': full_text})
     except Exception as e:
+        print("Error while fetching transcript:", str(e))  # ログ出力追加
         return jsonify({'error': str(e)}), 500
