@@ -40,15 +40,42 @@
       return /crios/.test(userAgent) || (/iphone|ipad/.test(userAgent) && /chrome/.test(userAgent));
     }
 
+    function isIOSSafari() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      return /iphone|ipad/.test(userAgent) && /safari/.test(userAgent) && !(/chrome/.test(userAgent));
+    }
+
     function startRecording() {
       if (isIOSChrome()) {
         showMessage("iOS版Chromeでは録音機能が制限されています。Safariブラウザをご利用ください。", "error");
         return;
       }
 
-      navigator.mediaDevices.getUserMedia({ audio: true })
+      const constraints = {
+        audio: {
+          echoCancellation: false,
+          autoGainControl: false,
+          noiseSuppression: false
+        }
+      };
+
+      if (isIOSSafari()) {
+        constraints.audio = true; // iOS Safariではシンプルな設定を使用
+      }
+
+      navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
-          recorder = new MediaRecorder(stream);
+          const options = {
+            mimeType: isIOSSafari() ? 'audio/mp4' : 'audio/webm'
+          };
+          
+          try {
+            recorder = new MediaRecorder(stream, options);
+          } catch(e) {
+            // フォールバック：オプションなしで試行
+            recorder = new MediaRecorder(stream);
+          }
+          
           chunks = [];
           recorder.ondataavailable = e => chunks.push(e.data);
           recorder.onstop = handleStop;
