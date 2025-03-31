@@ -13,29 +13,27 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("submitBtn").addEventListener("click", submitRecording);
 });
 
+async function fetchPresets() {
+  const res = await fetch("/api/presets");
+  presetData = await res.json();
 
-  async function fetchPresets() {
-    const res = await fetch("/api/presets");
-    presetData = await res.json();
+  const genreSelect = document.getElementById("genreSelect");
+  genreSelect.innerHTML = '<option value="">-- ジャンル選択 --</option>';
+  for (const genre in presetData) {
+    const opt = document.createElement("option");
+    opt.value = genre;
+    opt.textContent = genre;
+    genreSelect.appendChild(opt);
+  }
 
-    const genreSelect = document.getElementById("genreSelect");
-    genreSelect.innerHTML = '<option value="">-- ジャンル選択 --</option>';
-    for (const genre in presetData) {
-      const opt = document.createElement("option");
-      opt.value = genre;
-      opt.textContent = genre;
-      genreSelect.appendChild(opt);
-    }
+  const username = localStorage.getItem("username") || "guest";
+  await fetchUnlockedLevels(username);
 
-    // ✅ ユーザー名取得 → 解放情報を取得
-    const username = localStorage.getItem("username") || "guest";
-    await fetchUnlockedLevels(username);
+  genreSelect.addEventListener("change", () => {
+    updateLevelSelect();
+  });
 
-    genreSelect.addEventListener("change", () => {
-      updateLevelSelect();
-    });
-
-      document.getElementById("levelSelect").addEventListener("change", loadPreset);
+  document.getElementById("levelSelect").addEventListener("change", loadPreset);
 }
 
 async function loadPreset() {
@@ -47,11 +45,9 @@ async function loadPreset() {
   const audioUrl = `/presets/${genre}/${level}/audio.mp3`;
   const scriptUrl = `/presets/${genre}/${level}/script.txt`;
 
-  // 音声設定
   document.getElementById("originalAudio").src = audioUrl;
   originalAudioBlob = await fetch(audioUrl).then(res => res.blob());
 
-  // スクリプト表示
   currentScript = await fetch(scriptUrl).then(res => res.text());
   document.getElementById("displayScript").textContent = currentScript;
 
@@ -103,7 +99,6 @@ function submitRecording() {
   formData.append("original_audio", originalAudioBlob);
   formData.append("recorded_audio", document.recordedBlob);
 
-  // 👇 追加：ユーザー名、ジャンル、レベルを送信
   const username = localStorage.getItem("username") || "anonymous";
   const genre = document.getElementById("genreSelect").value.trim().toLowerCase();
   const level = document.getElementById("levelSelect").value.trim().toLowerCase();
@@ -132,19 +127,9 @@ function submitRecording() {
       `;
     }
     if (data.wer < 30) {
-  
-      // 🎯 次のレベル名を計算（例: "level1" → "level2"）
-      const match = level.match(/^level(\d+)$/i);
-      if (match) {
-        const currentNum = parseInt(match[1]);
-        const nextLevel = `level${currentNum + 1}`;
-        saveUnlockedLevel(genre, nextLevel);
-        console.log("🔓 Also unlocked next level:", nextLevel);
-      }
-  
-      updateLevelSelect(); // 🔁 セレクト再描画
+      updateLevelSelect();
     }
-    })
+  })
   .catch(err => {
     console.error("提出時エラー:", err);
     document.getElementById("resultBox").innerText = "❌ 提出失敗";
@@ -157,27 +142,6 @@ function getUnlockedLevels() {
   return data ? JSON.parse(data) : {};
 }
 
-function saveUnlockedLevel(genre, level) {
-  console.log("🔐 Save request:", genre, level);
-  const key = "unlockedLevels_" + (localStorage.getItem("username") || "guest");
-  const current = getUnlockedLevels();
-  if (!current[genre]) current[genre] = [];
-  if (!current[genre].includes(level)) {
-    current[genre].push(level);
-    localStorage.setItem(key, JSON.stringify(current));
-    console.log("✅ Level unlocked:", key, JSON.stringify(current));
-  } else {
-    console.log("⚠️ Already unlocked:", key, genre, level);
-  }
-}
-
-
-// 📌 ユーザーが録音を提出し、WER < 30% のときにレベル解放
-// その後、自動でセレクトボックスを更新する関数を定義
-/**
- * レベルセレクトボックスを現在のジャンルに応じて更新する
- * 解放されたレベルは選択可能、未解放は 🔒＋disabled にする
- */
 function updateLevelSelect() {
   const genre = document.getElementById("genreSelect").value.trim().toLowerCase();
   const levelSelect = document.getElementById("levelSelect");
@@ -204,11 +168,6 @@ function updateLevelSelect() {
   });
 }
 
-
-
-/**
- * サーバーから解放済みレベルを取得
- */
 async function fetchUnlockedLevels(username) {
   const res = await fetch(`/api/unlocked_levels/${username}`);
   unlockedLevels = await res.json();
