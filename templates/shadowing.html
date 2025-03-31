@@ -2,202 +2,38 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>シャドウイング精度チェック</title>
-  <style>
-    .container {
-      padding: 15px;
-    }
-    
-    .card {
-      margin: 15px 0;
-      padding: 15px;
-    }
-    
-    .button-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 15px 0;
-    }
-    
-    .button-group button {
-      flex: 1;
-      min-width: 120px;
-    }
-    
-    audio {
-      width: 100%;
-      margin: 10px 0;
-    }
-    
-    @media (max-width: 600px) {
-      .container {
-        padding: 10px;
-      }
-      
-      .card {
-        padding: 12px;
-      }
-      
-      h1 {
-        font-size: 1.5rem;
-      }
-      
-      h3 {
-        font-size: 1.2rem;
-      }
-      
-      .button-group {
-        flex-direction: column;
-      }
-      
-      .button-group button {
-        width: 100%;
-      }
-    }
-  </style>
-  <script defer>
-    let recorder;
-    let chunks = [];
-    let originalAudioBlob = null;
+<script src="/static/js/shadowing.js" defer></script>
 
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("audioFileInput").addEventListener("change", handleAudioLoad);
-      document.getElementById("startBtn").addEventListener("click", startRecording);
-      document.getElementById("stopBtn").addEventListener("click", stopRecording);
-      document.getElementById("submitBtn").addEventListener("click", submitRecording);
-    });
-
-    function handleAudioLoad(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      originalAudioBlob = file;
-      const audioUrl = URL.createObjectURL(file);
-      document.getElementById("originalAudio").src = audioUrl;
-      document.getElementById("audioLoadedBox").style.display = "block";
-    }
-
-    function startRecording() {
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-          recorder = new MediaRecorder(stream);
-          chunks = [];
-          recorder.ondataavailable = e => chunks.push(e.data);
-          recorder.onstop = handleStop;
-          recorder.start();
-
-          document.getElementById("startBtn").disabled = true;
-          document.getElementById("stopBtn").disabled = false;
-
-          // 同時再生
-          document.getElementById("originalAudio").currentTime = 0;
-          document.getElementById("originalAudio").play();
-        })
-        .catch(err => {
-          alert("マイクの使用が許可されていません。");
-          console.error(err);
-        });
-    }
-
-    function stopRecording() {
-      if (recorder && recorder.state === "recording") {
-        recorder.stop();
-        document.getElementById("startBtn").disabled = false;
-        document.getElementById("stopBtn").disabled = true;
-        document.getElementById("submitBtn").disabled = false;
-      }
-    }
-
-    function handleStop() {
-      const recordedBlob = new Blob(chunks, { type: 'audio/webm' });
-      document.getElementById("recordedAudio").src = URL.createObjectURL(recordedBlob);
-      document.recordedBlob = recordedBlob;
-    }
-
-    function submitRecording() {
-      if (!originalAudioBlob || !document.recordedBlob) {
-        alert("元音声と録音音声の両方が必要です。");
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("original_audio", originalAudioBlob);
-      formData.append("recorded_audio", document.recordedBlob);
-
-      fetch("/evaluate_shadowing", {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.error) {
-          document.getElementById("resultBox").innerText = "❌ エラー: " + data.error;
-        } else {
-          document.getElementById("resultBox").innerHTML = `
-            <div class="result-box">
-              <h3 class="success">✅ WER: ${data.wer}%</h3>
-              <hr>
-              <div class="diff-section">
-                <h4>🔍 Diff:</h4>
-                ${data.diff_html}
-              </div>
-              <hr>
-              <div class="text-section">
-                <h4>📜 Original Transcription:</h4>
-                <div class="display-text">${data.original_transcribed}</div>
-              </div>
-              <hr>
-              <div class="text-section">
-                <h4>🗣️ Your Transcription:</h4>
-                <div class="display-text">${data.user_transcribed}</div>
-              </div>
-            </div>
-          `;
-        }
-      })
-      .catch(err => {
-        console.error("提出時エラー:", err);
-        document.getElementById("resultBox").innerText = "❌ 提出失敗";
-      });
-    }
-  </script>
 </head>
 <body>
-  <div class="nav-header">
-    <div class="container">
-      <a href="/" class="back-button">← ホームに戻る</a>
-      <h1>🎧 シャドウイング精度チェック</h1>
-    </div>
+  <!-- 👤 ユーザー名の表示 -->
+  <p id="userDisplay">🧑‍💻 現在のユーザー(開発中)：</p>
+
+  <h2>🎧 プリセットシャドウイング精度チェック</h2>
+
+  <div>
+    <label>ジャンル：</label>
+    <select id="genreSelect"></select>
+    <label>レベル：</label>
+    <select id="levelSelect"></select>
   </div>
-  <div class="container">
-    <div class="card">
-      <h3>1. 元の音声をアップロード</h3>
-      <input type="file" id="audioFileInput" accept="audio/*">
-    </div>
 
-    <div id="audioLoadedBox" style="display:none">
-      <div class="card">
-        <h3>2. シャドウイング録音</h3>
-        <p>🔊 再生しながら録音してください：</p>
-        <audio id="originalAudio" controls></audio>
-        
-        <div class="button-group">
-          <button id="startBtn">▶️ 録音開始</button>
-          <button id="stopBtn" disabled>⏹ 停止</button>
-          <button id="submitBtn" disabled>📝 提出して評価</button>
-        </div>
+  <div id="presetLoaded" style="display:none; margin-top:1em;">
+    <h3>📜 正解スクリプト</h3>
+    <p id="displayScript" style="white-space: pre-wrap; border: 1px solid #ccc; padding: 1em;"></p>
 
-        <h4>録音音声：</h4>
-        <audio id="recordedAudio" controls></audio>
-      </div>
+    <h3>🔊 音声再生</h3>
+    <audio id="originalAudio" controls></audio><br><br>
 
-      <div class="card">
-        <h3>3. 評価結果</h3>
-        <div id="resultBox"></div>
-      </div>
-    </div>
+    <button id="startBtn">▶️ 録音開始</button>
+    <button id="stopBtn" disabled>⏹ 停止</button>
+    <button id="submitBtn" disabled>📝 提出して評価</button>
+
+    <h3>🎤 録音音声</h3>
+    <audio id="recordedAudio" controls></audio>
+
+    <div id="resultBox" style="margin-top: 2em;"></div>
   </div>
 </body>
 </html>

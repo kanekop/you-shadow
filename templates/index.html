@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,12 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>シャドウイング支援ツール</title>
   <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/js/index.js" defer></script>
+
 </head>
 <body>
   <div class="nav-header">
     <h1>シャドウイング支援ツール</h1>
+    <div id="nameForm" style="margin-top:1em;">
+      <label>名前を入力してください：</label>
+      <input type="text" id="username" placeholder="例：kaneko">
+      <button id="saveNameBtn">保存</button>
+    </div>
+    <p id="nameDisplay" style="margin-top: 0.5em;"></p>
+
+    <!-- ✅ デバッグ専用ユーザー切り替えボタン -->
+    <div style="margin-top: 1em;">
+      <label>テストユーザー切り替え：</label>
+      <button class="test-user-btn" data-user="alice">alice</button>
+      <button class="test-user-btn" data-user="bob">bob</button>
+      <button class="test-user-btn" data-user="charlie">charlie</button>
+    </div>
   </div>
-  
+
   <div class="container">
     <div class="card">
       <a href="/read-aloud" class="feature-link">
@@ -19,7 +34,7 @@
         <p>Reading Accuracy Check</p>
       </a>
     </div>
-    
+
     <div class="card">
       <a href="/shadowing" class="feature-link">
         <h2>🎧 シャドウイングの精度チェック</h2>

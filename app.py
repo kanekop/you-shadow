@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, make_response
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 from flask_cors import CORS
 from transcribe_utils import transcribe_audio
 import os
@@ -7,8 +7,8 @@ from wer_utils import wer
 from diff_viewer import diff_html
 import json
 from datetime import datetime
+
 import shutil  # ファイルコピー用のモジュールを追加
-from youtube_utils import get_transcript
 from youtube_utils import youtube_bp
 from youtube_utils import check_captions
 from diff_viewer import diff_html
@@ -27,6 +27,42 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 app.register_blueprint(youtube_bp)
 CORS(app) # Enable CORS
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+#API化
+def get_presets_structure(base_path="presets"):
+    presets = {}
+    if not os.path.exists(base_path):
+        return presets
+
+    for genre in sorted(os.listdir(base_path)):
+        genre_path = os.path.join(base_path, genre)
+        if os.path.isdir(genre_path):
+            levels = sorted([
+                d for d in os.listdir(genre_path)
+                if os.path.isdir(os.path.join(genre_path, d))
+            ])
+            presets[genre] = levels
+
+    return presets
+
+#
+def save_preset_log(data, log_path="preset_log.json"):
+    try:
+        if os.path.exists(log_path):
+            with open(log_path, "r", encoding="utf-8") as f:
+                logs = json.load(f)
+        else:
+            logs = []
+
+        logs.append(data)
+
+        with open(log_path, "w", encoding="utf-8") as f:
+            json.dump(logs, f, ensure_ascii=False, indent=2)
+        print(f"[ログ保存成功] {data}")  # 👈 この行を追加！
+    except Exception as e:
+        print(f"[ログ保存エラー] {e}")
+
+
 
 # === ルート画面 ===
 @app.route('/')
@@ -106,6 +142,70 @@ def evaluate_youtube():
         "diff_html": diff_result
     })
 
+
+#Flaskに「/presets/ は静的ファイルです」と教える
+@app.route("/presets/<path:filename>")
+def serve_presets(filename):
+    return send_from_directory("presets", filename)
+
+@app.route("/ranking")
+def show_ranking():
+    genre = request.args.get("genre")
+    level = request.args.get("level")
+
+    if not genre or not level:
+        return render_template("ranking.html", rankings=None)
+
+    log_path = "preset_log.json"
+    if not os.path.exists(log_path):
+        return render_template("ranking.html", rankings=[],
+                               genre=genre, level=level)
+
+    with open(log_path, "r", encoding="utf-8") as f:
+        logs = json.load(f)
+
+    # 🔍 ログイン中ユーザー名をlocalStorageから取得して送る（JS側で取得→埋め込む方法にする）
+    current_user = request.cookies.get("username", "anonymous")
+
+    matched = [entry for entry in logs if entry["genre"] == genre and entry["level"] == level]
+    sorted_entries = sorted(matched, key=lambda x: x["wer"])
+
+    return render_template("ranking.html",
+                           rankings=sorted_entries,
+                           genre=genre, level=level,
+                           current_user=current_user)
+
+#Userのアンロックレベルを確認
+@app.route("/api/unlocked_levels/<username>")
+def get_unlocked_levels(username):
+    import json
+    from collections import defaultdict
+
+    with open("preset_log.json", "r") as f:
+        logs = json.load(f)
+
+    result = defaultdict(set)
+
+    for entry in logs:
+        if entry["user"].lower() != username.lower():
+            continue
+        if float(entry["wer"]) >= 30:
+            continue
+
+        genre = entry["genre"].strip().lower()
+        level = entry["level"].strip().lower()
+        result[genre].add(level)
+
+    # セットをリストに変換
+    result = {genre: sorted(list(levels)) for genre, levels in result.items()}
+    return result
+
+
+#
+@app.route("/api/presets")
+def api_presets():
+    structure = get_presets_structure()
+    return jsonify(structure)
 
 
 # === 音声ファイルと入力の受信 ===
@@ -265,14 +365,29 @@ def evaluate_shadowing():
     wer_score = calculate_wer(original_transcribed, user_transcribed)
     diff_result = diff_html(original_transcribed, user_transcribed)
 
+    # ここまで既存処理と同じ
+    
+    # ログを保存
+    log_entry = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "user": request.form.get("username", "anonymous"),  # ←ここが動的に！
+        "genre": request.form.get("genre", ""),
+        "level": request.form.get("level", ""),
+        "wer": round(wer_score * 100, 2),
+        "original_transcribed": original_transcribed,
+        "user_transcribed": user_transcribed,
+        "script_excerpt": original_transcribed[:100]
+    }
+    
+    save_preset_log(log_entry)
+    
     return jsonify({
         "original_transcribed": original_transcribed,
         "user_transcribed": user_transcribed,
         "wer": round(wer_score * 100, 2),
         "diff_html": diff_result
     })
-
-
+    
 
 
 # === アプリ実行（Replitでは不要、ローカル用） ===

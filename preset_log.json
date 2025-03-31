@@ -1,0 +1,332 @@
+[
+  {
+    "timestamp": "2025-03-30T16:27:16.001752",
+    "user": "anonymous",
+    "genre": "",
+    "level": "",
+    "wer": 60.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "script text for general one level one",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T16:27:45.178366",
+    "user": "anonymous",
+    "genre": "",
+    "level": "",
+    "wer": 90.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "For a child on level one.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T16:27:48.498463",
+    "user": "anonymous",
+    "genre": "",
+    "level": "",
+    "wer": 90.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "and I'm going to score it down on level one.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T16:28:16.677049",
+    "user": "anonymous",
+    "genre": "",
+    "level": "",
+    "wer": 10.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "Hmm, this is sample script text for Gen 1, Level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T16:28:58.301855",
+    "user": "anonymous",
+    "genre": "",
+    "level": "",
+    "wer": 70.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is a sample script, sample script, whoo.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T16:35:41.723045",
+    "user": "anonymous",
+    "genre": "",
+    "level": "",
+    "wer": 10.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is the script text for Gen 1 Level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T16:47:57.249253",
+    "user": "kanekon",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 50.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "It's a test for Gen 1, Level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T16:49:07.358124",
+    "user": "kanekon",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 90.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "Or gentlemen level one",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T16:59:20.316575",
+    "user": "kanekon",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 80.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "script test for a general one level one",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T16:59:51.100907",
+    "user": "kanekon",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 0.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for Gen 1 Level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T17:01:25.800466",
+    "user": "kanekon",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 90.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "Group Test for JONE1 LEVEL1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T17:23:09.472764",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 40.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for a general one, level one.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T17:24:05.638397",
+    "user": "charlie",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 70.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "Example script text for a general one level one.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-30T17:40:23.568679",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 20.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for Gen1 level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T03:26:45.464609",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 30.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "Sample text for Gen 1, Level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T05:21:31.424808",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 100.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "you",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T05:24:15.096902",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 10.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for General 1, Level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T05:53:25.294535",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 50.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "Is sample script text for a general one level one?",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T05:53:50.320450",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 30.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for journal one, level one.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T05:54:32.894497",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 0.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T06:04:18.656058",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 40.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample scripts text for general one, level one.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T06:04:22.351511",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 40.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample scripts text for general one, level one.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T06:04:50.300041",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 40.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for a general one, level one.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T06:04:58.145078",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 40.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for a general one, level one.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T06:05:20.655345",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 0.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T06:07:46.318859",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 0.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T06:12:48.569403",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 40.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text origin one, level one.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T06:13:20.913460",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 0.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T06:18:18.812878",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 0.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T06:37:17.533061",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 30.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for adjournment one, level one.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T06:37:45.673456",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 0.0,
+    "original_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "user_transcribed": "This is sample script text for Gen 1 Level 1.",
+    "script_excerpt": "This is sample script text for Gen 1, Level 1."
+  },
+  {
+    "timestamp": "2025-03-31T06:38:07.123464",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "This is level 2.",
+    "script_excerpt": "This is level 2."
+  },
+  {
+    "timestamp": "2025-03-31T06:38:30.483177",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 0.0,
+    "original_transcribed": "This is level 3.",
+    "user_transcribed": "This is level 3.",
+    "script_excerpt": "This is level 3."
+  }
+]

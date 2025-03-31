@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>📊 ランキング表示</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; padding: 2em; }
+    h2 { margin-bottom: 1em; }
+    select, button { margin: 0.5em; padding: 0.3em; }
+    ol { margin-top: 1em; }
+    li { margin-bottom: 0.3em; }
+    .highlight { background-color: #ffffcc; font-weight: bold; }
+    #userDisplay { margin-bottom: 1em; font-weight: bold; }
+    #nextLevelNotice { margin-top: 1em; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <!-- 👤 ユーザー名の表示 -->
+  <p id="userDisplay">🧑‍💻 現在のユーザー：</p>
+
+  <h2>📊 ランキング表示</h2>
+
+  <label>ジャンル：</label>
+  <select id="genreSelect"></select>
+
+  <label>レベル：</label>
+  <select id="levelSelect"></select>
+
+  <button id="showBtn">表示</button>
+
+  {% if rankings %}
+    <h3>{{ genre }} - {{ level }} のランキング</h3>
+    <ol id="rankingList">
+      {% for r in rankings %}
+        <li data-user="{{ r.user }}" data-wer="{{ r.wer }}" data-timestamp="{{ r.timestamp }}">
+          {{ r.user }} - {{ r.wer }}%（{{ r.timestamp[:10] }}）
+        </li>
+      {% endfor %}
+    </ol>
+    <div id="nextLevelNotice"></div>
+  {% endif %}
+
+
+  <script src="/static/js/ranking.js" defer></script>
+
+</body>
+</html>
