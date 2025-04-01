@@ -13,6 +13,7 @@ from youtube_utils import youtube_bp
 from youtube_utils import check_captions
 from diff_viewer import diff_html
 from dotenv import load_dotenv
+from diff_viewer import get_diff_html
 
 load_dotenv()  # .env ファイルの読み込み
 

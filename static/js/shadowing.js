@@ -1,3 +1,4 @@
+"use strict";
 let recorder;
 let chunks = [];
 let originalAudioBlob = null;
@@ -5,6 +6,8 @@ let currentScript = "";
 let presetData = {}; // ← グローバル変数として定義
 let unlockedLevels = {};  // ← 解放レベルを保持
 let highestLevels = {}; // 👈 新しい最高レベル状態
+let currentGenre = "";
+let currentLevel = "";
 
 document.addEventListener("DOMContentLoaded", () => {
   fetchPresets();
@@ -39,6 +42,10 @@ async function loadPreset() {
   const genre = document.getElementById("genreSelect").value.trim().toLowerCase();
   const level = document.getElementById("levelSelect").value.trim().toLowerCase();
 
+  //Global 変数に送っておく
+  currentGenre = genre;
+  currentLevel = level;
+  
   if (!genre || !level) return;
 
   const audioUrl = `/presets/${genre}/${level}/audio.mp3`;
@@ -116,6 +123,7 @@ async function submitRecording() {
     return;
   }
 
+
   const formData = new FormData();
   formData.append("original_audio", originalAudioBlob);
   formData.append("recorded_audio", document.recordedBlob);
@@ -124,10 +132,14 @@ async function submitRecording() {
   const genre = document.getElementById("genreSelect").value.trim().toLowerCase();
   const level = document.getElementById("levelSelect").value.trim().toLowerCase();
 
+  console.log("🔍 submitRecording開始");
+  console.log("genre:", genre);
+  console.log("level:", level);
+  console.log("username:", username);
+  
   formData.append("username", username);
-  formData.append("genre", genre);
-  formData.append("level", level);
-
+  formData.append("genre", currentGenre);
+  formData.append("level", currentLevel);
   try {
     const res = await fetch("/evaluate_shadowing", {
       method: "POST",
@@ -142,17 +154,31 @@ async function submitRecording() {
       return;
     }
     
-    // ✅ 結果を表示（WERとスクリプト両方）
+    // ✅ WERとDiff表示（トグル付き）
     resultDiv.innerHTML = `
       ✅ WER: ${data.wer}%<br>
       <hr>
-      🔍 Diff:<br>${data.diff_html}<br>
+      🔍 Diff:
+      <div>
+        <label><input type="radio" name="diffMode" value="user" checked> ユーザーベース</label>
+        <label><input type="radio" name="diffMode" value="original"> 教材ベース</label>
+      </div>
+      <div id="diffResult">${data.diff_user}</div>
       <hr>
       📜 Original Transcript:<br>${data.original_transcribed}<br>
       <hr>
       🗣️ Your Transcription:<br>${data.user_transcribed}
     `;
 
+    // ✅ Diff 表示の切り替え
+    const radios = document.getElementsByName("diffMode");
+    radios.forEach(radio => {
+      radio.addEventListener("change", () => {
+        const selected = [...radios].find(r => r.checked).value;
+        document.getElementById("diffResult").innerHTML =
+          selected === "original" ? data.diff_original : data.diff_user;
+      });
+    });
     // ✅ ログを保存（本練習）
     await logAttempt(username, genre, level, data.wer, data.original_transcribed, data.user_transcribed);
 
@@ -171,7 +197,8 @@ async function submitRecording() {
     // ✅ 最新の最高到達レベルを取得してUI更新
     await fetchHighestLevels(username);
     updateLevelSelect();
-
+    console.log("🔍 submitRecording終了");
+  
     
   } catch (err) {
     console.error("提出時エラー:", err);
@@ -271,23 +298,3 @@ async function fetchHighestLevels(username) {
   console.log("⭐ Highest levels fetched:", highestLevels);
 }
 
-function displayResults(data) {
-  document.getElementById('werScore').innerText = `WER: ${data.wer.toFixed(1)}%`;
-
-  const diffUser = data.diff_user;
-  const diffOriginal = data.diff_original;
-
-  const diffContainer = document.getElementById('diffResult');
-  const radios = document.getElementsByName('diffMode');
-
-  function updateDiffView() {
-    const selected = [...radios].find(r => r.checked).value;
-    diffContainer.innerHTML = selected === 'original' ? diffOriginal : diffUser;
-  }
-
-  radios.forEach(radio => {
-    radio.addEventListener('change', updateDiffView);
-  });
-
-  updateDiffView();
-}

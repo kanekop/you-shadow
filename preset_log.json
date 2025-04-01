@@ -668,5 +668,516 @@
     "original_transcribed": "(auto-unlocked)",
     "user_transcribed": "(auto-unlocked)",
     "timestamp": "2025-04-01T00:57:58.315787"
+  },
+  {
+    "timestamp": "2025-04-01T03:11:17.326326",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 66.67,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "Enable script text for general one level.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 66.67,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "Enable script text for general one level.",
+    "timestamp": "2025-04-01T03:11:17.474911"
+  },
+  {
+    "timestamp": "2025-04-01T03:18:16.860355",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 77.78,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "Mission 40, level 1.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 77.78,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "Mission 40, level 1.",
+    "timestamp": "2025-04-01T03:18:17.012664"
+  },
+  {
+    "timestamp": "2025-04-01T03:36:34.252949",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 66.67,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is the next one, level one.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 66.67,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is the next one, level one.",
+    "timestamp": "2025-04-01T03:36:34.404075"
+  },
+  {
+    "timestamp": "2025-04-01T03:37:23.651090",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 66.67,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "4 is channel 1, level 1.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 66.67,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "4 is channel 1, level 1.",
+    "timestamp": "2025-04-01T03:37:23.803904"
+  },
+  {
+    "timestamp": "2025-04-01T03:43:55.737924",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 33.33,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is sample script text for general one, level one.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 33.33,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is sample script text for general one, level one.",
+    "timestamp": "2025-04-01T03:43:55.890622"
+  },
+  {
+    "timestamp": "2025-04-01T03:44:16.043222",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 88.89,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "It's time for channel one, level one.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 88.89,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "It's time for channel one, level one.",
+    "timestamp": "2025-04-01T03:44:16.195829"
+  },
+  {
+    "timestamp": "2025-04-01T03:44:28.896879",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 88.89,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "It's time for channel one, level one.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 88.89,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "It's time for channel one, level one.",
+    "timestamp": "2025-04-01T03:44:29.044343"
+  },
+  {
+    "timestamp": "2025-04-01T03:45:07.414309",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 33.33,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is sample script text for journal one, level one.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 33.33,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is sample script text for journal one, level one.",
+    "timestamp": "2025-04-01T03:45:07.562929"
+  },
+  {
+    "timestamp": "2025-04-01T03:55:43.045988",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 22.22,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is sample script text for Gen 1 Level 1.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 22.22,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is sample script text for Gen 1 Level 1.",
+    "timestamp": "2025-04-01T03:55:43.202850"
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-01T03:55:43.353222"
+  },
+  {
+    "timestamp": "2025-04-01T03:56:16.124239",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 33.33,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is sample script text for Gen1, Gen1.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 33.33,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is sample script text for Gen1, Gen1.",
+    "timestamp": "2025-04-01T03:56:16.288778"
+  },
+  {
+    "timestamp": "2025-04-01T04:06:02.480150",
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level1",
+    "wer": 27.36,
+    "original_transcribed": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a baseball, takes practice. Practice is the repetition of an action with the goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in our brains to make us better at things? Our brains have two kinds of neural tissue, gray matter and white matter. The gray matter processes information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel from the brain's gray matter down the spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin, and it's this myelin covering, or sheath, that seems to change with practice. Myelin is similar to insulation on electrical cables. It prevents energy loss from electrical signals that the brain uses, moving them more efficiently along neural pathways. Some recent studies in mice suggest that the repetition of a physical motion increases the layers of myelin sheath that insulates the axons. And the more layers, the greater the insulation around the axon chains, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, muscles themselves don't really have memory. Rather, it may be the myelination of neural pathways that give these athletes and performers their edge with faster and more efficient neural pathways. There are many theories that attempt to quantify the number of hours, days, and even years of practice that it takes to master a skill. While we don't yet have a magic number, we do know that mastery isn't simply about the amount of hours of practice. It's also the quality and effectiveness of that practice. Effective practice is consistent, intensely focused, and targets content or weaknesses that lie at the edge of one's current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off the computer or TV and putting your cell phone on airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay on task for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the root of most distractions. Start out slowly or in slow motion. Coordination is built with repetitions, whether correct or incorrect. If you gradually increase the speed of the quality repetitions, you have a better chance of doing them correctly. Next, frequent repetitions with allotted breaks are common practice habits of elite performers. Studies have shown that many top athletes, musicians, and dancers spend 50 to 60 hours per week on activities related to their craft. Many divide their time used for effective practice into multiple daily practice sessions of limited duration. And finally, practice in your brain in vivid detail. It's a bit surprising, but a number of studies suggest that once a physical motion has been established, it can be reinforced just by imagining it. In one study, 144 basketball players were divided into two groups. Group A physically practiced one-handed free throws, while Group B only mentally practiced them. When they were tested at the end of the two-week experiment, the intermediate and experienced players in both groups had improved by nearly the same amount. As scientists get closer to unraveling the secrets of our brains, our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing our individual limits, achieving new heights, and maximizing our potential.",
+    "user_transcribed": "Mastering many physical skills, be it moving a carousel, playing an instrument, or throwing a baseball. Exercise practice is a repetition of an action with a goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in the brain to make us better at these things? A brain has two kinds of neural tissues, gray matter and white matter. The gray matter processes the information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel to raise the gray matter and spinal cord through a chain of nerve fibers called axons to our muscles. How does practice or repetition affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin. This is myelin covering or sheath, and seems to change with practice. Myelin is similar to insulation on electrical cables, and prevents energy loss or electrical signals to the brain music, moving more efficiently along the neural pathway. In studies like this, the repetition of a physical motion increases the layer of myelin sheath to insulate the axons, and the more layers, the greater the information along the axon chain, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, most of themselves do not really have memory. Rather, it may be the myelin sheath of neural pathways that give these athletes and performers at their age a much more efficient neural pathway. There are many theories that attempt to quantify the number of hours, days, and years of practice that takes to master skills, but we do not yet have a magic number. We do know that mastering isn't simply about the amount of hours of practice, it's also about the energy efficiency of that practice. Effective practice is consistent and intentionally focused, and targets content or weaknesses aligned at the edge of one's current abilities. So if effective practice is key, how do we get the most out of the practice? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off your computer or TV, and putting your cell phone on airplane mode. And once a month, research has observed 260 student studies. On average, most students register on Slack for only six minutes at a time. But apps, cell phones, and particularly Facebook are the route for most distractions. Settle slowly in a slow motion. Coordination is built with repetitions, whether correct or incorrect. As you gradually increase the speed of recording repetitions, you have a better chance of doing the correct rate. Next, frequent repetition is a lot of work. But common practice habits lead to performance. Try to choose a mini-topic, three sessions, and dance to spend 50 to 60 hours per week. And activities related to the craft. Please avoid the time used for effective practice and multiple daily practice sessions or limited durations. And finally, practice in your brain in every detail. It may surprise you, but a number of students have suggested that once physical motion has been established, it can be reinforced just by imagining it. In one student, 144 basketball players divided into two groups. Group A physically practiced one-handed swing skills while group B only mentally practiced them. Just by the end of a two-week experiment, intermediate experience raised, both groups have improved by nearly the same amount. A scientist gets closer to a lovely team spirit. Understanding of effective practice will only improve. In the meantime, effective practice is the best way we have to pursue individual level of practice to reach new heights and maximizing our potential.",
+    "script_excerpt": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a bas"
+  },
+  {
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level1",
+    "wer": 27.36,
+    "original_transcribed": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a baseball, takes practice. Practice is the repetition of an action with the goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in our brains to make us better at things? Our brains have two kinds of neural tissue, gray matter and white matter. The gray matter processes information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel from the brain's gray matter down the spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin, and it's this myelin covering, or sheath, that seems to change with practice. Myelin is similar to insulation on electrical cables. It prevents energy loss from electrical signals that the brain uses, moving them more efficiently along neural pathways. Some recent studies in mice suggest that the repetition of a physical motion increases the layers of myelin sheath that insulates the axons. And the more layers, the greater the insulation around the axon chains, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, muscles themselves don't really have memory. Rather, it may be the myelination of neural pathways that give these athletes and performers their edge with faster and more efficient neural pathways. There are many theories that attempt to quantify the number of hours, days, and even years of practice that it takes to master a skill. While we don't yet have a magic number, we do know that mastery isn't simply about the amount of hours of practice. It's also the quality and effectiveness of that practice. Effective practice is consistent, intensely focused, and targets content or weaknesses that lie at the edge of one's current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off the computer or TV and putting your cell phone on airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay on task for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the root of most distractions. Start out slowly or in slow motion. Coordination is built with repetitions, whether correct or incorrect. If you gradually increase the speed of the quality repetitions, you have a better chance of doing them correctly. Next, frequent repetitions with allotted breaks are common practice habits of elite performers. Studies have shown that many top athletes, musicians, and dancers spend 50 to 60 hours per week on activities related to their craft. Many divide their time used for effective practice into multiple daily practice sessions of limited duration. And finally, practice in your brain in vivid detail. It's a bit surprising, but a number of studies suggest that once a physical motion has been established, it can be reinforced just by imagining it. In one study, 144 basketball players were divided into two groups. Group A physically practiced one-handed free throws, while Group B only mentally practiced them. When they were tested at the end of the two-week experiment, the intermediate and experienced players in both groups had improved by nearly the same amount. As scientists get closer to unraveling the secrets of our brains, our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing our individual limits, achieving new heights, and maximizing our potential.",
+    "user_transcribed": "Mastering many physical skills, be it moving a carousel, playing an instrument, or throwing a baseball. Exercise practice is a repetition of an action with a goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in the brain to make us better at these things? A brain has two kinds of neural tissues, gray matter and white matter. The gray matter processes the information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel to raise the gray matter and spinal cord through a chain of nerve fibers called axons to our muscles. How does practice or repetition affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin. This is myelin covering or sheath, and seems to change with practice. Myelin is similar to insulation on electrical cables, and prevents energy loss or electrical signals to the brain music, moving more efficiently along the neural pathway. In studies like this, the repetition of a physical motion increases the layer of myelin sheath to insulate the axons, and the more layers, the greater the information along the axon chain, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, most of themselves do not really have memory. Rather, it may be the myelin sheath of neural pathways that give these athletes and performers at their age a much more efficient neural pathway. There are many theories that attempt to quantify the number of hours, days, and years of practice that takes to master skills, but we do not yet have a magic number. We do know that mastering isn't simply about the amount of hours of practice, it's also about the energy efficiency of that practice. Effective practice is consistent and intentionally focused, and targets content or weaknesses aligned at the edge of one's current abilities. So if effective practice is key, how do we get the most out of the practice? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off your computer or TV, and putting your cell phone on airplane mode. And once a month, research has observed 260 student studies. On average, most students register on Slack for only six minutes at a time. But apps, cell phones, and particularly Facebook are the route for most distractions. Settle slowly in a slow motion. Coordination is built with repetitions, whether correct or incorrect. As you gradually increase the speed of recording repetitions, you have a better chance of doing the correct rate. Next, frequent repetition is a lot of work. But common practice habits lead to performance. Try to choose a mini-topic, three sessions, and dance to spend 50 to 60 hours per week. And activities related to the craft. Please avoid the time used for effective practice and multiple daily practice sessions or limited durations. And finally, practice in your brain in every detail. It may surprise you, but a number of students have suggested that once physical motion has been established, it can be reinforced just by imagining it. In one student, 144 basketball players divided into two groups. Group A physically practiced one-handed swing skills while group B only mentally practiced them. Just by the end of a two-week experiment, intermediate experience raised, both groups have improved by nearly the same amount. A scientist gets closer to a lovely team spirit. Understanding of effective practice will only improve. In the meantime, effective practice is the best way we have to pursue individual level of practice to reach new heights and maximizing our potential.",
+    "timestamp": "2025-04-01T04:06:02.871390"
+  },
+  {
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-01T04:06:03.023852"
+  },
+  {
+    "timestamp": "2025-04-01T04:06:35.580591",
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level1",
+    "wer": 26.6,
+    "original_transcribed": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a baseball, takes practice. Practice is the repetition of an action with the goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in our brains to make us better at things? Our brains have two kinds of neural tissue, gray matter and white matter. The gray matter processes information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel from the brain's gray matter down the spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin, and it's this myelin covering, or sheath, that seems to change with practice. Myelin is similar to insulation on electrical cables. It prevents energy loss from electrical signals that the brain uses, moving them more efficiently along neural pathways. Some recent studies in mice suggest that the repetition of a physical motion increases the layers of myelin sheath that insulates the axons. And the more layers, the greater the insulation around the axon chains, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, muscles themselves don't really have memory. Rather, it may be the myelination of neural pathways that give these athletes and performers their edge with faster and more efficient neural pathways. There are many theories that attempt to quantify the number of hours, days, and even years of practice that it takes to master a skill. While we don't yet have a magic number, we do know that mastery isn't simply about the amount of hours of practice. It's also the quality and effectiveness of that practice. Effective practice is consistent, intensely focused, and targets content or weaknesses that lie at the edge of one's current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off the computer or TV and putting your cell phone on airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay on task for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the root of most distractions. Start out slowly or in slow motion. Coordination is built with repetitions, whether correct or incorrect. If you gradually increase the speed of the quality repetitions, you have a better chance of doing them correctly. Next, frequent repetitions with allotted breaks are common practice habits of elite performers. Studies have shown that many top athletes, musicians, and dancers spend 50 to 60 hours per week on activities related to their craft. Many divide their time used for effective practice into multiple daily practice sessions of limited duration. And finally, practice in your brain in vivid detail. It's a bit surprising, but a number of studies suggest that once a physical motion has been established, it can be reinforced just by imagining it. In one study, 144 basketball players were divided into two groups. Group A physically practiced one-handed free throws, while Group B only mentally practiced them. When they were tested at the end of the two-week experiment, the intermediate and experienced players in both groups had improved by nearly the same amount. As scientists get closer to unraveling the secrets of our brains, our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing our individual limits, achieving new heights, and maximizing our potential.",
+    "user_transcribed": "Mastering many physical skills, be it moving a carousel, playing an instrument, or throwing a baseball. Exercise practice is a repetition of an action with a goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in the brain to make us better at these things? A brain has two kinds of neural tissues, gray matter and white matter. The gray matter processes the information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel to raise the gray matter and spinal cord through a chain of nerve fibers called axons to our muscles. How does practice or repetition affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin. This is myelin covering or sheath, and seems to change with practice. Myelin is similar to insulation on electrical cables, and prevents energy loss or electrical signals to the brain music, moving more efficiently along neural pathways. In studies like this, the repetition of a physical motion increases the layer of myelin sheath to insulate the axons, and the more layers, the greater the information along the axon chain, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, most of themselves do not really have memory. Rather, it may be the myelin sheath of neural pathways that gives these athletes and performers at their age a much more efficient neural pathway. There are many theories that attempt to quantify the number of hours, days, and years of practice that takes to master skills, but we do not yet have a magic number. We do know that mastering isn't simply about the amount of hours of practice, it's also about the energy efficiency of that practice. Effective practice is consistent and intentionally focused, and targets content or weaknesses aligned at the edge of one's current abilities. So if effective practice is key, how do you manage valuable practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off your computer or TV, and putting your cell phone on airplane mode. And once a month, research has observed 260 students studied. On average, most students were able to stay on track for only 6 minutes at a time. But apps, cell phones, and particularly Facebook were the route for most distractions. Settle slowly in a slow motion. Coordination is built with repetitions, whether correct or incorrect. As you gradually increase the speed and coordinate repetitions, you have a better chance of doing that correctly. Next, frequent repetition is a lot of work. But common practice habits lead to performance. Try to choose a mini-topic, three sessions, and dance to spend 50-60 hours per week on activities related to the craft. This is where the time used for effective practice and multiple daily practice sessions are limited in duration. And finally, practice in your brain in every detail. It may surprise you, but a number of things are just that. Once physical motion has been established, it can be reinforced just by imagining it. In one student, 144 basketball players divided into two groups. Group A physically practiced one-handed swing skills while Group B only mentally practiced them. Just by the end of a two-week experiment, intermediate experience raised, most groups have improved by nearly the same amount. As scientists get closer to developing new techniques, our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have to pursue individual level progress, achieving new heights, and maximizing our potential.",
+    "script_excerpt": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a bas"
+  },
+  {
+    "user": "alice",
+    "genre": "genre2",
+    "level": "",
+    "wer": 26.6,
+    "original_transcribed": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a baseball, takes practice. Practice is the repetition of an action with the goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in our brains to make us better at things? Our brains have two kinds of neural tissue, gray matter and white matter. The gray matter processes information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel from the brain's gray matter down the spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin, and it's this myelin covering, or sheath, that seems to change with practice. Myelin is similar to insulation on electrical cables. It prevents energy loss from electrical signals that the brain uses, moving them more efficiently along neural pathways. Some recent studies in mice suggest that the repetition of a physical motion increases the layers of myelin sheath that insulates the axons. And the more layers, the greater the insulation around the axon chains, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, muscles themselves don't really have memory. Rather, it may be the myelination of neural pathways that give these athletes and performers their edge with faster and more efficient neural pathways. There are many theories that attempt to quantify the number of hours, days, and even years of practice that it takes to master a skill. While we don't yet have a magic number, we do know that mastery isn't simply about the amount of hours of practice. It's also the quality and effectiveness of that practice. Effective practice is consistent, intensely focused, and targets content or weaknesses that lie at the edge of one's current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off the computer or TV and putting your cell phone on airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay on task for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the root of most distractions. Start out slowly or in slow motion. Coordination is built with repetitions, whether correct or incorrect. If you gradually increase the speed of the quality repetitions, you have a better chance of doing them correctly. Next, frequent repetitions with allotted breaks are common practice habits of elite performers. Studies have shown that many top athletes, musicians, and dancers spend 50 to 60 hours per week on activities related to their craft. Many divide their time used for effective practice into multiple daily practice sessions of limited duration. And finally, practice in your brain in vivid detail. It's a bit surprising, but a number of studies suggest that once a physical motion has been established, it can be reinforced just by imagining it. In one study, 144 basketball players were divided into two groups. Group A physically practiced one-handed free throws, while Group B only mentally practiced them. When they were tested at the end of the two-week experiment, the intermediate and experienced players in both groups had improved by nearly the same amount. As scientists get closer to unraveling the secrets of our brains, our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing our individual limits, achieving new heights, and maximizing our potential.",
+    "user_transcribed": "Mastering many physical skills, be it moving a carousel, playing an instrument, or throwing a baseball. Exercise practice is a repetition of an action with a goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in the brain to make us better at these things? A brain has two kinds of neural tissues, gray matter and white matter. The gray matter processes the information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel to raise the gray matter and spinal cord through a chain of nerve fibers called axons to our muscles. How does practice or repetition affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin. This is myelin covering or sheath, and seems to change with practice. Myelin is similar to insulation on electrical cables, and prevents energy loss or electrical signals to the brain music, moving more efficiently along neural pathways. In studies like this, the repetition of a physical motion increases the layer of myelin sheath to insulate the axons, and the more layers, the greater the information along the axon chain, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, most of themselves do not really have memory. Rather, it may be the myelin sheath of neural pathways that gives these athletes and performers at their age a much more efficient neural pathway. There are many theories that attempt to quantify the number of hours, days, and years of practice that takes to master skills, but we do not yet have a magic number. We do know that mastering isn't simply about the amount of hours of practice, it's also about the energy efficiency of that practice. Effective practice is consistent and intentionally focused, and targets content or weaknesses aligned at the edge of one's current abilities. So if effective practice is key, how do you manage valuable practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off your computer or TV, and putting your cell phone on airplane mode. And once a month, research has observed 260 students studied. On average, most students were able to stay on track for only 6 minutes at a time. But apps, cell phones, and particularly Facebook were the route for most distractions. Settle slowly in a slow motion. Coordination is built with repetitions, whether correct or incorrect. As you gradually increase the speed and coordinate repetitions, you have a better chance of doing that correctly. Next, frequent repetition is a lot of work. But common practice habits lead to performance. Try to choose a mini-topic, three sessions, and dance to spend 50-60 hours per week on activities related to the craft. This is where the time used for effective practice and multiple daily practice sessions are limited in duration. And finally, practice in your brain in every detail. It may surprise you, but a number of things are just that. Once physical motion has been established, it can be reinforced just by imagining it. In one student, 144 basketball players divided into two groups. Group A physically practiced one-handed swing skills while Group B only mentally practiced them. Just by the end of a two-week experiment, intermediate experience raised, most groups have improved by nearly the same amount. As scientists get closer to developing new techniques, our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have to pursue individual level progress, achieving new heights, and maximizing our potential.",
+    "timestamp": "2025-04-01T04:06:35.930974"
+  },
+  {
+    "timestamp": "2025-04-01T10:13:32.875673",
+    "user": "alice",
+    "genre": "genre3",
+    "level": "level1",
+    "wer": 99.66,
+    "original_transcribed": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matching socks into pairs.\nI just couldn't seem to find the right ones.\nThis went on for years—until I was around 21.\n\nThen one day, I came across a book by Weinberg, a brilliant computer programmer.\nIn the midst of his insightful tech advice, he casually shared a genius life hack: just buy a bunch of identical socks.\nThe idea was simple—grab any two, and they’ll always match.\n\nI thought, “This guy is a genius!”\nAnd from that moment on, I was hooked.\n\nFast forward to when I turned 35—I discovered five-finger socks.\nAnd let me tell you, they’re incredibly comfortable.\nIt’s like walking barefoot... but even better.\nI was hooked all over again—I made the switch completely.\n\nBut they do come with a twist.\nThese socks have left and right versions, which can be a little confusing at first.\nSo every morning felt like solving a tiny puzzle: figuring out which sock went on which foot.\nIt might sound a bit tricky, but honestly, it became part of the fun.\nAnd trust me—once you try them, you’ll never go back!\n\nSo today, I’m happy to share the little solution I found to the five-finger sock dilemma.\n\nEvery morning, I just grab any two socks. No need to check or match them.\nIf I end up with two left socks? No problem! I simply flip one inside out.\nIt feels great, and it still looks just fine.\nAnd if your socks are black? No one will ever notice.\n\nIt’s that simple—a small trick, but one that’s made my mornings so much easier.\nI have to say, I really love this little hack.",
+    "user_transcribed": "you",
+    "script_excerpt": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matchin"
+  },
+  {
+    "user": "alice",
+    "genre": "genre3",
+    "level": "level1",
+    "wer": 99.66,
+    "original_transcribed": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matching socks into pairs.\nI just couldn't seem to find the right ones.\nThis went on for years—until I was around 21.\n\nThen one day, I came across a book by Weinberg, a brilliant computer programmer.\nIn the midst of his insightful tech advice, he casually shared a genius life hack: just buy a bunch of identical socks.\nThe idea was simple—grab any two, and they’ll always match.\n\nI thought, “This guy is a genius!”\nAnd from that moment on, I was hooked.\n\nFast forward to when I turned 35—I discovered five-finger socks.\nAnd let me tell you, they’re incredibly comfortable.\nIt’s like walking barefoot... but even better.\nI was hooked all over again—I made the switch completely.\n\nBut they do come with a twist.\nThese socks have left and right versions, which can be a little confusing at first.\nSo every morning felt like solving a tiny puzzle: figuring out which sock went on which foot.\nIt might sound a bit tricky, but honestly, it became part of the fun.\nAnd trust me—once you try them, you’ll never go back!\n\nSo today, I’m happy to share the little solution I found to the five-finger sock dilemma.\n\nEvery morning, I just grab any two socks. No need to check or match them.\nIf I end up with two left socks? No problem! I simply flip one inside out.\nIt feels great, and it still looks just fine.\nAnd if your socks are black? No one will ever notice.\n\nIt’s that simple—a small trick, but one that’s made my mornings so much easier.\nI have to say, I really love this little hack.",
+    "user_transcribed": "you",
+    "timestamp": "2025-04-01T10:13:33.041128"
+  },
+  {
+    "timestamp": "2025-04-01T10:18:11.162030",
+    "user": "alice",
+    "genre": "genre3",
+    "level": "level1",
+    "wer": 30.34,
+    "original_transcribed": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matching socks into pairs.\nI just couldn't seem to find the right ones.\nThis went on for years—until I was around 21.\n\nThen one day, I came across a book by Weinberg, a brilliant computer programmer.\nIn the midst of his insightful tech advice, he casually shared a genius life hack: just buy a bunch of identical socks.\nThe idea was simple—grab any two, and they’ll always match.\n\nI thought, “This guy is a genius!”\nAnd from that moment on, I was hooked.\n\nFast forward to when I turned 35—I discovered five-finger socks.\nAnd let me tell you, they’re incredibly comfortable.\nIt’s like walking barefoot... but even better.\nI was hooked all over again—I made the switch completely.\n\nBut they do come with a twist.\nThese socks have left and right versions, which can be a little confusing at first.\nSo every morning felt like solving a tiny puzzle: figuring out which sock went on which foot.\nIt might sound a bit tricky, but honestly, it became part of the fun.\nAnd trust me—once you try them, you’ll never go back!\n\nSo today, I’m happy to share the little solution I found to the five-finger sock dilemma.\n\nEvery morning, I just grab any two socks. No need to check or match them.\nIf I end up with two left socks? No problem! I simply flip one inside out.\nIt feels great, and it still looks just fine.\nAnd if your socks are black? No one will ever notice.\n\nIt’s that simple—a small trick, but one that’s made my mornings so much easier.\nI have to say, I really love this little hack.",
+    "user_transcribed": "My journey to five-finger freedom. When I was a kid, I always had a toy to match socks and pants. I just couldn't see the vinyl, right? I don't know for years, until I was around 21. That one day, I came across a book I bought, a brain-computer program. In the midst of hints, I'd taken to them, and casually shared a genius life hack. Let's buy a bunch of identical socks. The idea was simple. Rub into them, and they all mismatched. I thought this guy is a genius. From that moment on, I was hooked. Fast-forward to when I turned 35. I discovered five-finger socks. Let me tell you, they're incredibly comfortable. It's like a walking belt, but even better. I was hooked all over again. I may have switched completely, but they do come with a twist. These socks have left and right versions. It can be really confusing at first. Every moment was like solving a tiny puzzle. Figuring out which sock went where to switch. It might sound a bit tricky, but honestly, it became part of a clone. And trust me, once you try them, you'll never go back. But since then, I'm happy to share the little solution I found, the five-finger sock dilemma. Every moment, I just grab any two socks, only to check on my socks. I find I have two left socks. No problem. I simply flip one inside out. It feels great, and it still looks just fine. If your socks crack, no one will ever notice. It's that simple. A small trick, one that makes mornings so much easier. I have to say, I really love this little hack.",
+    "script_excerpt": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matchin"
+  },
+  {
+    "user": "alice",
+    "genre": "genre3",
+    "level": "level1",
+    "wer": 30.34,
+    "original_transcribed": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matching socks into pairs.\nI just couldn't seem to find the right ones.\nThis went on for years—until I was around 21.\n\nThen one day, I came across a book by Weinberg, a brilliant computer programmer.\nIn the midst of his insightful tech advice, he casually shared a genius life hack: just buy a bunch of identical socks.\nThe idea was simple—grab any two, and they’ll always match.\n\nI thought, “This guy is a genius!”\nAnd from that moment on, I was hooked.\n\nFast forward to when I turned 35—I discovered five-finger socks.\nAnd let me tell you, they’re incredibly comfortable.\nIt’s like walking barefoot... but even better.\nI was hooked all over again—I made the switch completely.\n\nBut they do come with a twist.\nThese socks have left and right versions, which can be a little confusing at first.\nSo every morning felt like solving a tiny puzzle: figuring out which sock went on which foot.\nIt might sound a bit tricky, but honestly, it became part of the fun.\nAnd trust me—once you try them, you’ll never go back!\n\nSo today, I’m happy to share the little solution I found to the five-finger sock dilemma.\n\nEvery morning, I just grab any two socks. No need to check or match them.\nIf I end up with two left socks? No problem! I simply flip one inside out.\nIt feels great, and it still looks just fine.\nAnd if your socks are black? No one will ever notice.\n\nIt’s that simple—a small trick, but one that’s made my mornings so much easier.\nI have to say, I really love this little hack.",
+    "user_transcribed": "My journey to five-finger freedom. When I was a kid, I always had a toy to match socks and pants. I just couldn't see the vinyl, right? I don't know for years, until I was around 21. That one day, I came across a book I bought, a brain-computer program. In the midst of hints, I'd taken to them, and casually shared a genius life hack. Let's buy a bunch of identical socks. The idea was simple. Rub into them, and they all mismatched. I thought this guy is a genius. From that moment on, I was hooked. Fast-forward to when I turned 35. I discovered five-finger socks. Let me tell you, they're incredibly comfortable. It's like a walking belt, but even better. I was hooked all over again. I may have switched completely, but they do come with a twist. These socks have left and right versions. It can be really confusing at first. Every moment was like solving a tiny puzzle. Figuring out which sock went where to switch. It might sound a bit tricky, but honestly, it became part of a clone. And trust me, once you try them, you'll never go back. But since then, I'm happy to share the little solution I found, the five-finger sock dilemma. Every moment, I just grab any two socks, only to check on my socks. I find I have two left socks. No problem. I simply flip one inside out. It feels great, and it still looks just fine. If your socks crack, no one will ever notice. It's that simple. A small trick, one that makes mornings so much easier. I have to say, I really love this little hack.",
+    "timestamp": "2025-04-01T10:18:11.334796"
+  },
+  {
+    "timestamp": "2025-04-01T10:18:12.521553",
+    "user": "alice",
+    "genre": "genre3",
+    "level": "level1",
+    "wer": 30.34,
+    "original_transcribed": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matching socks into pairs.\nI just couldn't seem to find the right ones.\nThis went on for years—until I was around 21.\n\nThen one day, I came across a book by Weinberg, a brilliant computer programmer.\nIn the midst of his insightful tech advice, he casually shared a genius life hack: just buy a bunch of identical socks.\nThe idea was simple—grab any two, and they’ll always match.\n\nI thought, “This guy is a genius!”\nAnd from that moment on, I was hooked.\n\nFast forward to when I turned 35—I discovered five-finger socks.\nAnd let me tell you, they’re incredibly comfortable.\nIt’s like walking barefoot... but even better.\nI was hooked all over again—I made the switch completely.\n\nBut they do come with a twist.\nThese socks have left and right versions, which can be a little confusing at first.\nSo every morning felt like solving a tiny puzzle: figuring out which sock went on which foot.\nIt might sound a bit tricky, but honestly, it became part of the fun.\nAnd trust me—once you try them, you’ll never go back!\n\nSo today, I’m happy to share the little solution I found to the five-finger sock dilemma.\n\nEvery morning, I just grab any two socks. No need to check or match them.\nIf I end up with two left socks? No problem! I simply flip one inside out.\nIt feels great, and it still looks just fine.\nAnd if your socks are black? No one will ever notice.\n\nIt’s that simple—a small trick, but one that’s made my mornings so much easier.\nI have to say, I really love this little hack.",
+    "user_transcribed": "My journey to five-finger freedom. When I was a kid, I always had a toy to match socks and pants. I just couldn't see the vinyl, right? I don't know for years, until I was around 21. That one day, I came across a book I bought, a brain-computer program. In the midst of hints, I'd taken to them, and casually shared a genius life hack. Let's buy a bunch of identical socks. The idea was simple. Rub into them, and they all mismatched. I thought this guy is a genius. From that moment on, I was hooked. Fast-forward to when I turned 35. I discovered five-finger socks. Let me tell you, they're incredibly comfortable. It's like a walking belt, but even better. I was hooked all over again. I may have switched completely, but they do come with a twist. These socks have left and right versions. It can be really confusing at first. Every moment was like solving a tiny puzzle. Figuring out which sock went where to switch. It might sound a bit tricky, but honestly, it became part of a clone. And trust me, once you try them, you'll never go back. But since then, I'm happy to share the little solution I found, the five-finger sock dilemma. Every moment, I just grab any two socks, only to check on my socks. I find I have two left socks. No problem. I simply flip one inside out. It feels great, and it still looks just fine. If your socks crack, no one will ever notice. It's that simple. A small trick, one that makes mornings so much easier. I have to say, I really love this little hack.",
+    "script_excerpt": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matchin"
+  },
+  {
+    "user": "alice",
+    "genre": "genre3",
+    "level": "level1",
+    "wer": 30.34,
+    "original_transcribed": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matching socks into pairs.\nI just couldn't seem to find the right ones.\nThis went on for years—until I was around 21.\n\nThen one day, I came across a book by Weinberg, a brilliant computer programmer.\nIn the midst of his insightful tech advice, he casually shared a genius life hack: just buy a bunch of identical socks.\nThe idea was simple—grab any two, and they’ll always match.\n\nI thought, “This guy is a genius!”\nAnd from that moment on, I was hooked.\n\nFast forward to when I turned 35—I discovered five-finger socks.\nAnd let me tell you, they’re incredibly comfortable.\nIt’s like walking barefoot... but even better.\nI was hooked all over again—I made the switch completely.\n\nBut they do come with a twist.\nThese socks have left and right versions, which can be a little confusing at first.\nSo every morning felt like solving a tiny puzzle: figuring out which sock went on which foot.\nIt might sound a bit tricky, but honestly, it became part of the fun.\nAnd trust me—once you try them, you’ll never go back!\n\nSo today, I’m happy to share the little solution I found to the five-finger sock dilemma.\n\nEvery morning, I just grab any two socks. No need to check or match them.\nIf I end up with two left socks? No problem! I simply flip one inside out.\nIt feels great, and it still looks just fine.\nAnd if your socks are black? No one will ever notice.\n\nIt’s that simple—a small trick, but one that’s made my mornings so much easier.\nI have to say, I really love this little hack.",
+    "user_transcribed": "My journey to five-finger freedom. When I was a kid, I always had a toy to match socks and pants. I just couldn't see the vinyl, right? I don't know for years, until I was around 21. That one day, I came across a book I bought, a brain-computer program. In the midst of hints, I'd taken to them, and casually shared a genius life hack. Let's buy a bunch of identical socks. The idea was simple. Rub into them, and they all mismatched. I thought this guy is a genius. From that moment on, I was hooked. Fast-forward to when I turned 35. I discovered five-finger socks. Let me tell you, they're incredibly comfortable. It's like a walking belt, but even better. I was hooked all over again. I may have switched completely, but they do come with a twist. These socks have left and right versions. It can be really confusing at first. Every moment was like solving a tiny puzzle. Figuring out which sock went where to switch. It might sound a bit tricky, but honestly, it became part of a clone. And trust me, once you try them, you'll never go back. But since then, I'm happy to share the little solution I found, the five-finger sock dilemma. Every moment, I just grab any two socks, only to check on my socks. I find I have two left socks. No problem. I simply flip one inside out. It feels great, and it still looks just fine. If your socks crack, no one will ever notice. It's that simple. A small trick, one that makes mornings so much easier. I have to say, I really love this little hack.",
+    "timestamp": "2025-04-01T10:18:12.716459"
+  },
+  {
+    "timestamp": "2025-04-01T10:22:38.703654",
+    "user": "alice",
+    "genre": "genre3",
+    "level": "level1",
+    "wer": 26.55,
+    "original_transcribed": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matching socks into pairs.\nI just couldn't seem to find the right ones.\nThis went on for years—until I was around 21.\n\nThen one day, I came across a book by Weinberg, a brilliant computer programmer.\nIn the midst of his insightful tech advice, he casually shared a genius life hack: just buy a bunch of identical socks.\nThe idea was simple—grab any two, and they’ll always match.\n\nI thought, “This guy is a genius!”\nAnd from that moment on, I was hooked.\n\nFast forward to when I turned 35—I discovered five-finger socks.\nAnd let me tell you, they’re incredibly comfortable.\nIt’s like walking barefoot... but even better.\nI was hooked all over again—I made the switch completely.\n\nBut they do come with a twist.\nThese socks have left and right versions, which can be a little confusing at first.\nSo every morning felt like solving a tiny puzzle: figuring out which sock went on which foot.\nIt might sound a bit tricky, but honestly, it became part of the fun.\nAnd trust me—once you try them, you’ll never go back!\n\nSo today, I’m happy to share the little solution I found to the five-finger sock dilemma.\n\nEvery morning, I just grab any two socks. No need to check or match them.\nIf I end up with two left socks? No problem! I simply flip one inside out.\nIt feels great, and it still looks just fine.\nAnd if your socks are black? No one will ever notice.\n\nIt’s that simple—a small trick, but one that’s made my mornings so much easier.\nI have to say, I really love this little hack.",
+    "user_transcribed": "Talked it to me, my journey to five years. When I was sick, I always had a time matching how my two socks compared. We couldn't see in different light. That went on for years. Until I was around 21. Then one day, I came across a book by Weinberg, a brilliant computer programmer. In the midst of things I've taken advice. He casually shared a genius life hack. Just buy a bunch of Nanticoke socks. The idea was simple. Grab it in two, and you're always lost. I thought, this guy is genius. And from that moment on, I was hooked. Fast forward, and I'm in turn 35. I discovered five-finger socks. Let me tell you, very creatively comfortable. It's like walking barefoot, but even better. I was hooked all over. I may have switched completely, but they do come with twists. These socks are left in the right version, which can be a little confusing at first. Every morning felt like solving tiny puzzles. Figuring out which sock when I switched might sound a bit tricky, but honestly, it became part of the fun. And trust me, once I try them, you'll never go back. But then, I'm happy to share the little solution I found. The five-finger sock dilemma. Every morning, I just grab any two socks. As long as they're check or match. If I end up with two left socks, no problem. I simply clip one inside out. It feels great, and it looks just fine. And if your sock's black, no one will ever notice. It's definitely a small trick, but one that made my morning so much easier. I have to say, I really love this little hack.",
+    "script_excerpt": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matchin"
+  },
+  {
+    "user": "alice",
+    "genre": "genre3",
+    "level": "",
+    "wer": 26.55,
+    "original_transcribed": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matching socks into pairs.\nI just couldn't seem to find the right ones.\nThis went on for years—until I was around 21.\n\nThen one day, I came across a book by Weinberg, a brilliant computer programmer.\nIn the midst of his insightful tech advice, he casually shared a genius life hack: just buy a bunch of identical socks.\nThe idea was simple—grab any two, and they’ll always match.\n\nI thought, “This guy is a genius!”\nAnd from that moment on, I was hooked.\n\nFast forward to when I turned 35—I discovered five-finger socks.\nAnd let me tell you, they’re incredibly comfortable.\nIt’s like walking barefoot... but even better.\nI was hooked all over again—I made the switch completely.\n\nBut they do come with a twist.\nThese socks have left and right versions, which can be a little confusing at first.\nSo every morning felt like solving a tiny puzzle: figuring out which sock went on which foot.\nIt might sound a bit tricky, but honestly, it became part of the fun.\nAnd trust me—once you try them, you’ll never go back!\n\nSo today, I’m happy to share the little solution I found to the five-finger sock dilemma.\n\nEvery morning, I just grab any two socks. No need to check or match them.\nIf I end up with two left socks? No problem! I simply flip one inside out.\nIt feels great, and it still looks just fine.\nAnd if your socks are black? No one will ever notice.\n\nIt’s that simple—a small trick, but one that’s made my mornings so much easier.\nI have to say, I really love this little hack.",
+    "user_transcribed": "Talked it to me, my journey to five years. When I was sick, I always had a time matching how my two socks compared. We couldn't see in different light. That went on for years. Until I was around 21. Then one day, I came across a book by Weinberg, a brilliant computer programmer. In the midst of things I've taken advice. He casually shared a genius life hack. Just buy a bunch of Nanticoke socks. The idea was simple. Grab it in two, and you're always lost. I thought, this guy is genius. And from that moment on, I was hooked. Fast forward, and I'm in turn 35. I discovered five-finger socks. Let me tell you, very creatively comfortable. It's like walking barefoot, but even better. I was hooked all over. I may have switched completely, but they do come with twists. These socks are left in the right version, which can be a little confusing at first. Every morning felt like solving tiny puzzles. Figuring out which sock when I switched might sound a bit tricky, but honestly, it became part of the fun. And trust me, once I try them, you'll never go back. But then, I'm happy to share the little solution I found. The five-finger sock dilemma. Every morning, I just grab any two socks. As long as they're check or match. If I end up with two left socks, no problem. I simply clip one inside out. It feels great, and it looks just fine. And if your sock's black, no one will ever notice. It's definitely a small trick, but one that made my morning so much easier. I have to say, I really love this little hack.",
+    "timestamp": "2025-04-01T10:22:38.925336"
+  },
+  {
+    "timestamp": "2025-04-01T10:25:19.925273",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 100.0,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "How was that?",
+    "script_excerpt": "This is sample script text for genre1 level 3."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 100.0,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "How was that?",
+    "timestamp": "2025-04-01T10:25:20.081568"
+  },
+  {
+    "timestamp": "2025-04-01T10:25:24.557117",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 100.0,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "What do you say?",
+    "script_excerpt": "This is sample script text for genre1 level 3."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 100.0,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "What do you say?",
+    "timestamp": "2025-04-01T10:25:24.809644"
+  },
+  {
+    "timestamp": "2025-04-01T10:25:41.763206",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 22.22,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "This is sample script text for Gen 1 Level 3.",
+    "script_excerpt": "This is sample script text for genre1 level 3."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 22.22,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "This is sample script text for Gen 1 Level 3.",
+    "timestamp": "2025-04-01T10:25:41.916105"
+  },
+  {
+    "timestamp": "2025-04-01T10:34:55.180564",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 55.56,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "Script text for Gen 1 Level 3.",
+    "script_excerpt": "This is sample script text for genre1 level 3."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 55.56,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "Script text for Gen 1 Level 3.",
+    "timestamp": "2025-04-01T10:34:55.349931"
+  },
+  {
+    "timestamp": "2025-04-01T10:35:49.396462",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 22.22,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "This is the sample script text for Gen1 level 3.",
+    "script_excerpt": "This is sample script text for genre1 level 3."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 22.22,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "This is the sample script text for Gen1 level 3.",
+    "timestamp": "2025-04-01T10:35:49.554390"
+  },
+  {
+    "timestamp": "2025-04-01T10:36:54.896147",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 44.44,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "This is level sample script text for journal one, level three.",
+    "script_excerpt": "This is sample script text for genre1 level 3."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 44.44,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "This is level sample script text for journal one, level three.",
+    "timestamp": "2025-04-01T10:36:55.088181"
+  },
+  {
+    "timestamp": "2025-04-01T10:37:15.696981",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 33.33,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "This is sample script text for zone one, level three.",
+    "script_excerpt": "This is sample script text for genre1 level 3."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 33.33,
+    "original_transcribed": "This is sample script text for genre1 level 3.",
+    "user_transcribed": "This is sample script text for zone one, level three.",
+    "timestamp": "2025-04-01T10:37:15.869446"
+  },
+  {
+    "timestamp": "2025-04-01T10:38:24.547245",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 25.0,
+    "original_transcribed": "This is Level 3.",
+    "user_transcribed": "This is level three.",
+    "script_excerpt": "This is Level 3."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 25.0,
+    "original_transcribed": "This is Level 3.",
+    "user_transcribed": "This is level three.",
+    "timestamp": "2025-04-01T10:38:24.780743"
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level4",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-01T10:38:24.931526"
+  },
+  {
+    "timestamp": "2025-04-01T10:41:34.406440",
+    "user": "alice",
+    "genre": "genre3",
+    "level": "level1",
+    "wer": 28.28,
+    "original_transcribed": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matching socks into pairs.\nI just couldn't seem to find the right ones.\nThis went on for years—until I was around 21.\n\nThen one day, I came across a book by Weinberg, a brilliant computer programmer.\nIn the midst of his insightful tech advice, he casually shared a genius life hack: just buy a bunch of identical socks.\nThe idea was simple—grab any two, and they’ll always match.\n\nI thought, “This guy is a genius!”\nAnd from that moment on, I was hooked.\n\nFast forward to when I turned 35—I discovered five-finger socks.\nAnd let me tell you, they’re incredibly comfortable.\nIt’s like walking barefoot... but even better.\nI was hooked all over again—I made the switch completely.\n\nBut they do come with a twist.\nThese socks have left and right versions, which can be a little confusing at first.\nSo every morning felt like solving a tiny puzzle: figuring out which sock went on which foot.\nIt might sound a bit tricky, but honestly, it became part of the fun.\nAnd trust me—once you try them, you’ll never go back!\n\nSo today, I’m happy to share the little solution I found to the five-finger sock dilemma.\n\nEvery morning, I just grab any two socks. No need to check or match them.\nIf I end up with two left socks? No problem! I simply flip one inside out.\nIt feels great, and it still looks just fine.\nAnd if your socks are black? No one will ever notice.\n\nIt’s that simple—a small trick, but one that’s made my mornings so much easier.\nI have to say, I really love this little hack.",
+    "user_transcribed": "When I was a kid, I always had a hard time matching socks and pairs. I just couldn't see the final right ones. Then, one day, I came across a book by Weinberg, a brilliant computer programmer. In the midst of his time to take a spike, he tried to share a genius life hack. Just buy a bunch of dental gauze socks. The idea was simple. Grab any two of them at once. This guy is a genius. And from that moment on, I was hooked. By the time I was in my thirties, I discovered fun finger socks. Let me tell you, they're incredibly comfortable. It's like walking barefoot, but even better. I was hooked all over. I may switch completely, but they do come with a twist. These socks have left and right versions, which can be a little confusing at first. Every morning, I felt like solving a tiny puzzle, figuring out which house I'm rich with. It might sound a bit tricky, but honestly, it became part of the fun. And trust me, once you try them, you'll never go back. But today, I'm happy to share the little solution I found with the five-finger socks dilemma. Every morning, I just grab any two socks. No need to talk. It's magic. If I'm with two left socks, no problem. I simply flip one inside out. It feels great, and it still looks just fine. If your socks are black, no one will ever notice. It's that simple. A small trick that made my morning so much easier. I have to say, I really love this little hack.",
+    "script_excerpt": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matchin"
+  },
+  {
+    "user": "alice",
+    "genre": "genre3",
+    "level": "level1",
+    "wer": 28.28,
+    "original_transcribed": "Sock It to Me: My Journey to Five-Finger Freedom\n\nWhen I was a kid, I always had a hard time matching socks into pairs.\nI just couldn't seem to find the right ones.\nThis went on for years—until I was around 21.\n\nThen one day, I came across a book by Weinberg, a brilliant computer programmer.\nIn the midst of his insightful tech advice, he casually shared a genius life hack: just buy a bunch of identical socks.\nThe idea was simple—grab any two, and they’ll always match.\n\nI thought, “This guy is a genius!”\nAnd from that moment on, I was hooked.\n\nFast forward to when I turned 35—I discovered five-finger socks.\nAnd let me tell you, they’re incredibly comfortable.\nIt’s like walking barefoot... but even better.\nI was hooked all over again—I made the switch completely.\n\nBut they do come with a twist.\nThese socks have left and right versions, which can be a little confusing at first.\nSo every morning felt like solving a tiny puzzle: figuring out which sock went on which foot.\nIt might sound a bit tricky, but honestly, it became part of the fun.\nAnd trust me—once you try them, you’ll never go back!\n\nSo today, I’m happy to share the little solution I found to the five-finger sock dilemma.\n\nEvery morning, I just grab any two socks. No need to check or match them.\nIf I end up with two left socks? No problem! I simply flip one inside out.\nIt feels great, and it still looks just fine.\nAnd if your socks are black? No one will ever notice.\n\nIt’s that simple—a small trick, but one that’s made my mornings so much easier.\nI have to say, I really love this little hack.",
+    "user_transcribed": "When I was a kid, I always had a hard time matching socks and pairs. I just couldn't see the final right ones. Then, one day, I came across a book by Weinberg, a brilliant computer programmer. In the midst of his time to take a spike, he tried to share a genius life hack. Just buy a bunch of dental gauze socks. The idea was simple. Grab any two of them at once. This guy is a genius. And from that moment on, I was hooked. By the time I was in my thirties, I discovered fun finger socks. Let me tell you, they're incredibly comfortable. It's like walking barefoot, but even better. I was hooked all over. I may switch completely, but they do come with a twist. These socks have left and right versions, which can be a little confusing at first. Every morning, I felt like solving a tiny puzzle, figuring out which house I'm rich with. It might sound a bit tricky, but honestly, it became part of the fun. And trust me, once you try them, you'll never go back. But today, I'm happy to share the little solution I found with the five-finger socks dilemma. Every morning, I just grab any two socks. No need to talk. It's magic. If I'm with two left socks, no problem. I simply flip one inside out. It feels great, and it still looks just fine. If your socks are black, no one will ever notice. It's that simple. A small trick that made my morning so much easier. I have to say, I really love this little hack.",
+    "timestamp": "2025-04-01T10:41:34.573296"
+  },
+  {
+    "user": "alice",
+    "genre": "genre3",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-01T10:41:34.837415"
   }
 ]
