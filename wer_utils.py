@@ -1,5 +1,6 @@
 import numpy as np
 import re
+from utils import remove_fillers  # フィラー除去をインポート
 
 def normalize_text(text):
     """
@@ -27,6 +28,10 @@ def wer(reference, hypothesis):
         I: 挿入数
         N: 正解単語数
     """
+    # フィラー除去を適用
+    reference = remove_fillers(reference)
+    hypothesis = remove_fillers(hypothesis)
+    
     r = normalize_text(reference)
     h = normalize_text(hypothesis)
 

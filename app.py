@@ -341,15 +341,18 @@ def evaluate_shadowing():
 
     client = OpenAI()
 
-    # === 元音声の文字起こし ===
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_original:
-        original_audio.save(tmp_original.name)
-        with open(tmp_original.name, "rb") as f:
-            original_result = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=f
-            )
-        original_transcribed = original_result.text
+    # === フォームから情報取得 ===
+    genre = request.form.get("genre", "")
+    level = request.form.get("level", "")
+    username = request.form.get("username", "anonymous")
+
+    # === 教材スクリプトを script.txt から取得（Whisperは使わない）
+    script_path = os.path.join("presets", genre, level, "script.txt")
+    if not os.path.exists(script_path):
+        return jsonify({"error": f"Script not found at: {script_path}"}), 400
+
+    with open(script_path, "r", encoding="utf-8") as f:
+        original_transcribed = f.read().strip()
 
     # === ユーザー音声の文字起こし ===
     with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_user:
@@ -360,12 +363,11 @@ def evaluate_shadowing():
                 file=f
             )
         user_transcribed = user_result.text
-
+    
     # === 精度評価
     wer_score = calculate_wer(original_transcribed, user_transcribed)
-    diff_result = diff_html(original_transcribed, user_transcribed)
-
-    # ここまで既存処理と同じ
+    diff_user = get_diff_html(original_transcribed, user_transcribed, mode='user')
+    diff_original = get_diff_html(original_transcribed, user_transcribed, mode='original')
     
     # ログを保存
     log_entry = {
@@ -385,9 +387,75 @@ def evaluate_shadowing():
         "original_transcribed": original_transcribed,
         "user_transcribed": user_transcribed,
         "wer": round(wer_score * 100, 2),
-        "diff_html": diff_result
+        "diff_user": diff_user,
+        "diff_original": diff_original
     })
     
+@app.route("/api/highest_levels/<username>")
+def get_highest_levels(username):
+    import json
+    import re
+    from collections import defaultdict
+
+    def level_number(level_name):
+        match = re.match(r"level(\d+)", level_name.lower())
+        return int(match.group(1)) if match else -1
+
+    with open("preset_log.json", "r", encoding="utf-8") as f:
+        logs = json.load(f)
+
+    highest = defaultdict(int)
+
+    for entry in logs:
+        if entry["user"].lower() != username.lower():
+            continue
+        if float(entry["wer"]) >= 30:
+            continue
+
+        genre = entry["genre"].strip().lower()
+        level = entry["level"].strip().lower()
+
+        num = level_number(level)
+        if num > highest[genre]:
+            highest[genre] = num
+
+    # 結果を levelX の形式に変換
+    result = {genre: f"level{num}" for genre, num in highest.items()}
+    return result
+
+
+
+@app.route("/api/log_attempt", methods=["POST"])
+def log_attempt():
+    data = request.json
+
+    required_fields = ["user", "genre", "level", "wer", "original_transcribed", "user_transcribed"]
+    if not all(field in data for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    log_entry = {
+        "user": data["user"],
+        "genre": data["genre"],
+        "level": data["level"],
+        "wer": float(data["wer"]),
+        "original_transcribed": data["original_transcribed"],
+        "user_transcribed": data["user_transcribed"],
+        "timestamp": datetime.now().isoformat()
+    }
+
+    log_file = "preset_log.json"
+    if os.path.exists(log_file):
+        with open(log_file, "r", encoding="utf-8") as f:
+            logs = json.load(f)
+    else:
+        logs = []
+
+    logs.append(log_entry)
+
+    with open(log_file, "w", encoding="utf-8") as f:
+        json.dump(logs, f, indent=2, ensure_ascii=False)
+
+    return jsonify({"message": "Logged successfully"})
 
 
 # === アプリ実行（Replitでは不要、ローカル用） ===

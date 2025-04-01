@@ -320,6 +320,16 @@
     "script_excerpt": "This is level 2."
   },
   {
+    "timestamp": "2025-03-31T06:38:07.123464",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "This is level 2.",
+    "script_excerpt": "This is level 2."
+  },
+  {
     "timestamp": "2025-03-31T06:38:30.483177",
     "user": "bob",
     "genre": "genre1",
@@ -328,5 +338,335 @@
     "original_transcribed": "This is level 3.",
     "user_transcribed": "This is level 3.",
     "script_excerpt": "This is level 3."
+  },
+  {
+    "timestamp": "2025-03-31T08:07:50.327232",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "This is level 2.",
+    "script_excerpt": "This is level 2."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "This is level 2.",
+    "timestamp": "2025-03-31T08:07:50.528475"
+  },
+  {
+    "timestamp": "2025-03-31T08:07:52.649354",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "This is level 2.",
+    "script_excerpt": "This is level 2."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "This is level 2.",
+    "timestamp": "2025-03-31T08:07:52.882394"
+  },
+  {
+    "timestamp": "2025-03-31T14:07:15.503304",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "This is level 2.",
+    "script_excerpt": "This is level 2."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "This is level 2.",
+    "timestamp": "2025-03-31T14:07:15.652026"
+  },
+  {
+    "timestamp": "2025-03-31T14:21:42.085797",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 100.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "Thank you for watching.",
+    "script_excerpt": "This is level 2."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 100.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "Thank you for watching.",
+    "timestamp": "2025-03-31T14:21:42.238577"
+  },
+  {
+    "timestamp": "2025-03-31T14:22:06.612601",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 100.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "Thank you for watching.",
+    "script_excerpt": "This is level 2."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 100.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "Thank you for watching.",
+    "timestamp": "2025-03-31T14:22:06.758242"
+  },
+  {
+    "timestamp": "2025-03-31T14:24:40.689989",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 75.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "th level two",
+    "script_excerpt": "This is level 2."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 75.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "th level two",
+    "timestamp": "2025-03-31T14:24:40.847178"
+  },
+  {
+    "timestamp": "2025-03-31T15:24:32.699138",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "This is level 2.",
+    "script_excerpt": "This is level 2."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "This is level 2.",
+    "timestamp": "2025-03-31T15:24:32.871585"
+  },
+  {
+    "timestamp": "2025-03-31T15:43:44.744543",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "This is level 2.",
+    "script_excerpt": "This is level 2."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "This is level 2.",
+    "timestamp": "2025-03-31T15:43:44.902467"
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-03-31T15:43:45.053319"
+  },
+  {
+    "timestamp": "2025-03-31T15:44:36.865786",
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 0.0,
+    "original_transcribed": "This is level 3.",
+    "user_transcribed": "This is Level 3.",
+    "script_excerpt": "This is level 3."
+  },
+  {
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 0.0,
+    "original_transcribed": "This is level 3.",
+    "user_transcribed": "This is Level 3.",
+    "timestamp": "2025-03-31T15:44:37.024820"
+  },
+  {
+    "user": "bob",
+    "genre": "genre1",
+    "level": "level4",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-03-31T15:44:37.171272"
+  },
+  {
+    "timestamp": "2025-03-31T16:35:38.540930",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 100.0,
+    "original_transcribed": "This is level 3.",
+    "user_transcribed": "Bye-bye.",
+    "script_excerpt": "This is level 3."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 100.0,
+    "original_transcribed": "This is level 3.",
+    "user_transcribed": "Bye-bye.",
+    "timestamp": "2025-03-31T16:35:38.707224"
+  },
+  {
+    "timestamp": "2025-03-31T16:35:56.832841",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 0.0,
+    "original_transcribed": "This is level 3.",
+    "user_transcribed": "This is Level 3.",
+    "script_excerpt": "This is level 3."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 0.0,
+    "original_transcribed": "This is level 3.",
+    "user_transcribed": "This is Level 3.",
+    "timestamp": "2025-03-31T16:35:56.984139"
+  },
+  {
+    "timestamp": "2025-03-31T16:36:37.211313",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 25.0,
+    "original_transcribed": "This is level 3.",
+    "user_transcribed": "Hmm, this is level 3.",
+    "script_excerpt": "This is level 3."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "",
+    "wer": 25.0,
+    "original_transcribed": "This is level 3.",
+    "user_transcribed": "Hmm, this is level 3.",
+    "timestamp": "2025-03-31T16:36:37.358896"
+  },
+  {
+    "timestamp": "2025-04-01T00:11:51.845557",
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level1",
+    "wer": 23.25,
+    "original_transcribed": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a baseball, takes practice. Practice is the repetition of an action with the goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in our brains to make us better at things? Our brains have two kinds of neural tissue, gray matter and white matter. The gray matter processes information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel from the brain's gray matter down the spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin, and it's this myelin covering, or sheath, that seems to change with practice. Myelin is similar to insulation on electrical cables. It prevents energy loss from electrical signals that the brain uses, moving them more efficiently along neural pathways. Some recent studies in mice suggest that the repetition of a physical motion increases the layers of myelin sheath that insulates the axons. And the more layers, the greater the insulation around the axon chains, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, muscles themselves don't really have memory. Rather, it may be the myelination of neural pathways that give these athletes and performers their edge with faster and more efficient neural pathways. There are many theories that attempt to quantify the number of hours, days, and even years of practice that it takes to master a skill. While we don't yet have a magic number, we do know that mastery isn't simply about the amount of hours of practice. It's also the quality and effectiveness of that practice. Effective practice is consistent, intensely focused, and targets content or weaknesses that lie at the edge of one's current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off the computer or TV and putting your cell phone on airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay on task for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the root of most distractions. Start out slowly or in slow motion. Coordination is built with repetitions, whether correct or incorrect. If you gradually increase the speed of the quality repetitions, you have a better chance of doing them correctly. Next, frequent repetitions with allotted breaks are common practice habits of elite performers. Studies have shown that many top athletes, musicians, and dancers spend 50 to 60 hours per week on activities related to their craft. Many divide their time used for effective practice into multiple daily practice sessions of limited duration. And finally, practice in your brain in vivid detail. It's a bit surprising, but a number of studies suggest that once a physical motion has been established, it can be reinforced just by imagining it. In one study, 144 basketball players were divided into two groups. Group A physically practiced one-handed free throws, while Group B only mentally practiced them. When they were tested at the end of the two-week experiment, the intermediate and experienced players in both groups had improved by nearly the same amount. As scientists get closer to unraveling the secrets of our brains, our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing our individual limits, achieving new heights, and maximizing our potential.",
+    "user_transcribed": "Mastering the physical skills of the human and pure realm, playing an instrument, or playing a basketball, takes practice. Practice is a repetition of an action with the goal of improvement. It helps us perform more ease, speed, and confidence. So what does practice do in the brain to make us better at things? A blend of two kinds of neural tissue, gray matter and white matter. The gray matter processes the information in the brain, directing signals and sensory stimuli to nerve signals, while white matter is mostly made up of fatty tissue and nerve vitals. In order for a body to move, information needs to travel from the brain's gray matter and spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in white matter are wrapped with a fatty substance called myelin, and this myelin covering, or sheath, seems to change with practice. Myelin is a stimulant for insulation on electrical cables. It prevents energy loss from electrical signals to the brain musings. Moving more efficiently along neural pathways, some recent studies might suggest that the repetition of a physical motion increases the radius of myelin sheath, as well as the axons. The more layers, the greater the insulation along the axon chains, forming a sort of superhighway of information from your brain to your muscles. While many athletes and performers have sophisticated muscle memories, most of themselves don't really have memories. Rather, it may be the myelination of nerve pathways that gives these athletes and performers their age to faster and more efficient neural pathways. So many theories are attempted to quantify the amount of hours, days, and even years of practice that it takes to master skills. While we don't yet have magic numbers, we do know that mastery really can be about the amount of hours and practice, of course, in effectiveness, but what about practice? Effective practice is consistent, intently focused, and targets content or events that lie at the edge of current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential disruption by turning off your computer or TV and bring your cell phone in airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the route of most distractions, either slowly or in slow motion. Coordination is built with repetition, whether correct or incorrect. If you gradually increase the speed of part of repetition, you have a better chance of doing that correctly. Next, frequent repetition means a lot of breaks, and common processes have a unique performance. Studies have shown that many top athletes, musicians, and dancers, in 15 to 60 hours a week, are not physically able to do their craft, meaning by the time used for effective practice and for minimally-reduced sessions, how will their duration? And finally, processing your brain in very detail is a bit surprising. A number of studies suggest that non-cyclical motion has been established. Imagining it, in one study, 144 basketball players were divided into two groups. Group A physically practiced from 10 and 3 slots, while Group B only mentally practiced. When they were tested at the end of a two-week experiment, intermediate and experienced players in both groups had improved by nearly the same amount. A scientist is focused on unraveling the secrets of our brain. Our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing individual limits, achieving new heights, and maximizing our potential.",
+    "script_excerpt": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a bas"
+  },
+  {
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level1",
+    "wer": 23.25,
+    "original_transcribed": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a baseball, takes practice. Practice is the repetition of an action with the goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in our brains to make us better at things? Our brains have two kinds of neural tissue, gray matter and white matter. The gray matter processes information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel from the brain's gray matter down the spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin, and it's this myelin covering, or sheath, that seems to change with practice. Myelin is similar to insulation on electrical cables. It prevents energy loss from electrical signals that the brain uses, moving them more efficiently along neural pathways. Some recent studies in mice suggest that the repetition of a physical motion increases the layers of myelin sheath that insulates the axons. And the more layers, the greater the insulation around the axon chains, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, muscles themselves don't really have memory. Rather, it may be the myelination of neural pathways that give these athletes and performers their edge with faster and more efficient neural pathways. There are many theories that attempt to quantify the number of hours, days, and even years of practice that it takes to master a skill. While we don't yet have a magic number, we do know that mastery isn't simply about the amount of hours of practice. It's also the quality and effectiveness of that practice. Effective practice is consistent, intensely focused, and targets content or weaknesses that lie at the edge of one's current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off the computer or TV and putting your cell phone on airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay on task for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the root of most distractions. Start out slowly or in slow motion. Coordination is built with repetitions, whether correct or incorrect. If you gradually increase the speed of the quality repetitions, you have a better chance of doing them correctly. Next, frequent repetitions with allotted breaks are common practice habits of elite performers. Studies have shown that many top athletes, musicians, and dancers spend 50 to 60 hours per week on activities related to their craft. Many divide their time used for effective practice into multiple daily practice sessions of limited duration. And finally, practice in your brain in vivid detail. It's a bit surprising, but a number of studies suggest that once a physical motion has been established, it can be reinforced just by imagining it. In one study, 144 basketball players were divided into two groups. Group A physically practiced one-handed free throws, while Group B only mentally practiced them. When they were tested at the end of the two-week experiment, the intermediate and experienced players in both groups had improved by nearly the same amount. As scientists get closer to unraveling the secrets of our brains, our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing our individual limits, achieving new heights, and maximizing our potential.",
+    "user_transcribed": "Mastering the physical skills of the human and pure realm, playing an instrument, or playing a basketball, takes practice. Practice is a repetition of an action with the goal of improvement. It helps us perform more ease, speed, and confidence. So what does practice do in the brain to make us better at things? A blend of two kinds of neural tissue, gray matter and white matter. The gray matter processes the information in the brain, directing signals and sensory stimuli to nerve signals, while white matter is mostly made up of fatty tissue and nerve vitals. In order for a body to move, information needs to travel from the brain's gray matter and spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in white matter are wrapped with a fatty substance called myelin, and this myelin covering, or sheath, seems to change with practice. Myelin is a stimulant for insulation on electrical cables. It prevents energy loss from electrical signals to the brain musings. Moving more efficiently along neural pathways, some recent studies might suggest that the repetition of a physical motion increases the radius of myelin sheath, as well as the axons. The more layers, the greater the insulation along the axon chains, forming a sort of superhighway of information from your brain to your muscles. While many athletes and performers have sophisticated muscle memories, most of themselves don't really have memories. Rather, it may be the myelination of nerve pathways that gives these athletes and performers their age to faster and more efficient neural pathways. So many theories are attempted to quantify the amount of hours, days, and even years of practice that it takes to master skills. While we don't yet have magic numbers, we do know that mastery really can be about the amount of hours and practice, of course, in effectiveness, but what about practice? Effective practice is consistent, intently focused, and targets content or events that lie at the edge of current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential disruption by turning off your computer or TV and bring your cell phone in airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the route of most distractions, either slowly or in slow motion. Coordination is built with repetition, whether correct or incorrect. If you gradually increase the speed of part of repetition, you have a better chance of doing that correctly. Next, frequent repetition means a lot of breaks, and common processes have a unique performance. Studies have shown that many top athletes, musicians, and dancers, in 15 to 60 hours a week, are not physically able to do their craft, meaning by the time used for effective practice and for minimally-reduced sessions, how will their duration? And finally, processing your brain in very detail is a bit surprising. A number of studies suggest that non-cyclical motion has been established. Imagining it, in one study, 144 basketball players were divided into two groups. Group A physically practiced from 10 and 3 slots, while Group B only mentally practiced. When they were tested at the end of a two-week experiment, intermediate and experienced players in both groups had improved by nearly the same amount. A scientist is focused on unraveling the secrets of our brain. Our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing individual limits, achieving new heights, and maximizing our potential.",
+    "timestamp": "2025-04-01T00:11:52.161351"
+  },
+  {
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-01T00:11:52.320399"
+  },
+  {
+    "timestamp": "2025-04-01T00:12:39.435009",
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level1",
+    "wer": 23.95,
+    "original_transcribed": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a baseball, takes practice. Practice is the repetition of an action with the goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in our brains to make us better at things? Our brains have two kinds of neural tissue, gray matter and white matter. The gray matter processes information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel from the brain's gray matter down the spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin, and it's this myelin covering, or sheath, that seems to change with practice. Myelin is similar to insulation on electrical cables. It prevents energy loss from electrical signals that the brain uses, moving them more efficiently along neural pathways. Some recent studies in mice suggest that the repetition of a physical motion increases the layers of myelin sheath that insulates the axons. And the more layers, the greater the insulation around the axon chains, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, muscles themselves don't really have memory. Rather, it may be the myelination of neural pathways that give these athletes and performers their edge with faster and more efficient neural pathways. There are many theories that attempt to quantify the number of hours, days, and even years of practice that it takes to master a skill. While we don't yet have a magic number, we do know that mastery isn't simply about the amount of hours of practice. It's also the quality and effectiveness of that practice. Effective practice is consistent, intensely focused, and targets content or weaknesses that lie at the edge of one's current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off the computer or TV and putting your cell phone on airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay on task for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the root of most distractions. Start out slowly or in slow motion. Coordination is built with repetitions, whether correct or incorrect. If you gradually increase the speed of the quality repetitions, you have a better chance of doing them correctly. Next, frequent repetitions with allotted breaks are common practice habits of elite performers. Studies have shown that many top athletes, musicians, and dancers spend 50 to 60 hours per week on activities related to their craft. Many divide their time used for effective practice into multiple daily practice sessions of limited duration. And finally, practice in your brain in vivid detail. It's a bit surprising, but a number of studies suggest that once a physical motion has been established, it can be reinforced just by imagining it. In one study, 144 basketball players were divided into two groups. Group A physically practiced one-handed free throws, while Group B only mentally practiced them. When they were tested at the end of the two-week experiment, the intermediate and experienced players in both groups had improved by nearly the same amount. As scientists get closer to unraveling the secrets of our brains, our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing our individual limits, achieving new heights, and maximizing our potential. For more UN videos visit www.un.org",
+    "user_transcribed": "Mastering the physical skills of the human and pure realm, playing an instrument, or playing a basketball, takes practice. Practice is a repetition of an action with the goal of improvement. It helps us perform more ease, speed, and confidence. So what does practice do in the brain to make us better at things? A blend of two kinds of neural tissue, gray matter and white matter. The gray matter processes the information in the brain, directing signals and sensory stimuli to nerve signals, while white matter is mostly made up of fatty tissue and nerve vitals. In order for a body to move, information needs to travel from the brain's gray matter and spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in white matter are wrapped with a fatty substance called myelin, and this myelin covering, or sheath, seems to change with practice. Myelin is a stimulant for insulation on electrical cables. It prevents energy loss from electrical signals to the brain musings. Moving more efficiently along neural pathways, some recent studies might suggest that the repetition of a physical motion increases the radius of myelin sheath, as well as the axons. The more layers, the greater the insulation along the axon chains, forming a sort of superhighway of information from your brain to your muscles. While many athletes and performers have sophisticated muscle memories, most of themselves don't really have memories. Rather, it may be the myelination of nerve pathways that gives these athletes and performers their age to faster and more efficient neural pathways. So many theories are attempted to quantify the amount of hours, days, and even years of practice that it takes to master skills. While we don't yet have magic numbers, we do know that mastery really can be about the amount of hours and practice, of course, in effectiveness, but what about practice? Effective practice is consistent, intently focused, and targets content or events that lie at the edge of current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential disruption by turning off your computer or TV and bring your cell phone in airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the route of most distractions, either slowly or in slow motion. Coordination is built with repetition, whether correct or incorrect. If you gradually increase the speed of part of repetition, you have a better chance of doing that correctly. Next, frequent repetition means a lot of breaks, and common processes have a unique performance. Studies have shown that many top athletes, musicians, and dancers, in 15 to 60 hours a week, are not physically able to do their craft, meaning by the time used for effective practice and for minimally-reduced sessions, how will their duration? And finally, processing your brain in very detail is a bit surprising. A number of studies suggest that non-cyclical motion has been established. Imagining it, in one study, 144 basketball players were divided into two groups. Group A physically practiced from 10 and 3 slots, while Group B only mentally practiced. When they were tested at the end of a two-week experiment, intermediate and experienced players in both groups had improved by nearly the same amount. A scientist is focused on unraveling the secrets of our brain. Our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing individual limits, achieving new heights, and maximizing our potential.",
+    "script_excerpt": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a bas"
+  },
+  {
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level1",
+    "wer": 23.95,
+    "original_transcribed": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a baseball, takes practice. Practice is the repetition of an action with the goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in our brains to make us better at things? Our brains have two kinds of neural tissue, gray matter and white matter. The gray matter processes information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel from the brain's gray matter down the spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin, and it's this myelin covering, or sheath, that seems to change with practice. Myelin is similar to insulation on electrical cables. It prevents energy loss from electrical signals that the brain uses, moving them more efficiently along neural pathways. Some recent studies in mice suggest that the repetition of a physical motion increases the layers of myelin sheath that insulates the axons. And the more layers, the greater the insulation around the axon chains, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, muscles themselves don't really have memory. Rather, it may be the myelination of neural pathways that give these athletes and performers their edge with faster and more efficient neural pathways. There are many theories that attempt to quantify the number of hours, days, and even years of practice that it takes to master a skill. While we don't yet have a magic number, we do know that mastery isn't simply about the amount of hours of practice. It's also the quality and effectiveness of that practice. Effective practice is consistent, intensely focused, and targets content or weaknesses that lie at the edge of one's current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off the computer or TV and putting your cell phone on airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay on task for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the root of most distractions. Start out slowly or in slow motion. Coordination is built with repetitions, whether correct or incorrect. If you gradually increase the speed of the quality repetitions, you have a better chance of doing them correctly. Next, frequent repetitions with allotted breaks are common practice habits of elite performers. Studies have shown that many top athletes, musicians, and dancers spend 50 to 60 hours per week on activities related to their craft. Many divide their time used for effective practice into multiple daily practice sessions of limited duration. And finally, practice in your brain in vivid detail. It's a bit surprising, but a number of studies suggest that once a physical motion has been established, it can be reinforced just by imagining it. In one study, 144 basketball players were divided into two groups. Group A physically practiced one-handed free throws, while Group B only mentally practiced them. When they were tested at the end of the two-week experiment, the intermediate and experienced players in both groups had improved by nearly the same amount. As scientists get closer to unraveling the secrets of our brains, our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing our individual limits, achieving new heights, and maximizing our potential. For more UN videos visit www.un.org",
+    "user_transcribed": "Mastering the physical skills of the human and pure realm, playing an instrument, or playing a basketball, takes practice. Practice is a repetition of an action with the goal of improvement. It helps us perform more ease, speed, and confidence. So what does practice do in the brain to make us better at things? A blend of two kinds of neural tissue, gray matter and white matter. The gray matter processes the information in the brain, directing signals and sensory stimuli to nerve signals, while white matter is mostly made up of fatty tissue and nerve vitals. In order for a body to move, information needs to travel from the brain's gray matter and spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in white matter are wrapped with a fatty substance called myelin, and this myelin covering, or sheath, seems to change with practice. Myelin is a stimulant for insulation on electrical cables. It prevents energy loss from electrical signals to the brain musings. Moving more efficiently along neural pathways, some recent studies might suggest that the repetition of a physical motion increases the radius of myelin sheath, as well as the axons. The more layers, the greater the insulation along the axon chains, forming a sort of superhighway of information from your brain to your muscles. While many athletes and performers have sophisticated muscle memories, most of themselves don't really have memories. Rather, it may be the myelination of nerve pathways that gives these athletes and performers their age to faster and more efficient neural pathways. So many theories are attempted to quantify the amount of hours, days, and even years of practice that it takes to master skills. While we don't yet have magic numbers, we do know that mastery really can be about the amount of hours and practice, of course, in effectiveness, but what about practice? Effective practice is consistent, intently focused, and targets content or events that lie at the edge of current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential disruption by turning off your computer or TV and bring your cell phone in airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the route of most distractions, either slowly or in slow motion. Coordination is built with repetition, whether correct or incorrect. If you gradually increase the speed of part of repetition, you have a better chance of doing that correctly. Next, frequent repetition means a lot of breaks, and common processes have a unique performance. Studies have shown that many top athletes, musicians, and dancers, in 15 to 60 hours a week, are not physically able to do their craft, meaning by the time used for effective practice and for minimally-reduced sessions, how will their duration? And finally, processing your brain in very detail is a bit surprising. A number of studies suggest that non-cyclical motion has been established. Imagining it, in one study, 144 basketball players were divided into two groups. Group A physically practiced from 10 and 3 slots, while Group B only mentally practiced. When they were tested at the end of a two-week experiment, intermediate and experienced players in both groups had improved by nearly the same amount. A scientist is focused on unraveling the secrets of our brain. Our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing individual limits, achieving new heights, and maximizing our potential.",
+    "timestamp": "2025-04-01T00:12:39.772909"
+  },
+  {
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-01T00:12:40.066261"
+  },
+  {
+    "timestamp": "2025-04-01T00:57:57.694376",
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level1",
+    "wer": 28.57,
+    "original_transcribed": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a baseball, takes practice. Practice is the repetition of an action with the goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in our brains to make us better at things? Our brains have two kinds of neural tissue, gray matter and white matter. The gray matter processes information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel from the brain's gray matter down the spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin, and it's this myelin covering, or sheath, that seems to change with practice. Myelin is similar to insulation on electrical cables. It prevents energy loss from electrical signals that the brain uses, moving them more efficiently along neural pathways. Some recent studies in mice suggest that the repetition of a physical motion increases the layers of myelin sheath that insulates the axons. And the more layers, the greater the insulation around the axon chains, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, muscles themselves don't really have memory. Rather, it may be the myelination of neural pathways that give these athletes and performers their edge with faster and more efficient neural pathways. There are many theories that attempt to quantify the number of hours, days, and even years of practice that it takes to master a skill. While we don't yet have a magic number, we do know that mastery isn't simply about the amount of hours of practice. It's also the quality and effectiveness of that practice. Effective practice is consistent, intensely focused, and targets content or weaknesses that lie at the edge of one's current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off the computer or TV and putting your cell phone on airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay on task for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the root of most distractions. Start out slowly or in slow motion. Coordination is built with repetitions, whether correct or incorrect. If you gradually increase the speed of the quality repetitions, you have a better chance of doing them correctly. Next, frequent repetitions with allotted breaks are common practice habits of elite performers. Studies have shown that many top athletes, musicians, and dancers spend 50 to 60 hours per week on activities related to their craft. Many divide their time used for effective practice into multiple daily practice sessions of limited duration. And finally, practice in your brain in vivid detail. It's a bit surprising, but a number of studies suggest that once a physical motion has been established, it can be reinforced just by imagining it. In one study, 144 basketball players were divided into two groups. Group A physically practiced one-handed free throws, while Group B only mentally practiced them. When they were tested at the end of the two-week experiment, the intermediate and experienced players in both groups had improved by nearly the same amount. As scientists get closer to unraveling the secrets of our brains, our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing our individual limits, achieving new heights, and maximizing our potential.",
+    "user_transcribed": "Mastering any physical skill, be it performing a ritual, playing an instrument, or following a musical takes practice. Practice is a repetition of an action with a goal of improvement and helps us perform with more ease, speed, and confidence. What does practice do in the brain to make us better at things? The brain is made up of two kinds of neural tissue, gray matter and white matter. The gray matter processes the information in the brain, directing signals and sensory stimuli to nervous cells while white matter is mostly made up of fatty tissue and nerve vibrals. In order for our bodies to move, information needs to travel gray matter down the spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice or repetition affect the inner workings of our brains? The axons exist in the white matter, wrapped with a hiding substance called myelin, and this myelin covering a sheath seems to change with practice. Myelin is a similar institution of electrical cables that prevents energy from electrical signals and brain music, giving a more efficient, long neural pathway. For reasons related to myelin, it is the repetition of the clinical motion of myelin, which is related to the myelin sheath and the presence of the axons. The more layers, the greater the institutional of the axon chains, forming a sort of super hybrid, the information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, most of themselves do not really have memory. Rather, it may be that myelination of neural pathways gives these athletes and performers their edge, with faster and more efficient neural pathways. There are many theories that attempt to quantify the number of hours, days, even years of practice that takes to master skills. While we don't yet have a magic number, we do know that mastering isn't simply about the amount of hours of practice, it's also the quality and effectiveness of that practice. Effective practice is consistent, intensely focused, and targets content or weaknesses that lie at the edge of one's current abilities. If effective practice is weak, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off your computer or TV, and putting your cell phone on an app. In one of the cases, such as those of 260 students studying, on average, those students were able to spend only six minutes at a time. Laptops, smartphones, and particularly Facebook were the loop with the most distractions. Start off slowly, in slow motion, coordination, and repetition. Whether correct or incorrect. If you gradually increase the speed of quality repetition, you have a better chance of doing them correctly. Next, frequent repetition takes a lot of time. A common practice habit of the elite performers is that of showing to mini-tops, such as musicians and dancers, that they spend 15-60 hours per minute on activities related to their craft. Minimize the time needed for effective practice into multiple daily practices of a limited duration, and follow it. Practice in your mind in vivid detail. In the midst of a crisis, for a number of students, a list of all physical motions that have been established can be reinforced just by imagining. In one study, 124 basketball players were divided into two groups. Group A is group A practice, and group B is group B, a mental practice system. During the testing at the end of the experiment, the intermediate experience they used in both groups had improved by nearly the same amount. Scientists did post-traumatic loveliness with their brains. Our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing individual limits and achieving new heights and maximizing our potential.",
+    "script_excerpt": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a bas"
+  },
+  {
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level1",
+    "wer": 28.57,
+    "original_transcribed": "Mastering any physical skill, be it performing a pirouette, playing an instrument, or throwing a baseball, takes practice. Practice is the repetition of an action with the goal of improvement, and it helps us perform with more ease, speed, and confidence. So what does practice do in our brains to make us better at things? Our brains have two kinds of neural tissue, gray matter and white matter. The gray matter processes information in the brain, directing signals and sensory stimuli to nerve cells, while white matter is mostly made up of fatty tissue and nerve fibers. In order for our bodies to move, information needs to travel from the brain's gray matter down the spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice, or repetition, affect the inner workings of our brains? The axons that exist in the white matter are wrapped with a fatty substance called myelin, and it's this myelin covering, or sheath, that seems to change with practice. Myelin is similar to insulation on electrical cables. It prevents energy loss from electrical signals that the brain uses, moving them more efficiently along neural pathways. Some recent studies in mice suggest that the repetition of a physical motion increases the layers of myelin sheath that insulates the axons. And the more layers, the greater the insulation around the axon chains, forming a sort of superhighway for information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, muscles themselves don't really have memory. Rather, it may be the myelination of neural pathways that give these athletes and performers their edge with faster and more efficient neural pathways. There are many theories that attempt to quantify the number of hours, days, and even years of practice that it takes to master a skill. While we don't yet have a magic number, we do know that mastery isn't simply about the amount of hours of practice. It's also the quality and effectiveness of that practice. Effective practice is consistent, intensely focused, and targets content or weaknesses that lie at the edge of one's current abilities. So if effective practice is the key, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off the computer or TV and putting your cell phone on airplane mode. In one study, researchers observed 260 students studying. On average, those students were able to stay on task for only six minutes at a time. Laptops, smartphones, and particularly Facebook were the root of most distractions. Start out slowly or in slow motion. Coordination is built with repetitions, whether correct or incorrect. If you gradually increase the speed of the quality repetitions, you have a better chance of doing them correctly. Next, frequent repetitions with allotted breaks are common practice habits of elite performers. Studies have shown that many top athletes, musicians, and dancers spend 50 to 60 hours per week on activities related to their craft. Many divide their time used for effective practice into multiple daily practice sessions of limited duration. And finally, practice in your brain in vivid detail. It's a bit surprising, but a number of studies suggest that once a physical motion has been established, it can be reinforced just by imagining it. In one study, 144 basketball players were divided into two groups. Group A physically practiced one-handed free throws, while Group B only mentally practiced them. When they were tested at the end of the two-week experiment, the intermediate and experienced players in both groups had improved by nearly the same amount. As scientists get closer to unraveling the secrets of our brains, our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing our individual limits, achieving new heights, and maximizing our potential.",
+    "user_transcribed": "Mastering any physical skill, be it performing a ritual, playing an instrument, or following a musical takes practice. Practice is a repetition of an action with a goal of improvement and helps us perform with more ease, speed, and confidence. What does practice do in the brain to make us better at things? The brain is made up of two kinds of neural tissue, gray matter and white matter. The gray matter processes the information in the brain, directing signals and sensory stimuli to nervous cells while white matter is mostly made up of fatty tissue and nerve vibrals. In order for our bodies to move, information needs to travel gray matter down the spinal cord through a chain of nerve fibers called axons to our muscles. So how does practice or repetition affect the inner workings of our brains? The axons exist in the white matter, wrapped with a hiding substance called myelin, and this myelin covering a sheath seems to change with practice. Myelin is a similar institution of electrical cables that prevents energy from electrical signals and brain music, giving a more efficient, long neural pathway. For reasons related to myelin, it is the repetition of the clinical motion of myelin, which is related to the myelin sheath and the presence of the axons. The more layers, the greater the institutional of the axon chains, forming a sort of super hybrid, the information connecting your brain to your muscles. So while many athletes and performers attribute their successes to muscle memory, most of themselves do not really have memory. Rather, it may be that myelination of neural pathways gives these athletes and performers their edge, with faster and more efficient neural pathways. There are many theories that attempt to quantify the number of hours, days, even years of practice that takes to master skills. While we don't yet have a magic number, we do know that mastering isn't simply about the amount of hours of practice, it's also the quality and effectiveness of that practice. Effective practice is consistent, intensely focused, and targets content or weaknesses that lie at the edge of one's current abilities. If effective practice is weak, how can we get the most out of our practice time? Try these tips. Focus on the task at hand. Minimize potential distractions by turning off your computer or TV, and putting your cell phone on an app. In one of the cases, such as those of 260 students studying, on average, those students were able to spend only six minutes at a time. Laptops, smartphones, and particularly Facebook were the loop with the most distractions. Start off slowly, in slow motion, coordination, and repetition. Whether correct or incorrect. If you gradually increase the speed of quality repetition, you have a better chance of doing them correctly. Next, frequent repetition takes a lot of time. A common practice habit of the elite performers is that of showing to mini-tops, such as musicians and dancers, that they spend 15-60 hours per minute on activities related to their craft. Minimize the time needed for effective practice into multiple daily practices of a limited duration, and follow it. Practice in your mind in vivid detail. In the midst of a crisis, for a number of students, a list of all physical motions that have been established can be reinforced just by imagining. In one study, 124 basketball players were divided into two groups. Group A is group A practice, and group B is group B, a mental practice system. During the testing at the end of the experiment, the intermediate experience they used in both groups had improved by nearly the same amount. Scientists did post-traumatic loveliness with their brains. Our understanding of effective practice will only improve. In the meantime, effective practice is the best way we have of pushing individual limits and achieving new heights and maximizing our potential.",
+    "timestamp": "2025-04-01T00:57:58.120971"
+  },
+  {
+    "user": "alice",
+    "genre": "genre2",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-01T00:57:58.315787"
   }
 ]
