@@ -74,22 +74,43 @@ async function loadPreset() {
  * MediaRecorder's `onstart` event. Audio chunks are stored for later use.
  */
 function startRecording() {
-  navigator.mediaDevices.getUserMedia({ audio: true })
+  const constraints = { 
+    audio: {
+      echoCancellation: false,
+      autoGainControl: false,
+      noiseSuppression: false
+    }
+  };
+
+  navigator.mediaDevices.getUserMedia(constraints)
     .then(stream => {
-      recorder = new MediaRecorder(stream);
+      let options = {};
+      const mimeTypes = ['audio/webm', 'audio/mp4', 'audio/aac', ''];
+      
+      for (let type of mimeTypes) {
+        try {
+          if (!type || MediaRecorder.isTypeSupported(type)) {
+            options = type ? { mimeType: type, audioBitsPerSecond: 128000 } : {};
+            break;
+          }
+        } catch (e) {
+          console.warn('Mime type not supported:', type);
+        }
+      }
+
+      recorder = new MediaRecorder(stream, options);
       chunks = [];
 
       recorder.ondataavailable = e => chunks.push(e.data);
       recorder.onstop = handleStop;
 
-      // ✅ 録音が完全に開始されたタイミングで再生する
       recorder.onstart = () => {
         console.log("🎙️ 録音開始を確認 → 再生スタート");
         document.getElementById("originalAudio").currentTime = 0;
         document.getElementById("originalAudio").play();
       };
 
-      recorder.start(); // 🎙️ 録音スタート
+      recorder.start(1000); // Use smaller chunks for better iOS compatibility
 
       // UI 更新は録音開始と同時に行ってOK
       document.getElementById("startBtn").disabled = true;
