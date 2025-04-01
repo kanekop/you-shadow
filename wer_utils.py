@@ -1,19 +1,32 @@
 import numpy as np
 import re
-from utils import remove_fillers  # フィラー除去をインポート
+from utils import remove_fillers
+
+# Common number mappings
+NUMBER_MAP = {
+    'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
+    'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9'
+}
 
 def normalize_text(text):
     """
-    テキストを正規化：
-    - 小文字化
-    - 句読点の除去
-    - 単語のリストに変換
+    Enhanced text normalization with number handling
     """
-    if isinstance(text, list):  # すでにトークンリストならスルー
+    if isinstance(text, list):
         return text
+        
     text = text.lower()
     text = re.sub(r'[^\w\s]', '', text)
-    return text.strip().split()
+    words = text.strip().split()
+    
+    # Apply number normalization
+    normalized = []
+    for word in words:
+        if word in NUMBER_MAP:
+            word = NUMBER_MAP[word]
+        normalized.append(word)
+    
+    return normalized
 
 def wer(reference, hypothesis):
     """
