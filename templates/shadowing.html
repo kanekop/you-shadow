@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>シャドウイング精度チェック</title>
-<script src="/static/js/shadowing.js" defer></script>
+<script type="module">
+  import { AudioRecorder } from '/static/js/audio-recorder.js';
+  import { PresetManager } from '/static/js/preset-manager.js';
+</script>
+<script src="/static/js/shadowing-main.js" defer></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 </head>
