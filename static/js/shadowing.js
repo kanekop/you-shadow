@@ -11,6 +11,10 @@ let currentLevel = "";
 
 document.addEventListener("DOMContentLoaded", () => {
   fetchPresets();
+  
+  // Display username
+  const username = localStorage.getItem("username") || "（未設定）";
+  document.getElementById("userDisplay").textContent = `🧑‍💻 現在のユーザー：${username}`;
 
   document.getElementById("startBtn").addEventListener("click", startRecording);
   document.getElementById("stopBtn").addEventListener("click", stopRecording);
