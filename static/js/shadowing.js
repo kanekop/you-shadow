@@ -45,7 +45,7 @@ async function loadPreset() {
   //Global 変数に送っておく
   currentGenre = genre;
   currentLevel = level;
-  
+
   if (!genre || !level) return;
 
   const audioUrl = `/presets/${genre}/${level}/audio.mp3`;
@@ -107,7 +107,7 @@ function startRecording() {
       let options = {};
       // Try iOS-friendly formats first
       const mimeTypes = ['audio/aac', 'audio/mp4', 'audio/webm', ''];
-      
+
       for (let type of mimeTypes) {
         try {
           if (!type || MediaRecorder.isTypeSupported(type)) {
@@ -130,13 +130,28 @@ function startRecording() {
       recorder.ondataavailable = e => chunks.push(e.data);
       recorder.onstop = handleStop;
 
+      recorder.onerror = (e) => {
+        console.error("❌ MediaRecorder error:", e);
+        alert("Recording error: " + e.name);
+      };
+
+      recorder.onwarning = (e) => {
+        console.warn("⚠️ MediaRecorder warning:", e);
+      };
+
+      recorder.start(1000); // Use smaller chunks for better iOS compatibility
+
+      // Log recording state changes
+      recorder.onstart = () => console.log("🎙️ Recording started");
+      recorder.onpause = () => console.log("⏸️ Recording paused");
+      recorder.onresume = () => console.log("▶️ Recording resumed");
+      recorder.onstop = () => console.log("⏹️ Recording stopped");
+
       recorder.onstart = () => {
         console.log("🎙️ 録音開始を確認 → 再生スタート");
         document.getElementById("originalAudio").currentTime = 0;
         document.getElementById("originalAudio").play();
       };
-
-      recorder.start(1000); // Use smaller chunks for better iOS compatibility
 
       // UI 更新は録音開始と同時に行ってOK
       document.getElementById("startBtn").disabled = true;
@@ -161,7 +176,7 @@ function stopRecording() {
 function handleStop() {
   console.log("📼 Recording chunks:", chunks.length);
   console.log("📼 First chunk type:", chunks[0]?.type);
-  
+
   const recordedBlob = new Blob(chunks, { type: 'audio/webm' });
   console.log("📼 Created blob:", {
     size: recordedBlob.size,
@@ -170,12 +185,12 @@ function handleStop() {
 
   const audioURL = URL.createObjectURL(recordedBlob);
   const audioElement = document.getElementById("recordedAudio");
-  
+
   audioElement.onerror = (e) => {
     console.error("❌ Audio element error:", e);
     alert("Audio playback error. Check console for details.");
   };
-  
+
   audioElement.src = audioURL;
   document.recordedBlob = recordedBlob;
 }
@@ -199,7 +214,7 @@ async function submitRecording() {
   console.log("genre:", genre);
   console.log("level:", level);
   console.log("username:", username);
-  
+
   formData.append("username", username);
   formData.append("genre", currentGenre);
   formData.append("level", currentLevel);
@@ -216,7 +231,7 @@ async function submitRecording() {
       resultDiv.innerText = "❌ エラー: " + data.error;
       return;
     }
-    
+
     // ✅ WERとDiff表示（トグル付き）
     resultDiv.innerHTML = `
       ✅ WER: ${data.wer}%<br>
@@ -261,8 +276,8 @@ async function submitRecording() {
     await fetchHighestLevels(username);
     updateLevelSelect();
     console.log("🔍 submitRecording終了");
-  
-    
+
+
   } catch (err) {
     console.error("提出時エラー:", err);
     document.getElementById("resultBox").innerText = "❌ 提出中にエラーが発生しました。";
@@ -360,4 +375,3 @@ async function fetchHighestLevels(username) {
   highestLevels = await res.json();
   console.log("⭐ Highest levels fetched:", highestLevels);
 }
-
