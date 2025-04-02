@@ -1,5 +1,5 @@
 
-export export class PresetManager {
+class PresetManager {
   constructor() {
     this.presetData = {};
     this.currentGenre = "";
@@ -32,3 +32,5 @@ export export class PresetManager {
     return await res.json();
   }
 }
+
+window.PresetManager = PresetManager;

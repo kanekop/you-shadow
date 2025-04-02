@@ -1,4 +1,5 @@
-export class AudioRecorder {
+
+class AudioRecorder {
   constructor() {
     this.mediaRecorder = null;
     this.audioChunks = [];
@@ -26,3 +27,5 @@ export class AudioRecorder {
     return new Blob(this.audioChunks, { type: 'audio/webm' });
   }
 }
+
+window.AudioRecorder = AudioRecorder;
