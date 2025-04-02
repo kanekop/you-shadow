@@ -1179,5 +1179,33 @@
     "original_transcribed": "(auto-unlocked)",
     "user_transcribed": "(auto-unlocked)",
     "timestamp": "2025-04-01T10:41:34.837415"
+  },
+  {
+    "timestamp": "2025-04-01T11:23:45.894184",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level4",
+    "wer": 22.22,
+    "original_transcribed": "This is sample script text for genre1 level 4.",
+    "user_transcribed": "This is sample script text for agenda one, level four.",
+    "script_excerpt": "This is sample script text for genre1 level 4."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level4",
+    "wer": 22.22,
+    "original_transcribed": "This is sample script text for genre1 level 4.",
+    "user_transcribed": "This is sample script text for agenda one, level four.",
+    "timestamp": "2025-04-01T11:23:46.116783"
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level5",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-01T11:23:46.337140"
   }
 ]
