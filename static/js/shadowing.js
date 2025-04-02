@@ -75,22 +75,24 @@ async function loadPreset() {
  */
 function startRecording() {
   const constraints = { 
-    audio: {
-      echoCancellation: false,
-      autoGainControl: false,
-      noiseSuppression: false
-    }
+    audio: true  // Simplified audio constraints for better iOS compatibility
   };
 
   navigator.mediaDevices.getUserMedia(constraints)
     .then(stream => {
       let options = {};
-      const mimeTypes = ['audio/webm', 'audio/mp4', 'audio/aac', ''];
+      // Try iOS-friendly formats first
+      const mimeTypes = ['audio/aac', 'audio/mp4', 'audio/webm', ''];
       
       for (let type of mimeTypes) {
         try {
           if (!type || MediaRecorder.isTypeSupported(type)) {
-            options = type ? { mimeType: type, audioBitsPerSecond: 128000 } : {};
+            options = type ? { 
+              mimeType: type,
+              audioBitsPerSecond: 96000, // Lower bitrate for better compatibility
+              bitsPerSecond: 96000
+            } : {};
+            console.log('Using audio format:', type || 'default');
             break;
           }
         } catch (e) {
