@@ -1,5 +1,5 @@
 
-export class PresetManager {
+export export class PresetManager {
   constructor() {
     this.presetData = {};
     this.currentGenre = "";
