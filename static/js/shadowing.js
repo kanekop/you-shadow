@@ -74,12 +74,36 @@ async function loadPreset() {
  * MediaRecorder's `onstart` event. Audio chunks are stored for later use.
  */
 function startRecording() {
+  // Debug info about browser capabilities
+  console.log("🔍 Browser Info:", {
+    userAgent: navigator.userAgent,
+    vendor: navigator.vendor,
+    platform: navigator.platform
+  });
+
+  // Test audio context creation
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const testContext = new AudioContext();
+    console.log("✅ AudioContext created successfully");
+    testContext.close();
+  } catch (e) {
+    console.error("❌ AudioContext creation failed:", e);
+  }
+
   const constraints = { 
-    audio: true  // Simplified audio constraints for better iOS compatibility
+    audio: {
+      sampleRate: 44100,
+      channelCount: 1,
+      autoGainControl: false,
+      noiseSuppression: false
+    }
   };
 
+  console.log("🎤 Requesting microphone access...");
   navigator.mediaDevices.getUserMedia(constraints)
     .then(stream => {
+      console.log("✅ Microphone access granted");
       let options = {};
       // Try iOS-friendly formats first
       const mimeTypes = ['audio/aac', 'audio/mp4', 'audio/webm', ''];
@@ -135,8 +159,24 @@ function stopRecording() {
 }
 
 function handleStop() {
+  console.log("📼 Recording chunks:", chunks.length);
+  console.log("📼 First chunk type:", chunks[0]?.type);
+  
   const recordedBlob = new Blob(chunks, { type: 'audio/webm' });
-  document.getElementById("recordedAudio").src = URL.createObjectURL(recordedBlob);
+  console.log("📼 Created blob:", {
+    size: recordedBlob.size,
+    type: recordedBlob.type
+  });
+
+  const audioURL = URL.createObjectURL(recordedBlob);
+  const audioElement = document.getElementById("recordedAudio");
+  
+  audioElement.onerror = (e) => {
+    console.error("❌ Audio element error:", e);
+    alert("Audio playback error. Check console for details.");
+  };
+  
+  audioElement.src = audioURL;
   document.recordedBlob = recordedBlob;
 }
 
