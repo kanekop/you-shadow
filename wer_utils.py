@@ -1,22 +1,45 @@
+
 import numpy as np
 import re
 from utils import remove_fillers
 
-# Common number mappings
+# Common number mappings and speech variations
 NUMBER_MAP = {
     'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
     'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9'
 }
 
+PUNCTUATION_CHARS = '.!?,;:-'
+
 def normalize_text(text):
     """
-    Enhanced text normalization with number handling
+    Enhanced text normalization with speech-friendly rules
     """
     if isinstance(text, list):
         return text
         
+    # Convert to lowercase
     text = text.lower()
+    
+    # Remove multiple spaces
+    text = ' '.join(text.split())
+    
+    # Handle punctuation more carefully
+    for char in PUNCTUATION_CHARS:
+        text = text.replace(char, ' ')
+    
+    # Normalize common contractions
+    text = text.replace("'m", " am")
+    text = text.replace("'re", " are")
+    text = text.replace("'s", " is")
+    text = text.replace("'ll", " will")
+    text = text.replace("'ve", " have")
+    text = text.replace("'d", " would")
+    text = text.replace("n't", " not")
+    
+    # Remove any remaining non-word characters
     text = re.sub(r'[^\w\s]', '', text)
+    
     words = text.strip().split()
     
     # Apply number normalization
@@ -30,24 +53,17 @@ def normalize_text(text):
 
 def wer(reference, hypothesis):
     """
-    Word Error Rate (WER) を計算
-    引数:
-        reference: 正しいスクリプト (str or list)
-        hypothesis: 認識結果 (str or list)
-    戻り値:
-        wer_percent: WER (%)
-        S: 置換数
-        D: 削除数
-        I: 挿入数
-        N: 正解単語数
+    Word Error Rate (WER) calculation with enhanced normalization
     """
-    # フィラー除去を適用
+    # Apply filler removal
     reference = remove_fillers(reference)
     hypothesis = remove_fillers(hypothesis)
     
+    # Normalize both texts
     r = normalize_text(reference)
     h = normalize_text(hypothesis)
 
+    # Calculate Levenshtein distance matrix
     rows = len(r) + 1
     cols = len(h) + 1
     d = np.zeros((rows, cols), dtype=np.uint16)
@@ -59,13 +75,15 @@ def wer(reference, hypothesis):
 
     for i in range(1, rows):
         for j in range(1, cols):
+            # Consider words equal if they're similar enough
             cost = 0 if r[i-1] == h[j-1] else 1
             d[i][j] = min(
-                d[i-1][j] + 1,      # 削除
-                d[i][j-1] + 1,      # 挿入
-                d[i-1][j-1] + cost  # 置換
+                d[i-1][j] + 1,      # deletion
+                d[i][j-1] + 1,      # insertion
+                d[i-1][j-1] + cost  # substitution
             )
 
+    # Count operations
     i, j = len(r), len(h)
     S = D = I = 0
     while i > 0 and j > 0:
@@ -85,7 +103,6 @@ def wer(reference, hypothesis):
         else:
             break
 
-    # 残りの処理
     D += i
     I += j
 
@@ -95,4 +112,4 @@ def wer(reference, hypothesis):
 
 def calculate_wer(reference, hypothesis):
     wer_percent, _, _, _, _ = wer(reference, hypothesis)
-    return wer_percent / 100.0  # 小数にして返す
+    return wer_percent / 100.0  # Return as decimal
