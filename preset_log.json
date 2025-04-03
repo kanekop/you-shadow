@@ -57,5 +57,15 @@
     "original_transcribed": "This is sample script text for genre1 level 1.",
     "user_transcribed": "Sample script text for Gen 1, Level 1.",
     "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "timestamp": "2025-04-03T14:41:51.778570",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 33.33,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is Apple script text for Gen 1 Level 1.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
   }
 ]
