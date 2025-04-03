@@ -22,7 +22,7 @@ def normalize_text(text: str) -> list:
     text = ' '.join(words)
 
     # Smart quotes normalization
-    smart_quotes = [''', ''', '‚', '‛', '＇']
+    smart_quotes = [''', ''', '‛', '＇']
     for quote in smart_quotes:
         text = text.replace(quote, "'")
 

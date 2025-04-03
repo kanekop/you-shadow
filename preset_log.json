@@ -28,5 +28,34 @@
     "original_transcribed": "This is sample script text for genre1 level 1.",
     "user_transcribed": "Next, for zone one, level one.",
     "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "timestamp": "2025-04-03T14:18:59.507014",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 22.22,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is sample script text for Gen 1, Level 1.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-03T14:18:59.718834"
+  },
+  {
+    "timestamp": "2025-04-03T14:22:35.555051",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 44.44,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "Sample script text for Gen 1, Level 1.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
   }
 ]
