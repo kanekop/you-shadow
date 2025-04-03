@@ -28,18 +28,21 @@ def normalize_for_diff(text: str) -> list:
     """Normalize text for diff display by handling case and punctuation"""
     # Convert to lowercase first
     text = text.lower()
-    # Standardize contractions
-    text = text.replace("i'm", "im")
+    # Replace any kind of quotes with standard single quote
+    text = text.replace('"', "'")
+    text = text.replace('"', "'")
+    text = text.replace('"', "'")
     # Handle punctuation after commas and periods
     text = text.replace(", ", " ")
     text = text.replace(". ", " ")
-    # Split and strip remaining punctuation
+    # Split into words
     words = text.strip().split()
     # Normalize each word
     normalized = []
     for word in words:
-        word = word.strip('.,;:!?')
-        # Re-add standard contractions
+        # Remove any remaining punctuation at start/end
+        word = word.strip('.,;:!?(){}[]"\'')
+        # Standardize contractions
         if word == "im":
             word = "i'm"
         normalized.append(word)
