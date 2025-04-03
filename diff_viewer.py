@@ -25,7 +25,13 @@ def color_diff(correct_script, user_transcript):
     print("\n")
 
 def normalize_for_diff(text: str) -> list:
-    """Normalize text for diff display by stripping punctuation"""
+    """Normalize text for diff display by handling case and punctuation"""
+    # Convert to lowercase first
+    text = text.lower()
+    # Handle punctuation after commas and periods
+    text = text.replace(", ", " ")
+    text = text.replace(". ", " ")
+    # Split and strip remaining punctuation
     words = text.strip().split()
     return [word.strip('.,;:!?') for word in words]
 
