@@ -1,93 +1,67 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>シャドウイング支援ツール</title>
-  <link rel="stylesheet" href="/static/style.css">
-  <script src="/static/js/index.js" defer></script>
+    <meta charset="UTF-8">
+    <title>シャドウイング支援ツール</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/js/index.js" defer></script>
 </head>
 <body>
-  <div class="nav-header">
-    <h1>シャドウイング支援ツール</h1>
-    <div id="nameForm" style="margin-top:1em;">
-      <label>名前を入力してください：</label>
-      <input type="text" id="username" placeholder="例：kaneko">
-      <button id="saveNameBtn">保存</button>
-    </div>
-    <p id="nameDisplay" style="margin-top: 0.5em;"></p>
+    {% if user_id %}
+        <div class="nav-header">
+            <p id="nameDisplay">Welcome, {{ user_name }}!</p>
+            <div style="margin-top: 1em;">
+                <button onclick="logout()">Logout</button>
+            </div>
+        </div>
 
-    <!-- デバッグ専用ユーザー切り替えボタン -->
-    <div style="margin-top: 1em;">
-      <label>テストユーザー切り替え：</label>
-      <button class="test-user-btn" data-user="alice">alice</button>
-      <button class="test-user-btn" data-user="bob">bob</button>
-      <button class="test-user-btn" data-user="charlie">charlie</button>
-    </div>
-  </div>
+        <div class="features">
+            <div class="card">
+                <a href="/read-aloud" class="feature-link">
+                    <h2>🎙️ 音読練習</h2>
+                    <p>Reading Practice</p>
+                </a>
+            </div>
 
-  <div class="container">
-    <div class="card">
-      <a href="/read-aloud" class="feature-link">
-        <h2>📘 音読の精度チェック</h2>
-        <p>Reading Accuracy Check</p>
-      </a>
-    </div>
+            <div class="card">
+                <a href="/shadowing" class="feature-link">
+                    <h2>👥 シャドーイング</h2>
+                    <p>Shadowing Accuracy Check</p>
+                </a>
+            </div>
 
-    <div class="card">
-      <a href="/shadowing" class="feature-link">
-        <h2>🎧 シャドウイングの精度チェック</h2>
-        <p>Shadowing Accuracy Check</p>
-      </a>
-    </div>
+            <div class="card">
+                <a href="/compare" class="feature-link">
+                    <h2>📝 パッセージ比較</h2>
+                    <p>Passage Comparison</p>
+                </a>
+            </div>
 
-    <div class="card">
-      <a href="/compare" class="feature-link">
-        <h2>📝 パッセージ比較</h2>
-        <p>Compare Passages</p>
-      </a>
-    </div>
+            <div class="card">
+                <a href="/sentence-practice" class="feature-link">
+                    <h2>📖 文章練習</h2>
+                    <p>Sentence Practice</p>
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="login-container">
+            <h1>Login Required</h1>
+            <p>Please login with your Replit account to continue</p>
+            <div class="auth-button">
+                <script
+                    authed="location.reload()"
+                    src="https://auth.util.repl.co/script.js">
+                </script>
+            </div>
+        </div>
+    {% endif %}
 
-    <div class="card">
-      <a href="/sentence-practice" class="feature-link">
-        <h2>📖 文単位練習</h2>
-        <p>Sentence Practice</p>
-      </a>
-    </div>
-
-    <div class="card">
-      <a href="/youtube" class="feature-link">
-        <h2>📺 YouTube練習</h2>
-        <p>YouTube Practice</p>
-      </a>
-    </div>
-
-    <div class="card">
-      <a href="/ranking" class="feature-link">
-        <h2>🏆 ランキング</h2>
-        <p>User Rankings</p>
-      </a>
-    </div>
-
-    <div class="card">
-      <a href="/dashboard" class="feature-link" id="dashboardLink">
-        <h2>📊 ダッシュボード</h2>
-        <p>User Dashboard</p>
-      </a>
-    </div>
-  </div>
-
-  <script>
-    // Dashboard link will be updated with username when available
-    const updateDashboardLink = () => {
-      const username = localStorage.getItem('username');
-      if (username) {
-        const dashboardLink = document.getElementById('dashboardLink');
-        dashboardLink.href = `/dashboard/${username}`;
-      }
-    };
-    document.addEventListener('DOMContentLoaded', updateDashboardLink);
-  </script>
+    <script>
+        function logout() {
+            localStorage.removeItem('username');
+            location.reload();
+        }
+    </script>
 </body>
 </html>

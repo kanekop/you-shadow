@@ -125,7 +125,15 @@ def save_preset_log(data, log_path="preset_log.json"):
 # === ルート画面 ===
 @app.route('/')
 def index():
-    return render_template('index.html')
+    user_id = request.headers.get('X-Replit-User-Id')
+    user_name = request.headers.get('X-Replit-User-Name')
+    
+    if not user_id:
+        return render_template('index.html')
+    
+    return render_template('index.html',
+                         user_id=user_id,
+                         user_name=user_name)
 
 
 from flask import render_template
