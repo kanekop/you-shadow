@@ -1236,5 +1236,34 @@
     "original_transcribed": "(auto-unlocked)",
     "user_transcribed": "(auto-unlocked)",
     "timestamp": "2025-04-03T02:58:08.105330"
+  },
+  {
+    "timestamp": "2025-04-03T05:30:03.481656",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 100.0,
+    "original_transcribed": "This is Level 3.",
+    "user_transcribed": "You It is your bringing",
+    "script_excerpt": "This is Level 3."
+  },
+  {
+    "timestamp": "2025-04-03T05:31:21.918962",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 0.0,
+    "original_transcribed": "This is Level 3.",
+    "user_transcribed": "This is level 3.",
+    "script_excerpt": "This is Level 3."
+  },
+  {
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level4",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-03T05:31:22.726344"
   }
 ]
