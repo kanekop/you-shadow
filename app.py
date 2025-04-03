@@ -462,6 +462,24 @@ def log_attempt():
 def sentence_practice():
     return render_template('sentence_practice.html')
 
+@app.route('/compare')
+def compare():
+    return render_template('compare.html')
+
+@app.route('/api/compare_passages', methods=['POST'])
+def compare_passages():
+    data = request.json
+    passage1 = data.get('passage1', '')
+    passage2 = data.get('passage2', '')
+    
+    wer_score = calculate_wer(passage1, passage2)
+    diff_result = diff_html(passage1, passage2)
+    
+    return jsonify({
+        'wer': wer_score * 100,
+        'diff_html': diff_result
+    })
+
 @app.route('/api/sentence_structure')
 def get_sentence_structure():
     structure = {}

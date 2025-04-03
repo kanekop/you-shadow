@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Compare Passages</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Compare Passages</h1>
+    
+    <div class="input-group">
+      <label>First Passage:</label>
+      <textarea id="passage1" rows="5" placeholder="Enter first passage..."></textarea>
+      
+      <label>Second Passage:</label>
+      <textarea id="passage2" rows="5" placeholder="Enter second passage..."></textarea>
+      
+      <button id="compareBtn">Compare</button>
+    </div>
+
+    <div id="results" class="results-group" style="display: none;">
+      <div class="wer-score">WER Score: <span id="werScore">0</span>%</div>
+      <div class="diff-container">
+        <h3>Differences:</h3>
+        <div id="diffResult" class="diff-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/compare.js"></script>
+</body>
+</html>
