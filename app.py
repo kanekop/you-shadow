@@ -6,14 +6,18 @@ from werkzeug.utils import secure_filename
 from wer_utils import wer, calculate_wer
 from diff_viewer import diff_html
 import json
-from datetime import datetime
 
 import shutil  # ファイルコピー用のモジュールを追加
 from youtube_utils import youtube_bp
 from youtube_utils import check_captions
-from diff_viewer import diff_html
 from dotenv import load_dotenv
 from diff_viewer import get_diff_html
+
+from datetime import datetime, timedelta
+from collections import defaultdict
+import pandas as pd
+
+
 
 load_dotenv()  # .env ファイルの読み込み
 
@@ -30,6 +34,58 @@ CORS(app) # Enable CORS
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 #API化
+def generate_wer_matrix(username, logs):
+    user_logs = [log for log in logs if log.get("user", "").lower() == username.lower()]
+    wer_matrix = {}
+    for log in user_logs:
+        genre = log.get("genre", "")
+        level = log.get("level", "")
+        wer = log.get("wer", None)
+        if not (genre and level and isinstance(wer, (int, float))):
+            continue
+        try:
+            level_num = int(level.lower().replace("level", ""))
+        except:
+            continue
+        key = (level_num, genre)
+        wer_matrix[key] = wer
+    df = pd.DataFrame([
+        {"Level": level, "Genre": genre, "WER": wer}
+        for (level, genre), wer in wer_matrix.items()
+    ])
+    pivot = df.pivot(index="Level", columns="Genre", values="WER").sort_index()
+    return pivot.fillna("")
+
+# ジャンル×レベルごとの最小WERクロス表を生成する関数
+def generate_min_wer_matrix(username, logs):
+    user_logs = [log for log in logs if log.get("user", "").lower() == username.lower()]
+    wer_matrix = {}
+
+    for log in user_logs:
+        genre = log.get("genre", "")
+        level = log.get("level", "")
+        wer = log.get("wer", None)
+        if not (genre and level and isinstance(wer, (int, float))):
+            continue
+        try:
+            level_num = int(level.lower().replace("level", ""))
+        except:
+            continue
+        key = (level_num, genre)
+        if key not in wer_matrix or wer < wer_matrix[key]:
+            wer_matrix[key] = wer
+
+    df = pd.DataFrame([
+        {"Level": level, "Genre": genre, "WER": wer}
+        for (level, genre), wer in wer_matrix.items()
+    ])
+    pivot = df.pivot(index="Level", columns="Genre", values="WER").sort_index()
+    return pivot.fillna("")
+
+
+    
+
+
 def get_presets_structure(practice_type="shadowing"):
     base_path = os.path.join("presets", practice_type)
     presets = {}
@@ -77,18 +133,18 @@ from collections import defaultdict
 import json
 from datetime import datetime, timedelta
 
+
+# /dashboard/<username> のルート定義
 @app.route("/dashboard/<username>")
 def dashboard(username):
-    log_path = "preset_log.json"  # 実際のパスに合わせて調整
     try:
-        with open(log_path, "r", encoding="utf-8") as f:
+        with open("preset_log.json", "r", encoding="utf-8") as f:
             logs = json.load(f)
     except Exception as e:
         return f"Error loading log: {e}"
 
+    # 連続記録日数を計算
     user_logs = [log for log in logs if log.get("user", "").lower() == username.lower()]
-
-    # 1. 連続記録日数
     date_set = {datetime.fromisoformat(log["timestamp"]).date() for log in user_logs if "timestamp" in log}
     streak = 0
     today = datetime.utcnow().date()
@@ -96,44 +152,40 @@ def dashboard(username):
         streak += 1
         today -= timedelta(days=1)
 
-    # 2. WER 推移
-    wer_scores = [log["wer"] for log in user_logs if isinstance(log.get("wer"), (int, float))]
-    latest_wer = wer_scores[-1] if wer_scores else None
-    average_wer = round(sum(wer_scores) / len(wer_scores), 1) if wer_scores else None
-
-    # 3. 到達レベル一覧（ジャンルごとに最高レベル）
-    def level_number(level):
-        try:
-            return int(level.lower().replace("level", ""))
-        except:
-            return -1
-
-    highest_levels = defaultdict(int)
-    for log in user_logs:
-        genre = log.get("genre", "")
-        level = log.get("level", "")
-        level_num = level_number(level)
-        if genre and level_num > highest_levels[genre]:
-            highest_levels[genre] = level_num
-
-    highest_levels_display = {genre: f"level{num}" for genre, num in highest_levels.items()}
+    # WERマトリクスの取得（最小WER）
+    wer_table = generate_min_wer_matrix(username, logs)
+    genres = list(wer_table.columns)
+    levels = list(wer_table.index)
+    wer_values = wer_table.values.tolist()
 
     return render_template("dashboard.html",
                            username=username,
                            streak=streak,
-                           latest_wer=latest_wer,
-                           average_wer=average_wer,
-                           highest_levels=highest_levels_display)
+                           genres=genres,
+                           levels=levels,
+                           wer_values=wer_values)
 
-# === 音声ファイルのアップロード ===
+@app.route("/details/<username>/<genre>/<level>")
+def detail_view(username, genre, level):
+    with open("preset_log.json", "r", encoding="utf-8") as f:
+        logs = json.load(f)
+
+    # 該当ログだけ抽出
+    user_logs = [
+        log for log in logs
+        if log.get("user", "").lower() == username.lower()
+        and log.get("genre") == genre
+        and log.get("level") == level
+    ]
+
+    # 新しいテンプレートに渡す
+    return render_template("detail.html",
+                           username=username,
+                           genre=genre,
+                           level=level,
+                           logs=user_logs)
 
 
-@app.route('/shorts')
-def shorts_ui():
-    return render_template('shorts.html')
-
-from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
-# ...他のimport省略
 
 @app.route("/read-aloud", methods=["GET", "POST"])
 def read_aloud():

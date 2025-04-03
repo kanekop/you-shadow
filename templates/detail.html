@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Detail - {{ genre }} {{ level }}</title>
+</head>
+<body>
+    <h1>{{ username }}'s Record - {{ genre }} {{ level }}</h1>
+    <a href="/dashboard/{{ username }}">← Back to Dashboard</a>
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Date</th>
+            <th>WER (%)</th>
+            <th>Other Info</th>
+        </tr>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.timestamp }}</td>
+            <td>{{ log.wer }}</td>
+            <td>{{ log.comment or '' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

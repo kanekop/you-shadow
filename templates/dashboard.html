@@ -1,19 +1,54 @@
+<!-- templates/dashboard.html の改良版 -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ username }}'s Dashboard</title>
+    <meta charset="UTF-8">
+    <title>Dashboard for {{ username }}</title>
+    <style>
+        table, th, td {
+            border: 1px solid #999;
+            border-collapse: collapse;
+            padding: 6px 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        td {
+            min-width: 60px;
+        }
+        a {
+            text-decoration: none;
+            color: #0366d6;
+        }
+    </style>
 </head>
 <body>
     <h1>Dashboard for {{ username }}</h1>
-    <p><strong>連続記録日数 (Streak):</strong> {{ streak }} 日</p>
-    <p><strong>最新 WER:</strong> {{ latest_wer }}%</p>
-    <p><strong>平均 WER:</strong> {{ average_wer }}%</p>
-
-    <h2>到達レベル一覧</h2>
-    <ul>
-        {% for genre, level in highest_levels.items() %}
-            <li>{{ genre }}: {{ level }}</li>
+    <p><strong>Streak:</strong> {{ streak }} 日</p>
+    <h2>到達レベル一覧（WER %）</h2>
+    <table>
+        <tr>
+            <th>Level</th>
+            {% for genre in genres %}
+                <th>{{ genre }}</th>
+            {% endfor %}
+        </tr>
+        {% for i in range(levels | length) %}
+        <tr>
+            <td>{{ levels[i] }}</td>
+            {% for j in range(genres | length) %}
+                <td>
+                    {% set wer = wer_values[i][j] %}
+                    {% if wer != "" %}
+                        <a href="/details/{{ username }}/{{ genres[j] }}/level{{ levels[i] }}">{{ wer }}</a>
+                    {% else %}
+                        &nbsp;
+                    {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
         {% endfor %}
-    </ul>
+    </table>
 </body>
 </html>
