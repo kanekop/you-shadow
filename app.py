@@ -3,7 +3,7 @@ from flask_cors import CORS
 from transcribe_utils import transcribe_audio
 import os
 from werkzeug.utils import secure_filename
-from wer_utils import wer
+from wer_utils import wer, calculate_wer
 from diff_viewer import diff_html
 import json
 from datetime import datetime
