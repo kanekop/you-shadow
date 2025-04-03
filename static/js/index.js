@@ -28,3 +28,10 @@
       });
     });
   });
+function logout() {
+  fetch('/__replauthlogout')
+    .then(() => {
+      localStorage.removeItem('username');
+      window.location.reload();
+    });
+}

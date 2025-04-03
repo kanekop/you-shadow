@@ -1,5 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 from flask_cors import CORS
+from functools import wraps
+
+def auth_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user_id = request.headers.get('X-Replit-User-Id')
+        if not user_id:
+            return redirect('/')
+        return f(*args, **kwargs)
+    return decorated_function
 from transcribe_utils import transcribe_audio
 import os
 from werkzeug.utils import secure_filename
@@ -144,6 +154,7 @@ from datetime import datetime, timedelta
 
 # /dashboard/<username> のルート定義
 @app.route("/dashboard/<username>")
+@auth_required
 def dashboard(username):
     try:
         with open("preset_log.json", "r", encoding="utf-8") as f:
