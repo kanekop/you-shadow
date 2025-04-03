@@ -166,10 +166,23 @@ audio {
 
 .diff-result {
   line-height: 1.8;
-  display: block;
-  white-space: pre-wrap;
+  display: inline;
+  white-space: normal;
   word-wrap: break-word;
   margin: 10px 0;
+}
+
+.eval-content {
+  margin-top: 10px;
+}
+
+.text-label {
+  margin: 10px 0 5px 0;
+  font-weight: bold;
+}
+
+.transcribed-text {
+  line-height: 1.8;
 }
 
 .diff-result .insert, .diff-result .delete {
