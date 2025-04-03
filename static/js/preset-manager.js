@@ -7,7 +7,7 @@ class PresetManager {
   }
 
   async fetchPresets() {
-    const res = await fetch("/api/presets");
+    const res = await fetch("/api/presets?practice_type=shadowing");
     this.presetData = await res.json();
     return this.presetData;
   }

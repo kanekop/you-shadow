@@ -1,4 +1,3 @@
-
 // Main shadowing functionality
 const recorder = new AudioRecorder();
 const presetManager = new PresetManager();
@@ -16,21 +15,21 @@ async function setupPresets() {
   const presets = await presetManager.fetchPresets();
   const username = localStorage.getItem("username") || "guest";
   highestLevels = await presetManager.fetchHighestLevels(username);
-  
+
   setupGenreSelect(presets);
 }
 
 function setupGenreSelect(presets) {
   const genreSelect = document.getElementById("genreSelect");
   genreSelect.innerHTML = '<option value="">-- ジャンル選択 --</option>';
-  
+
   for (const genre in presets) {
     const opt = document.createElement("option");
     opt.value = genre;
     opt.textContent = genre;
     genreSelect.appendChild(opt);
   }
-  
+
   genreSelect.addEventListener("change", updateLevelSelect);
 }
 
@@ -69,7 +68,7 @@ async function updateLevelSelect() {
     .forEach(level => {
       const opt = document.createElement("option");
       opt.value = level;
-      
+
       const levelNum = parseInt(level.replace("level", ""));
       if (levelNum <= maxUnlocked || levelNum === 1) {
         opt.textContent = level;
@@ -77,7 +76,7 @@ async function updateLevelSelect() {
         opt.textContent = `🔒 ${level}`;
         opt.disabled = true;
       }
-      
+
       levelSelect.appendChild(opt);
     });
 }
@@ -88,15 +87,33 @@ async function loadPreset() {
 
   if (!genre || !level) return;
 
-  const preset = await presetManager.loadPreset(genre, level);
-  if (!preset) return;
+  const audioUrl = `/presets/shadowing/${genre}/${level}/audio.mp3`;
+  const scriptUrl = `/presets/shadowing/${genre}/${level}/script.txt`;
 
-  originalAudioBlob = preset.audioBlob;
-  currentScript = preset.script;
+  try {
+    const audioResponse = await fetch(audioUrl);
+    if (!audioResponse.ok) {
+      throw new Error(`Failed to fetch audio: ${audioResponse.status}`);
+    }
+    const audioBlob = await audioResponse.blob();
 
-  document.getElementById("originalAudio").src = URL.createObjectURL(originalAudioBlob);
-  document.getElementById("displayScript").textContent = currentScript;
-  document.getElementById("presetLoaded").style.display = "block";
+    const scriptResponse = await fetch(scriptUrl);
+    if (!scriptResponse.ok) {
+      throw new Error(`Failed to fetch script: ${scriptResponse.status}`);
+    }
+    const scriptText = await scriptResponse.text();
+
+
+    originalAudioBlob = audioBlob;
+    currentScript = scriptText;
+
+    document.getElementById("originalAudio").src = URL.createObjectURL(originalAudioBlob);
+    document.getElementById("displayScript").textContent = currentScript;
+    document.getElementById("presetLoaded").style.display = "block";
+  } catch (error) {
+    console.error("Error loading preset:", error);
+    alert("プリセットの読み込みに失敗しました。");
+  }
 }
 
 async function startRecording() {
@@ -104,7 +121,7 @@ async function startRecording() {
     document.getElementById("originalAudio").currentTime = 0;
     await recorder.startRecording();
     document.getElementById("originalAudio").play();
-    
+
     document.getElementById("startBtn").disabled = true;
     document.getElementById("stopBtn").disabled = false;
   } catch (err) {
@@ -118,7 +135,7 @@ function stopRecording() {
   document.getElementById("startBtn").disabled = false;
   document.getElementById("stopBtn").disabled = true;
   document.getElementById("submitBtn").disabled = false;
-  
+
   const audioURL = URL.createObjectURL(recorder.getBlob());
   document.getElementById("recordedAudio").src = audioURL;
 }
@@ -132,7 +149,7 @@ async function submitRecording() {
   const formData = new FormData();
   formData.append("original_audio", originalAudioBlob);
   formData.append("recorded_audio", recorder.getBlob());
-  
+
   const username = localStorage.getItem("username") || "anonymous";
   const genre = document.getElementById("genreSelect").value;
   const level = document.getElementById("levelSelect").value;
@@ -149,11 +166,11 @@ async function submitRecording() {
 
     const data = await res.json();
     displayResults(data);
-    
+
     if (data.wer < 30) {
       await handleLevelUnlock(username, genre, level);
     }
-    
+
     await updateHighestLevels();
   } catch (err) {
     console.error("提出時エラー:", err);
@@ -163,7 +180,7 @@ async function submitRecording() {
 
 function displayResults(data) {
   const resultDiv = document.getElementById("resultBox");
-  
+
   if (data.error) {
     resultDiv.innerText = "❌ エラー: " + data.error;
     return;
