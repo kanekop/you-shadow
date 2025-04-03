@@ -21,15 +21,21 @@ class SentencePractice {
   }
 
   async loadGenres() {
-    const response = await fetch('/api/sentence_structure');
-    const structure = await response.json();
-    this.structure = structure;
-    this.displayGenreSelect();
+    try {
+      const response = await fetch('/api/sentence_structure');
+      const structure = await response.json();
+      this.structure = structure;
+      this.displayGenreSelect();
+    } catch (error) {
+      console.error('Error loading genres:', error);
+    }
   }
 
   displayGenreSelect() {
     const select = document.getElementById('genreSelect');
     select.innerHTML = '<option value="">-- ジャンル選択 --</option>';
+    select.style.backgroundColor = '#fff';
+    select.style.color = '#000';
 
     for (const genre in this.structure) {
       const option = document.createElement('option');
@@ -43,6 +49,8 @@ class SentencePractice {
     const genre = document.getElementById('genreSelect').value;
     const select = document.getElementById('levelSelect');
     select.innerHTML = '<option value="">-- レベル選択 --</option>';
+    select.style.backgroundColor = '#fff';
+    select.style.color = '#000';
 
     if (!genre || !this.structure[genre]) return;
 
@@ -60,9 +68,13 @@ class SentencePractice {
 
     if (!genre || !level) return;
 
-    const response = await fetch(`/api/sentences/${genre}/${level}`);
-    this.sentences = await response.json();
-    this.displaySentences();
+    try {
+      const response = await fetch(`/api/sentences/${genre}/${level}`);
+      this.sentences = await response.json();
+      this.displaySentences();
+    } catch (error) {
+      console.error('Error loading sentences:', error);
+    }
   }
 
   displaySentences() {
@@ -73,4 +85,11 @@ class SentencePractice {
 
 document.addEventListener('DOMContentLoaded', () => {
   new SentencePractice();
+  
+  // Style mode select as well
+  const modeSelect = document.getElementById('practiceMode');
+  if (modeSelect) {
+    modeSelect.style.backgroundColor = '#fff';
+    modeSelect.style.color = '#000';
+  }
 });
