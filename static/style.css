@@ -104,14 +104,36 @@ audio {
 
 /* Add your styles here */
 .sentence-item {
-  padding: 10px;
-  margin: 5px 0;
+  padding: 15px;
+  margin: 10px 0;
   border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.sentence-item span {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.sentence-item audio {
+  margin: 5px 0;
+  width: 100%;
+}
+
+.record-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
   border-radius: 4px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
   cursor: pointer;
+  margin-top: 5px;
+}
+
+.record-btn:hover {
+  background: #45a049;
 }
 
 .sentence-item button {
