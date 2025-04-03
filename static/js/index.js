@@ -1,5 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
   const nameDisplay = document.getElementById("nameDisplay");
+  const username = document.querySelector('[data-username]')?.dataset.username;
+  
+  if (username) {
+    localStorage.setItem('username', username);
+  }
+  
   if (nameDisplay) {
     const savedName = localStorage.getItem("username");
     if (savedName) {

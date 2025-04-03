@@ -9,7 +9,7 @@
 <body>
     {% if user_id %}
         <div class="nav-header">
-            <p id="nameDisplay">Welcome, {{ user_name }}!</p>
+            <p id="nameDisplay" data-username="{{ user_name }}">Welcome, {{ user_name }}!</p>
             <div style="margin-top: 1em;">
                 <button onclick="logout()">Logout</button>
             </div>
