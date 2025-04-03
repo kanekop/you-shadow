@@ -124,7 +124,7 @@ def wer(reference, hypothesis, lenient=False):
 
 
 
-def calculate_wer(reference, hypothesis, lenient=False):
+def calculate_wer(reference, hypothesis, lenient=True):
     """
     Return WER score as decimal (0.0 - 1.0)
     """
