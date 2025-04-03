@@ -16,29 +16,27 @@ def normalize_text(text: str) -> list:
 
     # Split into words and apply number mapping
     words = text.split()
-    words = [NUMBER_MAP.get(word, word) for word in words]
-    
-    # Join back for further normalization
-    text = ' '.join(words)
-
-    # Smart quotes normalization
-    smart_quotes = [''', ''', '‛', '＇']
-    for quote in smart_quotes:
-        text = text.replace(quote, "'")
-
-    # Unicode normalization
-    text = unicodedata.normalize("NFKC", text)
-
-    # Clean up punctuation and spaces
-    text = text.replace(", ", " ")
-    text = text.replace(". ", " ")
-    words = text.strip().split()
     normalized = []
-    for word in words:
+    
+    for i, word in enumerate(words):
+        # Handle number mapping
+        word = NUMBER_MAP.get(word, word)
+        
+        # Handle genre variations
+        if word == "gen" and i + 1 < len(words) and words[i + 1].isdigit():
+            word = "genre"
+        elif word.startswith("genre"):
+            word = "genre"
+            
+        # Clean punctuation
         word = word.strip('.,;:!?(){}[]"\'')
+        
+        # Special cases
         if word == "im":
             word = "i'm"
+            
         normalized.append(word)
+
     return normalized
 
 def color_diff(correct_script, user_transcript):
