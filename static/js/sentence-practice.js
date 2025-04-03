@@ -113,8 +113,28 @@ class SentencePractice {
   }
 
   displaySentences() {
-    // Display logic will go here
-    console.log("Loaded sentences:", this.sentences);
+    const container = document.getElementById('sentenceList');
+    container.innerHTML = '';
+
+    this.sentences.forEach((sentence, index) => {
+      const sentenceDiv = document.createElement('div');
+      sentenceDiv.className = 'sentence-item';
+      
+      const audio = document.createElement('audio');
+      audio.src = sentence.audio_file;
+      
+      const playButton = document.createElement('button');
+      playButton.textContent = '▶';
+      playButton.onclick = () => audio.play();
+      
+      const textSpan = document.createElement('span');
+      textSpan.textContent = sentence.text;
+      textSpan.onclick = () => audio.play();
+      
+      sentenceDiv.appendChild(playButton);
+      sentenceDiv.appendChild(textSpan);
+      container.appendChild(sentenceDiv);
+    });
   }
 }
 
