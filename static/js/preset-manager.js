@@ -15,8 +15,8 @@ class PresetManager {
   async loadPreset(genre, level) {
     if (!genre || !level) return null;
     
-    const audioUrl = `/presets/${genre}/${level}/audio.mp3`;
-    const scriptUrl = `/presets/${genre}/${level}/script.txt`;
+    const audioUrl = `/presets/shadowing/${genre}/${level}/audio.mp3`;
+    const scriptUrl = `/presets/shadowing/${genre}/${level}/script.txt`;
 
     const audioBlob = await fetch(audioUrl).then(res => res.blob());
     const script = await fetch(scriptUrl).then(res => res.text());
