@@ -32,6 +32,8 @@ def normalize_for_diff(text: str) -> list:
     text = text.replace('"', "'")
     text = text.replace('"', "'")
     text = text.replace('"', "'")
+    text = text.replace("'", "'")  # Smart quote to standard
+    text = text.replace("'", "'")  # Smart quote to standard
     # Handle punctuation after commas and periods
     text = text.replace(", ", " ")
     text = text.replace(". ", " ")
