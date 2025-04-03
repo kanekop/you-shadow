@@ -1,4 +1,3 @@
-
 import numpy as np
 import re
 from utils import remove_fillers
@@ -18,17 +17,17 @@ def normalize_text(text):
     """
     if isinstance(text, list):
         return text
-        
+
     # Convert to lowercase
     text = text.lower()
-    
+
     # Remove multiple spaces
     text = ' '.join(text.split())
-    
+
     # Handle punctuation more carefully
     for char in PUNCTUATION_CHARS:
         text = text.replace(char, ' ')
-    
+
     # Normalize common contractions
     text = text.replace("'m", " am")
     text = text.replace("'re", " are")
@@ -37,20 +36,24 @@ def normalize_text(text):
     text = text.replace("'ve", " have")
     text = text.replace("'d", " would")
     text = text.replace("n't", " not")
-    
+
     # Remove any remaining non-word characters
     text = re.sub(r'[^\w\s]', '', text)
-    
+
     words = text.strip().split()
-    
+
     # Apply number normalization
     normalized = []
     for word in words:
         if word in NUMBER_MAP:
             word = NUMBER_MAP[word]
         normalized.append(word)
-    
+
     return normalized
+
+def strip_punct(word):
+    return ''.join(c for c in word if c not in PUNCTUATION_CHARS)
+
 
 def wer(reference, hypothesis, lenient=False):
     """
@@ -64,11 +67,6 @@ def wer(reference, hypothesis, lenient=False):
     # Normalize both texts
     r = normalize_text(reference)
     h = normalize_text(hypothesis)
-    
-    # Case-insensitive comparison in lenient mode
-    if lenient:
-        r = [word.lower() for word in r]
-        h = [word.lower() for word in h]
 
     # Levenshtein distance matrix
     rows = len(r) + 1
@@ -82,12 +80,17 @@ def wer(reference, hypothesis, lenient=False):
 
     for i in range(1, rows):
         for j in range(1, cols):
+            # Always strip punctuation and convert to lowercase for comparison
+            r_word = strip_punct(r[i-1]).lower()
+            h_word = strip_punct(h[j-1]).lower()
+
             if lenient:
-                # ✅ 類似度85%以上なら同じとみなす
-                ratio = difflib.SequenceMatcher(None, r[i-1], h[j-1]).ratio()
+                # Use similarity ratio for lenient mode
+                ratio = difflib.SequenceMatcher(None, r_word, h_word).ratio()
                 cost = 0 if ratio >= 0.85 else 1
             else:
-                cost = 0 if r[i-1] == h[j-1] else 1
+                # For strict mode, require exact match but case-insensitive
+                cost = 0 if r_word == h_word else 1
 
             d[i][j] = min(
                 d[i-1][j] + 1,      # deletion
