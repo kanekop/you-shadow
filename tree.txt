@@ -1,0 +1,228 @@
+.
+ |-uv.lock
+ |-pyproject.toml
+ |-generated-icon.png
+ |-thisistheah.mp3
+ |-temp.py
+ |-__pycache__
+ | |-transcribe_utils.cpython-311.pyc
+ | |-youtube_utils.cpython-311.pyc
+ | |-utils.cpython-311.pyc
+ | |-diff_viewer.cpython-311.pyc
+ | |-wer_utils.cpython-311.pyc
+ |-log.json
+ |-export_csv.py
+ |-log.csv
+ |-upload_to_sheet.py
+ |-credentials.json
+ |-templates
+ | |-result.html
+ | |-youtube.html
+ | |-read_aloud.html
+ | |-ranking.html
+ | |-shadowing.html
+ | |-compare.html
+ | |-index.html
+ | |-sentence_practice.html
+ |-uploads
+ | |-thisistheah.mp3
+ | |-44-4.m4a
+ | |-recorded.webm
+ |-transcribe_utils.py
+ |-static
+ | |-youtube.js
+ | |-script.js
+ | |-js
+ | | |-read_aloud.js
+ | | |-ranking.js
+ | | |-index.js
+ | | |-compare.js
+ | | |-sentence-practice.js
+ | | |-audio-recorder.js
+ | | |-preset-manager.js
+ | | |-shadowing-main.js
+ | |-style.css
+ |-get_transcript
+ |-Procfile
+ |-replit.nix
+ |-youtube_utils.py
+ |-requirements.txt
+ |-attached_assets
+ | |-IMG_1466.PNG
+ | |-image_1743576235997.png
+ | |-image_1743576409927.png
+ | |-image_1743644943755.png
+ | |-image_1743645204560.png
+ | |-image_1743645356739.png
+ | |-image_1743645623589.png
+ | |-image_1743645898510.png
+ | |-image_1743647112429.png
+ | |-image_1743647433204.png
+ | |-image_1743647614775.png
+ | |-image_1743647819437.png
+ | |-image_1743649640465.png
+ | |-image_1743651371026.png
+ | |-image_1743651682290.png
+ | |-image_1743652144439.png
+ | |-image_1743652346406.png
+ | |-image_1743652538225.png
+ | |-image_1743677512208.png
+ | |-image_1743677674194.png
+ | |-image_1743677927972.png
+ |-init.sh
+ |-presets
+ | |-sentences
+ | | |-genre1
+ | | | |-level1
+ | | | | |-output_001.mp3
+ | | | | |-output_002.mp3
+ | | | | |-output_003.mp3
+ | | | | |-output_004.mp3
+ | | | | |-output_005.mp3
+ | | | | |-output_006.mp3
+ | | | | |-output_007.mp3
+ | | | | |-output_008.mp3
+ | | | | |-output_009.mp3
+ | | | | |-output_010.mp3
+ | | | | |-output_011.mp3
+ | | | | |-output_012.mp3
+ | | | | |-output_013.mp3
+ | | | | |-script_006.txt
+ | | | | |-script_001.txt
+ | | | | |-script_002.txt
+ | | | | |-script_003.txt
+ | | | | |-script_004.txt
+ | | | | |-script_005.txt
+ | | | | |-script_007.txt
+ | | | | |-script_008.txt
+ | | | | |-script_009.txt
+ | | | | |-script_010.txt
+ | | | | |-script_011.txt
+ | | | | |-script_012.txt
+ | | | | |-script_013.txt
+ | | | |-level2
+ | | | | |-output_008.mp3
+ | | | | |-output_009.mp3
+ | | | | |-output_011.mp3
+ | | | | |-output_010.mp3
+ | | | | |-script_001.txt
+ | | | | |-script_002.txt
+ | | | | |-script_003.txt
+ | | | | |-script_004.txt
+ | | | | |-script_005.txt
+ | | | | |-script_006.txt
+ | | | | |-script_007.txt
+ | | | | |-script_008.txt
+ | | | | |-script_009.txt
+ | | | | |-script_010.txt
+ | | | | |-script_011.txt
+ | | | | |-output_001.mp3
+ | | | | |-output_002.mp3
+ | | | | |-output_003.mp3
+ | | | | |-output_004.mp3
+ | | | | |-output_005.mp3
+ | | | | |-output_006.mp3
+ | | | | |-output_007.mp3
+ | |-shadowing
+ | | |-genre2
+ | | | |-level10
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level2
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level3
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level4
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level5
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level6
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level7
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level8
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level9
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level1
+ | | | | |-script.txt
+ | | | | |-audio.mp3
+ | | |-genre3
+ | | | |-level1
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level10
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level2
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level3
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level4
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level5
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level6
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level7
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level8
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level9
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | |-genre1
+ | | | |-level1
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level10
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level2
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level3
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level4
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level5
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level6
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level7
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level8
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ | | | |-level9
+ | | | | |-audio.mp3
+ | | | | |-script.txt
+ |-localStorage
+ |-preset_log.json
+ |-wer
+ | |-calculator.py
+ |-utils.py
+ |-diff_viewer.py
+ |-wer_utils.py
+ |-app.py
+ |-tree.txt

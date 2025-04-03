@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ username }}'s Dashboard</title>
+</head>
+<body>
+    <h1>Dashboard for {{ username }}</h1>
+    <p><strong>連続記録日数 (Streak):</strong> {{ streak }} 日</p>
+    <p><strong>最新 WER:</strong> {{ latest_wer }}%</p>
+    <p><strong>平均 WER:</strong> {{ average_wer }}%</p>
+
+    <h2>到達レベル一覧</h2>
+    <ul>
+        {% for genre, level in highest_levels.items() %}
+            <li>{{ genre }}: {{ level }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

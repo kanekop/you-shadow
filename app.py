@@ -71,6 +71,63 @@ def save_preset_log(data, log_path="preset_log.json"):
 def index():
     return render_template('index.html')
 
+
+from flask import render_template
+from collections import defaultdict
+import json
+from datetime import datetime, timedelta
+
+@app.route("/dashboard/<username>")
+def dashboard(username):
+    log_path = "preset_log.json"  # 実際のパスに合わせて調整
+    try:
+        with open(log_path, "r", encoding="utf-8") as f:
+            logs = json.load(f)
+    except Exception as e:
+        return f"Error loading log: {e}"
+
+    user_logs = [log for log in logs if log.get("user", "").lower() == username.lower()]
+
+    # 1. 連続記録日数
+    date_set = {datetime.fromisoformat(log["timestamp"]).date() for log in user_logs if "timestamp" in log}
+    streak = 0
+    today = datetime.utcnow().date()
+    while today in date_set:
+        streak += 1
+        today -= timedelta(days=1)
+
+    # 2. WER 推移
+    wer_scores = [log["wer"] for log in user_logs if isinstance(log.get("wer"), (int, float))]
+    latest_wer = wer_scores[-1] if wer_scores else None
+    average_wer = round(sum(wer_scores) / len(wer_scores), 1) if wer_scores else None
+
+    # 3. 到達レベル一覧（ジャンルごとに最高レベル）
+    def level_number(level):
+        try:
+            return int(level.lower().replace("level", ""))
+        except:
+            return -1
+
+    highest_levels = defaultdict(int)
+    for log in user_logs:
+        genre = log.get("genre", "")
+        level = log.get("level", "")
+        level_num = level_number(level)
+        if genre and level_num > highest_levels[genre]:
+            highest_levels[genre] = level_num
+
+    highest_levels_display = {genre: f"level{num}" for genre, num in highest_levels.items()}
+
+    return render_template("dashboard.html",
+                           username=username,
+                           streak=streak,
+                           latest_wer=latest_wer,
+                           average_wer=average_wer,
+                           highest_levels=highest_levels_display)
+
+# === 音声ファイルのアップロード ===
+
+
 @app.route('/shorts')
 def shorts_ui():
     return render_template('shorts.html')
