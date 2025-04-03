@@ -15,7 +15,10 @@ async loadGenres() {
       select.appendChild(option);
     }
 
-    select.addEventListener('change', () => this.updateLevelSelect(structure));
+    // Remove any existing listeners before adding a new one
+    const newSelect = select.cloneNode(true);
+    select.parentNode.replaceChild(newSelect, select);
+    newSelect.addEventListener('change', () => this.updateLevelSelect(structure));
   }
 
   updateLevelSelect(structure) {
@@ -32,7 +35,10 @@ async loadGenres() {
       select.appendChild(option);
     });
 
-    select.addEventListener('change', () => this.loadSentences());
+    // Remove any existing listeners before adding a new one
+    const newSelect = select.cloneNode(true);
+    select.parentNode.replaceChild(newSelect, select);
+    newSelect.addEventListener('change', () => this.loadSentences());
   }
 
   async loadSentences() {
