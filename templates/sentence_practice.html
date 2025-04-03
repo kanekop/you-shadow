@@ -1,0 +1,30 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>文章シャドウイング練習</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h2>🎧 文章シャドウイング練習</h2>
+  <div id="controls">
+    <label>モード選択：</label>
+    <select id="practiceMode">
+      <option value="playback">再生のみ</option>
+      <option value="shadowing">シャドウイング練習</option>
+    </select>
+  </div>
+
+  <div id="sentenceList"></div>
+  
+  <div id="recordingControls" style="display: none;">
+    <audio id="recordedAudio" controls></audio>
+    <button id="submitBtn" disabled>提出して評価</button>
+    <div id="resultBox"></div>
+  </div>
+
+  <script src="/static/js/audio-recorder.js"></script>
+  <script src="/static/js/sentence-practice.js"></script>
+</body>
+</html>

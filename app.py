@@ -330,6 +330,33 @@ def evaluate_read_aloud():
 def shadowing_ui():
     return render_template('shadowing.html')
 
+@app.route('/sentence-practice')
+def sentence_practice():
+    return render_template('sentence_practice.html')
+
+@app.route('/api/sentences')
+def get_sentences():
+    sentences = []
+    base_path = 'presets/sentences'
+    
+    if os.path.exists(base_path):
+        script_files = sorted([f for f in os.listdir(base_path) if f.startswith('script_')])
+        
+        for script_file in script_files:
+            index = script_file.split('_')[1].split('.')[0]
+            audio_file = f'output_{index}.mp3'
+            
+            with open(os.path.join(base_path, script_file), 'r') as f:
+                text = f.read().strip()
+                
+            sentences.append({
+                'text': text,
+                'audio_file': audio_file,
+                'index': index
+            })
+    
+    return jsonify(sentences)
+
 
 @app.route('/evaluate_shadowing', methods=['POST'])
 def evaluate_shadowing():
