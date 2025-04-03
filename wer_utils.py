@@ -64,6 +64,11 @@ def wer(reference, hypothesis, lenient=False):
     # Normalize both texts
     r = normalize_text(reference)
     h = normalize_text(hypothesis)
+    
+    # Case-insensitive comparison in lenient mode
+    if lenient:
+        r = [word.lower() for word in r]
+        h = [word.lower() for word in h]
 
     # Levenshtein distance matrix
     rows = len(r) + 1
