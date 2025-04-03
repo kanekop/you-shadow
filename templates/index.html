@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,7 +7,6 @@
   <title>シャドウイング支援ツール</title>
   <link rel="stylesheet" href="/static/style.css">
   <script src="/static/js/index.js" defer></script>
-
 </head>
 <body>
   <div class="nav-header">
@@ -18,7 +18,7 @@
     </div>
     <p id="nameDisplay" style="margin-top: 0.5em;"></p>
 
-    <!-- ✅ デバッグ専用ユーザー切り替えボタン -->
+    <!-- デバッグ専用ユーザー切り替えボタン -->
     <div style="margin-top: 1em;">
       <label>テストユーザー切り替え：</label>
       <button class="test-user-btn" data-user="alice">alice</button>
@@ -41,6 +41,7 @@
         <p>Shadowing Accuracy Check</p>
       </a>
     </div>
+
     <div class="card">
       <a href="/compare" class="feature-link">
         <h2>📝 パッセージ比較</h2>
@@ -54,6 +55,39 @@
         <p>Sentence Practice</p>
       </a>
     </div>
+
+    <div class="card">
+      <a href="/youtube" class="feature-link">
+        <h2>📺 YouTube練習</h2>
+        <p>YouTube Practice</p>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="/ranking" class="feature-link">
+        <h2>🏆 ランキング</h2>
+        <p>User Rankings</p>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="/dashboard" class="feature-link" id="dashboardLink">
+        <h2>📊 ダッシュボード</h2>
+        <p>User Dashboard</p>
+      </a>
+    </div>
   </div>
+
+  <script>
+    // Dashboard link will be updated with username when available
+    const updateDashboardLink = () => {
+      const username = localStorage.getItem('username');
+      if (username) {
+        const dashboardLink = document.getElementById('dashboardLink');
+        dashboardLink.href = `/dashboard/${username}`;
+      }
+    };
+    document.addEventListener('DOMContentLoaded', updateDashboardLink);
+  </script>
 </body>
 </html>
