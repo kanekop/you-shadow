@@ -125,7 +125,7 @@ class SentencePractice {
     }
   }
 
-  handleRecordingStop(sentenceDiv) {
+  async handleRecordingStop(sentenceDiv) {
     const blob = new Blob(this.chunks, { type: 'audio/webm' });
     const recordedAudio = sentenceDiv.querySelector('.recorded-audio');
     recordedAudio.src = URL.createObjectURL(blob);
@@ -135,6 +135,35 @@ class SentencePractice {
     const recordBtn = sentenceDiv.querySelector('.record-btn');
     recordBtn.textContent = '🎤 Record';
     recordBtn.onclick = () => this.startRecording(sentenceDiv);
+
+    // Evaluate recording
+    const formData = new FormData();
+    formData.append('audio', blob);
+    formData.append('transcript', sentenceDiv.querySelector('.sentence-text').textContent);
+
+    try {
+      const response = await fetch('/evaluate_read_aloud', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await response.json();
+      
+      const resultDiv = sentenceDiv.querySelector('.eval-result');
+      if (!resultDiv) {
+        const newResultDiv = document.createElement('div');
+        newResultDiv.className = 'eval-result';
+        sentenceDiv.appendChild(newResultDiv);
+      }
+      
+      const evalResult = sentenceDiv.querySelector('.eval-result');
+      evalResult.innerHTML = `
+        <div class="wer-score">WER: ${data.wer}%</div>
+        <div class="diff-result">${data.diff_html}</div>
+      `;
+      evalResult.style.display = 'block';
+    } catch (error) {
+      console.error('Evaluation error:', error);
+    }
   }
 
   displaySentences() {
@@ -146,6 +175,7 @@ class SentencePractice {
       sentenceDiv.className = 'sentence-item';
       
       const textSpan = document.createElement('span');
+      textSpan.className = 'sentence-text';
       textSpan.textContent = sentence.text;
       
       const audio = document.createElement('audio');
