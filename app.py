@@ -330,33 +330,6 @@ def evaluate_read_aloud():
 def shadowing_ui():
     return render_template('shadowing.html')
 
-@app.route('/sentence-practice')
-def sentence_practice():
-    return render_template('sentence_practice.html')
-
-@app.route('/api/sentences')
-def get_sentences():
-    sentences = []
-    base_path = 'presets/sentences'
-    
-    if os.path.exists(base_path):
-        script_files = sorted([f for f in os.listdir(base_path) if f.startswith('script_')])
-        
-        for script_file in script_files:
-            index = script_file.split('_')[1].split('.')[0]
-            audio_file = f'output_{index}.mp3'
-            
-            with open(os.path.join(base_path, script_file), 'r') as f:
-                text = f.read().strip()
-                
-            sentences.append({
-                'text': text,
-                'audio_file': audio_file,
-                'index': index
-            })
-    
-    return jsonify(sentences)
-
 
 @app.route('/evaluate_shadowing', methods=['POST'])
 def evaluate_shadowing():
@@ -391,12 +364,12 @@ def evaluate_shadowing():
                 file=f
             )
         user_transcribed = user_result.text
-    
+
     # === 精度評価
     wer_score = calculate_wer(original_transcribed, user_transcribed)
     diff_user = get_diff_html(original_transcribed, user_transcribed, mode='user')
     diff_original = get_diff_html(original_transcribed, user_transcribed, mode='original')
-    
+
     # ログを保存
     log_entry = {
         "timestamp": datetime.utcnow().isoformat(),
@@ -408,9 +381,9 @@ def evaluate_shadowing():
         "user_transcribed": user_transcribed,
         "script_excerpt": original_transcribed[:100]
     }
-    
+
     save_preset_log(log_entry)
-    
+
     return jsonify({
         "original_transcribed": original_transcribed,
         "user_transcribed": user_transcribed,
@@ -418,7 +391,7 @@ def evaluate_shadowing():
         "diff_user": diff_user,
         "diff_original": diff_original
     })
-    
+
 @app.route("/api/highest_levels/<username>")
 def get_highest_levels(username):
     import json
@@ -484,6 +457,52 @@ def log_attempt():
         json.dump(logs, f, indent=2, ensure_ascii=False)
 
     return jsonify({"message": "Logged successfully"})
+
+@app.route('/sentence-practice')
+def sentence_practice():
+    return render_template('sentence_practice.html')
+
+@app.route('/api/sentence_structure')
+def get_sentence_structure():
+    structure = {}
+    base_path = 'presets/sentences'
+
+    if os.path.exists(base_path):
+        for genre in os.listdir(base_path):
+            genre_path = os.path.join(base_path, genre)
+            if os.path.isdir(genre_path):
+                structure[genre] = []
+                for level in os.listdir(genre_path):
+                    level_path = os.path.join(genre_path, level)
+                    if os.path.isdir(level_path):
+                        structure[genre].append(level)
+
+    return jsonify(structure)
+
+@app.route('/api/sentences/<genre>/<level>')
+def get_sentences(genre, level):
+    sentences = []
+    base_path = os.path.join('presets/sentences', genre, level)
+
+    if os.path.exists(base_path):
+        script_files = sorted([f for f in os.listdir(base_path) if f.startswith('script_')])
+
+        for script_file in script_files:
+            index = script_file.split('_')[1].split('.')[0]
+            audio_file = f'output_{index}.mp3'
+            audio_path = os.path.join(base_path, audio_file)
+
+            if os.path.exists(audio_path):
+                with open(os.path.join(base_path, script_file), 'r', encoding='utf-8') as f:
+                    text = f.read().strip()
+
+                sentences.append({
+                    'text': text,
+                    'audio_file': f'/presets/sentences/{genre}/{level}/{audio_file}',
+                    'index': index
+                })
+
+    return jsonify(sentences)
 
 
 # === アプリ実行（Replitでは不要、ローカル用） ===
