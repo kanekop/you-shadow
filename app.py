@@ -533,27 +533,29 @@ def get_highest_levels(username):
         match = re.match(r"level(\d+)", level_name.lower())
         return int(match.group(1)) if match else -1
 
-    with open("preset_log.json", "r", encoding="utf-8") as f:
+    log_file = "preset_log.json"
+    if not os.path.exists(log_file):
+        return jsonify({})
+
+    with open(log_file, "r", encoding="utf-8") as f:
         logs = json.load(f)
 
-    highest = defaultdict(int)
+    genre_max_level = defaultdict(int)
 
     for entry in logs:
         if entry["user"].lower() != username.lower():
             continue
-        if float(entry["wer"]) >= 30:
-            continue
 
-        genre = entry["genre"].strip().lower()
-        level = entry["level"].strip().lower()
+        genre = entry.get("genre", "").strip().lower()
+        level = entry.get("level", "").strip().lower()
+        wer = float(entry.get("wer", 100))
 
-        num = level_number(level)
-        if num > highest[genre]:
-            highest[genre] = num
+        level_num = level_number(level)
+        if wer < 30.0 and level_num > genre_max_level[genre]:
+            genre_max_level[genre] = level_num
 
-    # 結果を levelX の形式に変換
-    result = {genre: f"level{num}" for genre, num in highest.items()}
-    return result
+    result = {genre: f"level{num}" for genre, num in genre_max_level.items()}
+    return jsonify(result)
 
 
 
