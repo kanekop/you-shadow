@@ -228,8 +228,16 @@ async function handleLevelUnlock(username, genre, level) {
 
 async function updateHighestLevels() {
   const username = localStorage.getItem("username") || "guest";
+  const levelSelect = document.getElementById("levelSelect");
+  const currentLevel = levelSelect.value; // Store current selection
+  
   highestLevels = await presetManager.fetchHighestLevels(username);
   updateLevelSelect();
+  
+  // Restore previous selection if it exists
+  if (currentLevel) {
+    levelSelect.value = currentLevel;
+  }
 }
 
 async function logAttempt(username, genre, level, wer, original, user) {
