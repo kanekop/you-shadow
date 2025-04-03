@@ -163,6 +163,16 @@ audio {
   background: #f8f8f8;
 }
 
+.sentence-item.completed {
+  opacity: 0.6;
+  background: #f0f0f0;
+}
+
+#targetWER {
+  width: 60px;
+  margin: 0 10px;
+}
+
 .eval-result {
   margin-top: 10px;
   padding: 10px;

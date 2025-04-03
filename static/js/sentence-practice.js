@@ -7,6 +7,8 @@ class SentencePractice {
     this.isLoading = false;
     this.recorder = null;
     this.chunks = [];
+    this.completedSentences = new Set();
+    this.targetWER = 20;
     this.loadGenres();
     this.setupEventListeners();
   }
@@ -16,8 +18,9 @@ class SentencePractice {
     const levelSelect = document.getElementById('levelSelect');
     const modeSelect = document.getElementById('practiceMode');
     const showSentences = document.getElementById('showSentences');
+    const targetWERInput = document.getElementById('targetWER');
 
-    if (!genreSelect || !levelSelect || !modeSelect || !showSentences) {
+    if (!genreSelect || !levelSelect || !modeSelect || !showSentences || !targetWERInput) {
       console.error('Required elements not found');
       return;
     }
@@ -29,6 +32,10 @@ class SentencePractice {
       } else {
         container.classList.add('sentence-hidden');
       }
+    });
+
+    targetWERInput.addEventListener('change', (e) => {
+      this.targetWER = parseFloat(e.target.value) || 20;
     });
 
     levelSelect.disabled = true;
@@ -211,6 +218,12 @@ class SentencePractice {
         </div>
       `;
       evalResult.style.display = 'block';
+
+      // Check if WER is below target
+      if (data.wer <= this.targetWER) {
+        this.completedSentences.add(sentenceDiv.dataset.index);
+        sentenceDiv.classList.add('completed');
+      }
     } catch (error) {
       console.error('Evaluation error:', error);
     }
@@ -223,6 +236,7 @@ class SentencePractice {
     this.sentences.forEach((sentence, index) => {
       const sentenceDiv = document.createElement('div');
       sentenceDiv.className = 'sentence-item';
+      sentenceDiv.dataset.index = index;
       
       const textSpan = document.createElement('span');
       textSpan.className = 'sentence-text';
