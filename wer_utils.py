@@ -13,7 +13,7 @@ PUNCTUATION_CHARS = '.!?,;:-'
 
 def normalize_text(text):
     """
-    Enhanced text normalization with speech-friendly rules
+    Enhanced text normalization with more lenient rules
     """
     if isinstance(text, list):
         return text
@@ -21,35 +21,26 @@ def normalize_text(text):
     # Convert to lowercase
     text = text.lower()
 
-    # Remove multiple spaces
+    # Remove all punctuation
+    for char in PUNCTUATION_CHARS:
+        text = text.replace(char, '')
+
+    # Remove multiple spaces and trim
     text = ' '.join(text.split())
 
-    # Handle punctuation more carefully
-    for char in PUNCTUATION_CHARS:
-        text = text.replace(char, ' ')
-
-    # Normalize common contractions
-    text = text.replace("'m", " am")
-    text = text.replace("'re", " are")
-    text = text.replace("'s", " is")
-    text = text.replace("'ll", " will")
-    text = text.replace("'ve", " have")
-    text = text.replace("'d", " would")
-    text = text.replace("n't", " not")
+    # Handle contractions
+    text = text.replace("'m", "m")
+    text = text.replace("'re", "re")
+    text = text.replace("'s", "s")
+    text = text.replace("'ll", "ll")
+    text = text.replace("'ve", "ve")
+    text = text.replace("'d", "d")
+    text = text.replace("n't", "nt")
 
     # Remove any remaining non-word characters
     text = re.sub(r'[^\w\s]', '', text)
 
-    words = text.strip().split()
-
-    # Apply number normalization
-    normalized = []
-    for word in words:
-        if word in NUMBER_MAP:
-            word = NUMBER_MAP[word]
-        normalized.append(word)
-
-    return normalized
+    return text.split()
 
 def strip_punct(word):
     return ''.join(c for c in word if c not in PUNCTUATION_CHARS)
