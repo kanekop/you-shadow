@@ -480,6 +480,8 @@ def evaluate_shadowing():
     script_path = os.path.join("presets", "shadowing", genre, level, "script.txt")
     if not os.path.exists(script_path):
         return jsonify({"error": f"Script not found at: {script_path}"}), 400
+    if not os.path.exists(script_path):
+        return jsonify({"error": f"Script not found at: {script_path}"}), 400
 
     with open(script_path, "r", encoding="utf-8") as f:
         original_transcribed = f.read().strip()
