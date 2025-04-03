@@ -1,6 +1,5 @@
 from difflib import SequenceMatcher
 import difflib
-
 from utils import remove_fillers
 
 # ANSIカラー定義（赤 = 削除, 緑 = 追加, リセット）
@@ -25,9 +24,8 @@ def color_diff(correct_script, user_transcript):
         # '? '（違いの位置）は表示しない
     print("\n")
 
-import difflib
-
 def diff_html(correct: str, transcript: str) -> str:
+    """Creates HTML diff with insert/delete spans for evaluation results"""
     correct_words = correct.strip().split()
     transcript_words = transcript.strip().split()
 
@@ -36,22 +34,22 @@ def diff_html(correct: str, transcript: str) -> str:
 
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
         if tag == 'equal':
-            for word in correct_words[i1:i2]:
-                result_html.append(f'<span>{word} </span>')
+            result_html.append(' '.join(correct_words[i1:i2]))
         elif tag == 'replace':
-            for word in transcript_words[j1:j2]:
-                result_html.append(f'<span style="color: red;">{word} </span>')
+            result_html.append(
+                f'<span class="delete">{" ".join(correct_words[i1:i2])}</span> '
+                f'<span class="insert">{" ".join(transcript_words[j1:j2])}</span>'
+            )
         elif tag == 'insert':
-            for word in transcript_words[j1:j2]:
-                result_html.append(f'<span style="color: green;">{word} </span>')
+            result_html.append(f'<span class="insert">{" ".join(transcript_words[j1:j2])}</span>')
         elif tag == 'delete':
-            for word in correct_words[i1:i2]:
-                result_html.append(f'<span style="color: orange; text-decoration: line-through;">{word} </span>')
+            result_html.append(f'<span class="delete">{" ".join(correct_words[i1:i2])}</span>')
 
-    return ''.join(result_html)
+    return ' '.join(result_html)
 
 
 def get_diff_html(reference: str, hypothesis: str, mode='user') -> str:
+    """Creates HTML diff with insert/delete spans for shadowing view"""
     ref_words = remove_fillers(reference).split()
     hyp_words = remove_fillers(hypothesis).split()
 
@@ -63,17 +61,19 @@ def get_diff_html(reference: str, hypothesis: str, mode='user') -> str:
         compare_words = ref_words
 
     sm = SequenceMatcher(None, base_words, compare_words)
-    result_html = ""
+    result_html = []
+
     for opcode, i1, i2, j1, j2 in sm.get_opcodes():
         if opcode == 'equal':
-            result_html += ' ' + ' '.join(base_words[i1:i2])
+            result_html.append(' '.join(base_words[i1:i2]))
         elif opcode == 'insert':
-            result_html += ' <span class="insert">' + ' '.join(compare_words[j1:j2]) + '</span>'
+            result_html.append(f'<span class="insert">{" ".join(compare_words[j1:j2])}</span>')
         elif opcode == 'delete':
-            result_html += ' <span class="delete">' + ' '.join(base_words[i1:i2]) + '</span>'
+            result_html.append(f'<span class="delete">{" ".join(base_words[i1:i2])}</span>')
         elif opcode == 'replace':
-            result_html += (
-                ' <span class="delete">' + ' '.join(base_words[i1:i2]) + '</span>' +
-                ' <span class="insert">' + ' '.join(compare_words[j1:j2]) + '</span>'
+            result_html.append(
+                f'<span class="delete">{" ".join(base_words[i1:i2])}</span> '
+                f'<span class="insert">{" ".join(compare_words[j1:j2])}</span>'
             )
-    return result_html.strip()
+
+    return ' '.join(result_html)
