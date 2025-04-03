@@ -1,6 +1,8 @@
 from difflib import SequenceMatcher
 import difflib
 from utils import remove_fillers
+import unicodedata
+
 
 # ANSIカラー定義（赤 = 削除, 緑 = 追加, リセット）
 RED = "\033[91m"
@@ -25,30 +27,29 @@ def color_diff(correct_script, user_transcript):
     print("\n")
 
 def normalize_for_diff(text: str) -> list:
-    """Normalize text for diff display by handling case and punctuation"""
-    # Convert to lowercase first
+    import unicodedata
     text = text.lower()
-    # Replace any kind of quotes with standard single quote
-    text = text.replace('"', "'")
-    text = text.replace('"', "'")
-    text = text.replace('"', "'")
-    text = text.replace("'", "'")  # Smart quote to standard
-    text = text.replace("'", "'")  # Smart quote to standard
-    # Handle punctuation after commas and periods
+
+    # 1. スマートクォートや異体文字を標準アポストロフィに置換
+    smart_quotes = ['‘', '’', '‚', '‛', '＇']  # 全角含む
+    for quote in smart_quotes:
+        text = text.replace(quote, "'")
+
+    # 2. Unicode正規化（NFKC：記号の統一・合成）
+    text = unicodedata.normalize("NFKC", text)
+
+    # 3. 通常の処理
     text = text.replace(", ", " ")
     text = text.replace(". ", " ")
-    # Split into words
     words = text.strip().split()
-    # Normalize each word
     normalized = []
     for word in words:
-        # Remove any remaining punctuation at start/end
         word = word.strip('.,;:!?(){}[]"\'')
-        # Standardize contractions
         if word == "im":
             word = "i'm"
         normalized.append(word)
     return normalized
+
 
 def diff_html(correct: str, transcript: str) -> str:
     """Creates HTML diff with insert/delete spans for evaluation results"""
