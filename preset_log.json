@@ -1207,5 +1207,15 @@
     "original_transcribed": "(auto-unlocked)",
     "user_transcribed": "(auto-unlocked)",
     "timestamp": "2025-04-01T11:23:46.337140"
+  },
+  {
+    "timestamp": "2025-04-03T02:24:26.813677",
+    "user": "alice",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 100.0,
+    "original_transcribed": "This is Level 3.",
+    "user_transcribed": "Bye.",
+    "script_excerpt": "This is Level 3."
   }
 ]
