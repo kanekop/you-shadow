@@ -95,24 +95,59 @@ class SentencePractice {
 
   async startRecording(sentenceDiv) {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      this.recorder = new MediaRecorder(stream);
+      const constraints = {
+        audio: {
+          sampleRate: 44100,
+          channelCount: 1,
+          autoGainControl: false,
+          noiseSuppression: false
+        }
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      let options = {};
+      const mimeTypes = ['audio/aac', 'audio/mp4', 'audio/webm', ''];
+
+      for (let type of mimeTypes) {
+        try {
+          if (!type || MediaRecorder.isTypeSupported(type)) {
+            options = type ? {
+              mimeType: type,
+              audioBitsPerSecond: 96000,
+              bitsPerSecond: 96000
+            } : {};
+            console.log('Using audio format:', type || 'default');
+            break;
+          }
+        } catch (e) {
+          console.warn('Mime type not supported:', type);
+        }
+      }
+
+      this.recorder = new MediaRecorder(stream, options);
       this.chunks = [];
 
       this.recorder.ondataavailable = e => this.chunks.push(e.data);
       this.recorder.onstop = () => this.handleRecordingStop(sentenceDiv);
+      this.recorder.onerror = (e) => {
+        console.error("❌ MediaRecorder error:", e);
+        alert("Recording error: " + e.name);
+      };
 
-      this.recorder.start();
-      
+      this.recorder.start(1000); // Use smaller chunks
+
       // Update UI
       const recordBtn = sentenceDiv.querySelector('.record-btn');
       recordBtn.textContent = '⏹ Stop';
       recordBtn.onclick = () => this.stopRecording();
-      
-      // Play original audio
-      const audio = sentenceDiv.querySelector('audio');
-      audio.currentTime = 0;
-      audio.play();
+
+      // Play original audio after recording starts
+      this.recorder.onstart = () => {
+        console.log("🎙️ Recording started → playing audio");
+        const audio = sentenceDiv.querySelector('audio');
+        audio.currentTime = 0;
+        audio.play();
+      };
     } catch (err) {
       console.error('Recording error:', err);
       alert('マイクの使用が許可されていません。');
