@@ -87,6 +87,8 @@ class SentencePractice {
 
     if (!genre || !this.structure[genre]) return;
 
+    select.disabled = false; // Enable the select box
+    
     this.structure[genre].forEach(level => {
       const option = document.createElement('option');
       option.value = level;
