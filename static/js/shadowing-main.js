@@ -91,16 +91,17 @@ async function loadPreset() {
   const scriptUrl = `/presets/shadowing/${genre}/${level}/script.txt`;
 
   try {
-    const audioResponse = await fetch(audioUrl);
-    if (!audioResponse.ok) {
-      throw new Error(`Failed to fetch audio: ${audioResponse.status}`);
-    }
-    const audioBlob = await audioResponse.blob();
+    // First verify both resources exist
+    const [audioResponse, scriptResponse] = await Promise.all([
+      fetch(audioUrl),
+      fetch(scriptUrl)
+    ]);
 
-    const scriptResponse = await fetch(scriptUrl);
-    if (!scriptResponse.ok) {
-      throw new Error(`Failed to fetch script: ${scriptResponse.status}`);
+    if (!audioResponse.ok || !scriptResponse.ok) {
+      throw new Error(`Failed to fetch resources`);
     }
+
+    const audioBlob = await audioResponse.blob();
     const scriptText = await scriptResponse.text();
 
 
