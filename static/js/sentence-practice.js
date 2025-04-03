@@ -193,7 +193,12 @@ class SentencePractice {
       const evalResult = sentenceDiv.querySelector('.eval-result');
       evalResult.innerHTML = `
         <div class="wer-score">WER: ${data.wer}%</div>
-        <div class="diff-result">${data.diff_html}</div>
+        <div>
+          <div>Original text:</div>
+          <div class="diff-result">${data.diff_html}</div>
+          <div>Your recording:</div>
+          <div>${data.transcribed}</div>
+        </div>
       `;
       evalResult.style.display = 'block';
     } catch (error) {
