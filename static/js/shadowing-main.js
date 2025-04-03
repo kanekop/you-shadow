@@ -146,6 +146,8 @@ function stopRecording() {
   document.getElementById("recordedAudio").src = audioURL;
 }
 
+
+
 async function submitRecording() {
   if (!originalAudioBlob || !recorder.getBlob() || !currentScript) {
     alert("プリセットと録音が揃っていません。");
@@ -173,8 +175,23 @@ async function submitRecording() {
     const data = await res.json();
     displayResults(data);
 
+    // 🔒 提出ボタンを無効化
+    document.getElementById("submitBtn").disabled = true;
+
+    // ✅ ログを保存（通常の練習）
+    await logAttempt(username, genre, level, data.wer, data.original_transcribed, data.user_transcribed);
+
+    // ✅ WERが30%未満なら次のレベルを自動開放（shadowing.jsと同じロジック）
     if (data.wer < 30) {
-      await handleLevelUnlock(username, genre, level);
+      const resultDiv = document.getElementById("resultBox");
+      resultDiv.innerHTML += "<br>🎉 あなたのWERが30%未満です！次のレベルに進めます！";
+
+      const match = level.match(/^level(\d+)$/i);
+      if (match) {
+        const nextLevel = `level${parseInt(match[1]) + 1}`;
+        await logAttempt(username, genre, nextLevel, 0.0, "(auto-unlocked)", "(auto-unlocked)");
+        console.log(`🔓 次のレベル ${nextLevel} を自動解放しました`);
+      }
     }
 
     await updateHighestLevels();
@@ -232,7 +249,7 @@ async function updateHighestLevels() {
   const currentLevel = levelSelect.value; // Store current selection
   
   highestLevels = await presetManager.fetchHighestLevels(username);
-  updateLevelSelect();
+  await updateLevelSelect();
   
   // Restore previous selection if it exists
   if (currentLevel) {

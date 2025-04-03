@@ -124,5 +124,105 @@
     "original_transcribed": "(auto-unlocked)",
     "user_transcribed": "(auto-unlocked)",
     "timestamp": "2025-04-03T14:48:31.468926"
+  },
+  {
+    "timestamp": "2025-04-03T14:51:56.667762",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 55.56,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "Let's print out script text for Gen 1 Level 1.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "timestamp": "2025-04-03T15:05:10.130762",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 66.67,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "The full script text for general one level one.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "timestamp": "2025-04-03T15:15:21.873389",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 33.33,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is sample script text for a John Wundt Level 1.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "timestamp": "2025-04-03T15:17:52.648739",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 77.78,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "or general one level one",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "timestamp": "2025-04-03T15:20:27.178903",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 33.33,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is the script text for journal 1, level 1.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "timestamp": "2025-04-03T15:20:28.274273",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 33.33,
+    "original_transcribed": "This is sample script text for genre1 level 1.",
+    "user_transcribed": "This is the script text for journal 1, level 1.",
+    "script_excerpt": "This is sample script text for genre1 level 1."
+  },
+  {
+    "timestamp": "2025-04-03T15:21:35.899505",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 90.0,
+    "original_transcribed": "This is sample script text for genre 1 level 1.",
+    "user_transcribed": "or a general level one.",
+    "script_excerpt": "This is sample script text for genre 1 level 1."
+  },
+  {
+    "timestamp": "2025-04-03T15:21:54.195782",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 90.0,
+    "original_transcribed": "This is sample script text for genre 1 level 1.",
+    "user_transcribed": "Level one.",
+    "script_excerpt": "This is sample script text for genre 1 level 1."
+  },
+  {
+    "timestamp": "2025-04-03T15:21:55.728447",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 60.0,
+    "original_transcribed": "This is sample script text for genre 1 level 1.",
+    "user_transcribed": "text, for level 1.",
+    "script_excerpt": "This is sample script text for genre 1 level 1."
+  },
+  {
+    "timestamp": "2025-04-03T15:22:18.901635",
+    "user": "anonymous",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 10.0,
+    "original_transcribed": "This is sample script text for genre 1 level 1.",
+    "user_transcribed": "This is sample script text for journal 1, level 1.",
+    "script_excerpt": "This is sample script text for genre 1 level 1."
   }
 ]
