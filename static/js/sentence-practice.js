@@ -1,38 +1,71 @@
 
 class SentencePractice {
   constructor() {
+    console.log('🏗️ Initializing SentencePractice');
     this.sentences = [];
     this.currentSentenceIndex = 0;
+    this.structure = null;
+    this.isLoading = false;
     this.loadGenres();
     this.setupEventListeners();
   }
 
   setupEventListeners() {
+    console.log('🎯 Setting up event listeners');
     const genreSelect = document.getElementById('genreSelect');
     const levelSelect = document.getElementById('levelSelect');
+    const modeSelect = document.getElementById('practiceMode');
 
-    genreSelect.addEventListener('change', () => {
+    if (!genreSelect || !levelSelect || !modeSelect) {
+      console.error('❌ Failed to find required select elements');
+      return;
+    }
+
+    // Disable selects initially until data is loaded
+    levelSelect.disabled = true;
+    modeSelect.disabled = true;
+
+    genreSelect.addEventListener('change', (e) => {
+      console.log('📢 Genre changed:', e.target.value);
       this.updateLevelSelect();
     });
 
-    levelSelect.addEventListener('change', () => {
-      this.loadSentences();
+    levelSelect.addEventListener('change', (e) => {
+      console.log('📢 Level changed:', e.target.value);
+      if (e.target.value) {
+        modeSelect.disabled = false;
+        this.loadSentences();
+      }
     });
   }
 
   async loadGenres() {
+    console.log('📚 Loading genres...');
+    this.isLoading = true;
     try {
       const response = await fetch('/api/sentence_structure');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const structure = await response.json();
+      console.log('📦 Loaded structure:', structure);
       this.structure = structure;
       this.displayGenreSelect();
     } catch (error) {
-      console.error('Error loading genres:', error);
+      console.error('❌ Error loading genres:', error);
+    } finally {
+      this.isLoading = false;
     }
   }
 
   displayGenreSelect() {
+    console.log('🎨 Displaying genre select');
     const select = document.getElementById('genreSelect');
+    if (!select) {
+      console.error('❌ Genre select element not found');
+      return;
+    }
+    
     select.innerHTML = '<option value="">-- ジャンル選択 --</option>';
     select.style.backgroundColor = '#fff';
     select.style.color = '#000';
