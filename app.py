@@ -315,10 +315,10 @@ def evaluate_read_aloud():
         transcribed = response.text
 
     # WER計算
-    wer_score = calculate_wer(transcript_text, transcribed)
+    wer_score = calculate_wer(transcribed, transcript_text)
 
     # 差分をHTMLで生成
-    diff_result = diff_html(transcript_text, transcribed)
+    diff_result = diff_html(transcribed, transcript_text)
 
     return jsonify({
         "transcribed": transcribed,
