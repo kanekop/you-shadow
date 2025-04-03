@@ -30,7 +30,8 @@ CORS(app) # Enable CORS
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 #API化
-def get_presets_structure(base_path="presets"):
+def get_presets_structure(practice_type="shadowing"):
+    base_path = os.path.join("presets", practice_type)
     presets = {}
     if not os.path.exists(base_path):
         return presets
