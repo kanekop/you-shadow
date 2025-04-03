@@ -1,44 +1,35 @@
+
 from difflib import SequenceMatcher
 import difflib
 from utils import remove_fillers
 import unicodedata
 
+# Common number mappings
+NUMBER_MAP = {
+    'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
+    'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9'
+}
 
-# ANSIカラー定義（赤 = 削除, 緑 = 追加, リセット）
-RED = "\033[91m"
-GREEN = "\033[92m"
-RESET = "\033[0m"
-
-def color_diff(correct_script, user_transcript):
-    correct_words = correct_script.strip().split()
-    transcript_words = user_transcript.strip().split()
-
-    diff = list(difflib.ndiff(correct_words, transcript_words))
-
-    print("=== Meld-style Diff ===")
-    for token in diff:
-        if token.startswith("- "):
-            print(f"{RED}{token[2:]}{RESET}", end=" ")
-        elif token.startswith("+ "):
-            print(f"{GREEN}{token[2:]}{RESET}", end=" ")
-        elif token.startswith("  "):
-            print(token[2:], end=" ")
-        # '? '（違いの位置）は表示しない
-    print("\n")
-
-def normalize_for_diff(text: str) -> list:
+def normalize_text(text: str) -> list:
     import unicodedata
     text = text.lower()
 
-    # 1. スマートクォートや異体文字を標準アポストロフィに置換
-    smart_quotes = ['‘', '’', '‚', '‛', '＇']  # 全角含む
+    # Split into words and apply number mapping
+    words = text.split()
+    words = [NUMBER_MAP.get(word, word) for word in words]
+    
+    # Join back for further normalization
+    text = ' '.join(words)
+
+    # Smart quotes normalization
+    smart_quotes = [''', ''', '‚', '‛', '＇']
     for quote in smart_quotes:
         text = text.replace(quote, "'")
 
-    # 2. Unicode正規化（NFKC：記号の統一・合成）
+    # Unicode normalization
     text = unicodedata.normalize("NFKC", text)
 
-    # 3. 通常の処理
+    # Clean up punctuation and spaces
     text = text.replace(", ", " ")
     text = text.replace(". ", " ")
     words = text.strip().split()
@@ -50,11 +41,26 @@ def normalize_for_diff(text: str) -> list:
         normalized.append(word)
     return normalized
 
+def color_diff(correct_script, user_transcript):
+    correct_words = normalize_text(correct_script)
+    transcript_words = normalize_text(user_transcript)
+
+    diff = list(difflib.ndiff(correct_words, transcript_words))
+
+    print("=== Meld-style Diff ===")
+    for token in diff:
+        if token.startswith("- "):
+            print(f"{RED}{token[2:]}{RESET}", end=" ")
+        elif token.startswith("+ "):
+            print(f"{GREEN}{token[2:]}{RESET}", end=" ")
+        elif token.startswith("  "):
+            print(token[2:], end=" ")
+    print("\n")
 
 def diff_html(correct: str, transcript: str) -> str:
     """Creates HTML diff with insert/delete spans for evaluation results"""
-    correct_words = normalize_for_diff(correct)
-    transcript_words = normalize_for_diff(transcript)
+    correct_words = normalize_text(correct)
+    transcript_words = normalize_text(transcript)
 
     matcher = difflib.SequenceMatcher(None, correct_words, transcript_words)
     result_html = []
@@ -74,11 +80,10 @@ def diff_html(correct: str, transcript: str) -> str:
 
     return ' '.join(result_html)
 
-
 def get_diff_html(reference: str, hypothesis: str, mode='user') -> str:
     """Creates HTML diff with insert/delete spans for shadowing view"""
-    ref_words = remove_fillers(reference).split()
-    hyp_words = remove_fillers(hypothesis).split()
+    ref_words = normalize_text(remove_fillers(reference))
+    hyp_words = normalize_text(remove_fillers(hypothesis))
 
     if mode == 'original':
         base_words = ref_words
