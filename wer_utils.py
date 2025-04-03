@@ -2,6 +2,7 @@
 import numpy as np
 import re
 from utils import remove_fillers
+import difflib
 
 # Common number mappings and speech variations
 NUMBER_MAP = {
@@ -51,19 +52,20 @@ def normalize_text(text):
     
     return normalized
 
-def wer(reference, hypothesis):
+def wer(reference, hypothesis, lenient=False):
     """
-    Word Error Rate (WER) calculation with enhanced normalization
+    Word Error Rate (WER) calculation
+    If lenient=True, allow similar words (>=85% match) to be treated as correct
     """
     # Apply filler removal
     reference = remove_fillers(reference)
     hypothesis = remove_fillers(hypothesis)
-    
+
     # Normalize both texts
     r = normalize_text(reference)
     h = normalize_text(hypothesis)
 
-    # Calculate Levenshtein distance matrix
+    # Levenshtein distance matrix
     rows = len(r) + 1
     cols = len(h) + 1
     d = np.zeros((rows, cols), dtype=np.uint16)
@@ -75,8 +77,13 @@ def wer(reference, hypothesis):
 
     for i in range(1, rows):
         for j in range(1, cols):
-            # Consider words equal if they're similar enough
-            cost = 0 if r[i-1] == h[j-1] else 1
+            if lenient:
+                # ✅ 類似度85%以上なら同じとみなす
+                ratio = difflib.SequenceMatcher(None, r[i-1], h[j-1]).ratio()
+                cost = 0 if ratio >= 0.85 else 1
+            else:
+                cost = 0 if r[i-1] == h[j-1] else 1
+
             d[i][j] = min(
                 d[i-1][j] + 1,      # deletion
                 d[i][j-1] + 1,      # insertion
@@ -87,7 +94,7 @@ def wer(reference, hypothesis):
     i, j = len(r), len(h)
     S = D = I = 0
     while i > 0 and j > 0:
-        if r[i-1] == h[j-1]:
+        if r[i-1] == h[j-1] or (lenient and difflib.SequenceMatcher(None, r[i-1], h[j-1]).ratio() >= 0.85):
             i -= 1
             j -= 1
         elif d[i][j] == d[i-1][j-1] + 1:
@@ -110,6 +117,11 @@ def wer(reference, hypothesis):
     wer_percent = ((S + D + I) / N) * 100 if N > 0 else 0
     return wer_percent, S, D, I, N
 
-def calculate_wer(reference, hypothesis):
-    wer_percent, _, _, _, _ = wer(reference, hypothesis)
-    return wer_percent / 100.0  # Return as decimal
+
+
+def calculate_wer(reference, hypothesis, lenient=False):
+    """
+    Return WER score as decimal (0.0 - 1.0)
+    """
+    wer_percent, _, _, _, _ = wer(reference, hypothesis, lenient)
+    return wer_percent / 100.0
