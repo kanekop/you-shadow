@@ -24,10 +24,15 @@ def color_diff(correct_script, user_transcript):
         # '? '（違いの位置）は表示しない
     print("\n")
 
+def normalize_for_diff(text: str) -> list:
+    """Normalize text for diff display by stripping punctuation"""
+    words = text.strip().split()
+    return [word.strip('.,;:!?') for word in words]
+
 def diff_html(correct: str, transcript: str) -> str:
     """Creates HTML diff with insert/delete spans for evaluation results"""
-    correct_words = correct.strip().split()
-    transcript_words = transcript.strip().split()
+    correct_words = normalize_for_diff(correct)
+    transcript_words = normalize_for_diff(transcript)
 
     matcher = difflib.SequenceMatcher(None, correct_words, transcript_words)
     result_html = []
