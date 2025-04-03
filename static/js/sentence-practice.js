@@ -15,11 +15,21 @@ class SentencePractice {
     const genreSelect = document.getElementById('genreSelect');
     const levelSelect = document.getElementById('levelSelect');
     const modeSelect = document.getElementById('practiceMode');
+    const showSentences = document.getElementById('showSentences');
 
-    if (!genreSelect || !levelSelect || !modeSelect) {
+    if (!genreSelect || !levelSelect || !modeSelect || !showSentences) {
       console.error('Required elements not found');
       return;
     }
+
+    showSentences.addEventListener('change', (e) => {
+      const container = document.getElementById('sentenceList');
+      if (e.target.checked) {
+        container.classList.remove('sentence-hidden');
+      } else {
+        container.classList.add('sentence-hidden');
+      }
+    });
 
     levelSelect.disabled = true;
     modeSelect.disabled = true;

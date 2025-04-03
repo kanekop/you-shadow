@@ -117,6 +117,16 @@ audio {
   font-size: 16px;
 }
 
+.visibility-toggle {
+  margin: 10px 0;
+  display: inline-block;
+  margin-left: 20px;
+}
+
+.sentence-hidden .sentence-text {
+  display: none;
+}
+
 .sentence-item audio {
   margin: 5px 0;
   width: 100%;
