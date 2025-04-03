@@ -52,8 +52,8 @@ async function loadPreset() {
 
   if (!genre || !level) return;
 
-  const audioUrl = `/presets/${genre}/${level}/audio.mp3`;
-  const scriptUrl = `/presets/${genre}/${level}/script.txt`;
+  const audioUrl = `/presets/shadowing/${genre}/${level}/audio.mp3`;
+  const scriptUrl = `/presets/shadowing/${genre}/${level}/script.txt`;
 
   document.getElementById("originalAudio").src = audioUrl;
   originalAudioBlob = await fetch(audioUrl).then(res => res.blob());
