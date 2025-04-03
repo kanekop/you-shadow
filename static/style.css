@@ -166,7 +166,7 @@ audio {
 
 .diff-result {
   line-height: 1.8;
-  display: inline;
+  display: inline-block;
   white-space: normal;
   word-wrap: break-word;
   margin: 10px 0;
