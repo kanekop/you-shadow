@@ -349,7 +349,7 @@ def evaluate_shadowing():
     username = request.form.get("username", "anonymous")
 
     # === 教材スクリプトを script.txt から取得（Whisperは使わない）
-    script_path = os.path.join("presets", genre, level, "script.txt")
+    script_path = os.path.join("presets", "shadowing", genre, level, "script.txt")
     if not os.path.exists(script_path):
         return jsonify({"error": f"Script not found at: {script_path}"}), 400
 
