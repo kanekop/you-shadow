@@ -137,8 +137,22 @@ async function startRecording() {
     document.getElementById("startBtn").disabled = true;
     document.getElementById("stopBtn").disabled = false;
   } catch (err) {
+    if (recorder) {
+      try {
+        recorder.stop();
+        if (recorder.stream) {
+          recorder.stream.getTracks().forEach(track => track.stop());
+        }
+      } catch (cleanupErr) {
+        console.error("Cleanup error:", cleanupErr);
+      }
+    }
     alert("マイクの使用が許可されていません。");
-    console.error(err);
+    console.error("Recording error:", err);
+    
+    // Reset UI state
+    document.getElementById("startBtn").disabled = false;
+    document.getElementById("stopBtn").disabled = true;
   }
 }
 function stopRecording() {
