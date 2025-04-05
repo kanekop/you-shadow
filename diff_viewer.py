@@ -40,8 +40,13 @@ def normalize_text(text: str) -> list:
     return normalized
 
 def color_diff(correct_script, user_transcript):
-    correct_words = normalize_text(remove_fillers(correct_script.lower().strip()))
-    transcript_words = normalize_text(remove_fillers(user_transcript.lower().strip()))
+    # First normalize, then remove fillers
+    correct_words = normalize_text(correct_script.lower().strip())
+    transcript_words = normalize_text(user_transcript.lower().strip())
+    
+    # Remove fillers after normalization
+    correct_words = normalize_text(remove_fillers(' '.join(correct_words)))
+    transcript_words = normalize_text(remove_fillers(' '.join(transcript_words)))
 
     diff = list(difflib.ndiff(correct_words, transcript_words))
 
@@ -57,8 +62,12 @@ def color_diff(correct_script, user_transcript):
 
 def diff_html(correct: str, transcript: str) -> str:
     """Creates HTML diff with insert/delete spans for evaluation results"""
-    correct_words = normalize_text(correct)
-    transcript_words = normalize_text(transcript)
+    correct_words = normalize_text(correct.lower().strip())
+    transcript_words = normalize_text(transcript.lower().strip())
+    
+    # Remove fillers after normalization
+    correct_words = normalize_text(remove_fillers(' '.join(correct_words)))
+    transcript_words = normalize_text(remove_fillers(' '.join(transcript_words)))
 
     matcher = difflib.SequenceMatcher(None, correct_words, transcript_words)
     result_html = []
