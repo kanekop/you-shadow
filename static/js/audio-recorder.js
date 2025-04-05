@@ -26,13 +26,29 @@ class AudioRecorder {
       this.mediaRecorder = new MediaRecorder(this.stream, options);
       this.audioChunks = [];
 
+      this.mediaRecorder.onstart = () => {
+        console.log("✅ MediaRecorder has started.");
+      };
+
+      this.mediaRecorder.onstop = () => {
+        console.log("🛑 MediaRecorder has stopped.");
+      };
+
+      this.mediaRecorder.ondataavailable = (event) => {
+        console.log("📦 ondataavailable fired:", event.data?.size);
+        if (event.data.size > 0) {
+          this.audioChunks.push(event.data);
+        }
+      };
+
+      
       this.mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           this.audioChunks.push(event.data);
         }
       };
 
-      this.mediaRecorder.start();
+      this.mediaRecorder.start(100);
       this.startTime = Date.now(); // ⬅️ スタート時間を記録
       console.log('Recording started');
     } catch (err) {

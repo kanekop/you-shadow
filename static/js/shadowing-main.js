@@ -122,21 +122,34 @@ async function loadPreset() {
   }
 }
 
-//500ms待つ処理を入れた
+//500ms待つ処理を外した。ah.mp3追加
 async function startRecording() {
   try {
-    document.getElementById("originalAudio").currentTime = 0;
+    const originalAudio = document.getElementById("originalAudio");
 
+    // 教材再生をリセットしておく
+    originalAudio.pause();
+    originalAudio.currentTime = 0;
+
+    // 🎙️ 録音スタート
     await recorder.startRecording();
 
-    // 🎯 空録音時間として500ms待つ
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // 🎧 ah.mp3 再生
+    const ahAudio = new Audio("/static/audio/ah.mp3");
+    ahAudio.play();
 
-    document.getElementById("originalAudio").play();
+    // ah.mp3 再生後に教材再生
+    ahAudio.onended = () => {
+      console.log("✅ ah.mp3 finished. Starting main audio...");
+      originalAudio.play();
+    };
 
+    // UI制御
     document.getElementById("startBtn").disabled = true;
     document.getElementById("stopBtn").disabled = false;
+
   } catch (err) {
+    // 録音やストリーム停止処理（元のコードを維持）
     if (recorder) {
       try {
         recorder.stop();
@@ -147,14 +160,16 @@ async function startRecording() {
         console.error("Cleanup error:", cleanupErr);
       }
     }
+
     alert("マイクの使用が許可されていません。");
     console.error("Recording error:", err);
-    
-    // Reset UI state
+
+    // UIを元に戻す
     document.getElementById("startBtn").disabled = false;
     document.getElementById("stopBtn").disabled = true;
   }
 }
+
 function stopRecording() {
   recorder.stop();
   document.getElementById("startBtn").disabled = false;

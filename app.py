@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 from flask_cors import CORS
 from functools import wraps
+from flask import send_from_directory
 
 def auth_required(f):
     @wraps(f)
