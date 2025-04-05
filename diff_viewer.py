@@ -40,8 +40,8 @@ def normalize_text(text: str) -> list:
     return normalized
 
 def color_diff(correct_script, user_transcript):
-    correct_words = normalize_text(correct_script)
-    transcript_words = normalize_text(user_transcript)
+    correct_words = normalize_text(remove_fillers(correct_script.lower().strip()))
+    transcript_words = normalize_text(remove_fillers(user_transcript.lower().strip()))
 
     diff = list(difflib.ndiff(correct_words, transcript_words))
 
@@ -80,8 +80,9 @@ def diff_html(correct: str, transcript: str) -> str:
 
 def get_diff_html(reference: str, hypothesis: str, mode='user') -> str:
     """Creates HTML diff with insert/delete spans for shadowing view"""
-    ref_words = normalize_text(remove_fillers(reference))
-    hyp_words = normalize_text(remove_fillers(hypothesis))
+    # Clean up and normalize before diff
+    ref_words = normalize_text(remove_fillers(reference.lower().strip()))
+    hyp_words = normalize_text(remove_fillers(hypothesis.lower().strip()))
 
     if mode == 'original':
         base_words = ref_words
