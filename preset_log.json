@@ -252,5 +252,71 @@
     "original_transcribed": "(auto-unlocked)",
     "user_transcribed": "(auto-unlocked)",
     "timestamp": "2025-04-03T15:47:57.398494"
+  },
+  {
+    "timestamp": "2025-04-03T16:09:55.565652",
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 30.0,
+    "original_transcribed": "This is sample script text for genre 1 level 1.",
+    "user_transcribed": "Is sample script text for a general one level one",
+    "script_excerpt": "This is sample script text for genre 1 level 1."
+  },
+  {
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 30.0,
+    "original_transcribed": "This is sample script text for genre 1 level 1.",
+    "user_transcribed": "Is sample script text for a general one level one",
+    "timestamp": "2025-04-03T16:09:55.736306"
+  },
+  {
+    "timestamp": "2025-04-03T16:10:15.938195",
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 70.0,
+    "original_transcribed": "This is sample script text for genre 1 level 1.",
+    "user_transcribed": "That's all for section 4 of Gen 1 level 1.",
+    "script_excerpt": "This is sample script text for genre 1 level 1."
+  },
+  {
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 70.0,
+    "original_transcribed": "This is sample script text for genre 1 level 1.",
+    "user_transcribed": "That's all for section 4 of Gen 1 level 1.",
+    "timestamp": "2025-04-03T16:10:16.160088"
+  },
+  {
+    "timestamp": "2025-04-03T16:10:36.337043",
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 20.0,
+    "original_transcribed": "This is sample script text for genre 1 level 1.",
+    "user_transcribed": "This is sample script text for a general one level one",
+    "script_excerpt": "This is sample script text for genre 1 level 1."
+  },
+  {
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level1",
+    "wer": 20.0,
+    "original_transcribed": "This is sample script text for genre 1 level 1.",
+    "user_transcribed": "This is sample script text for a general one level one",
+    "timestamp": "2025-04-03T16:10:36.543076"
+  },
+  {
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-03T16:10:36.710802"
   }
 ]
