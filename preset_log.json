@@ -318,5 +318,43 @@
     "original_transcribed": "(auto-unlocked)",
     "user_transcribed": "(auto-unlocked)",
     "timestamp": "2025-04-03T16:10:36.710802"
+  },
+  {
+    "timestamp": "2025-04-05T08:11:52.050909",
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 100.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "Thank you. Bye-bye. ",
+    "script_excerpt": "This is level 2."
+  },
+  {
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 100.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "Thank you. Bye-bye. ",
+    "timestamp": "2025-04-05T08:11:52.217143"
+  },
+  {
+    "timestamp": "2025-04-05T08:11:52.427473",
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 100.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "",
+    "script_excerpt": "This is level 2."
+  },
+  {
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level2",
+    "wer": 100.0,
+    "original_transcribed": "This is level 2.",
+    "user_transcribed": "",
+    "timestamp": "2025-04-05T08:11:52.580690"
   }
 ]
