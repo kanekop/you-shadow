@@ -247,10 +247,10 @@ async function updateHighestLevels() {
   const username = localStorage.getItem("username") || "guest";
   const levelSelect = document.getElementById("levelSelect");
   const currentLevel = levelSelect.value; // Store current selection
-  
+
   highestLevels = await presetManager.fetchHighestLevels(username);
   await updateLevelSelect();
-  
+
   // Restore previous selection if it exists
   if (currentLevel) {
     levelSelect.value = currentLevel;

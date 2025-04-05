@@ -1,4 +1,3 @@
-
 class AudioRecorder {
   constructor() {
     this.mediaRecorder = null;
@@ -12,8 +11,10 @@ class AudioRecorder {
         audio: {
           sampleRate: 44100,
           channelCount: 1,
-          autoGainControl: false,
-          noiseSuppression: false
+          autoGainControl: true,
+          noiseSuppression: true,
+          echoCancellation: true,
+          latency: 0
         }
       });
 
@@ -31,8 +32,10 @@ class AudioRecorder {
         }
       };
 
+      // Initialize recording with buffer
+      await new Promise(resolve => setTimeout(resolve, 500));
       this.mediaRecorder.start(1000);
-      console.log('Recording started');
+      console.log('Recording started with buffer');
     } catch (err) {
       console.error('Failed to start recording:', err);
       throw err;
