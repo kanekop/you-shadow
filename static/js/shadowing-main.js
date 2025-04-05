@@ -161,8 +161,15 @@ function stopRecording() {
   document.getElementById("stopBtn").disabled = true;
   document.getElementById("submitBtn").disabled = false;
 
-  const audioURL = URL.createObjectURL(recorder.getBlob());
-  document.getElementById("recordedAudio").src = audioURL;
+  const recordedBlob = recorder.getBlob();
+  if (recordedBlob && recordedBlob.size > 0) {
+    const audioURL = URL.createObjectURL(recordedBlob);
+    const recordedAudio = document.getElementById("recordedAudio");
+    recordedAudio.src = audioURL;
+    recordedAudio.controls = true;
+  } else {
+    console.error("No recording data available");
+  }
 }
 
 
