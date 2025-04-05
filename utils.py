@@ -7,4 +7,4 @@ FILLER_WORDS = {
 
 def remove_fillers(text: str) -> str:
     tokens = text.lower().split()
-    return ' '.join([t for t in tokens if t not in FILLER_WORDS])
+    return ' '.join([t for t in tokens if t not in FILLER_WORDS])ot in FILLER_WORDS])

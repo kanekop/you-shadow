@@ -43,12 +43,13 @@ def wer(reference, hypothesis, lenient=False):
     """
     Calculate WER and related metrics
     """
-    # Remove fillers first, then normalize
-    reference = remove_fillers(reference)
-    hypothesis = remove_fillers(hypothesis)
-
+    # Normalize first, then remove fillers
     r = normalize_text(reference)
     h = normalize_text(hypothesis)
+    
+    # Join words, remove fillers, then split again
+    r = remove_fillers(' '.join(r)).split()
+    h = remove_fillers(' '.join(h)).split()
 
     rows = len(r) + 1
     cols = len(h) + 1
