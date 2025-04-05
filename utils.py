@@ -1,3 +1,4 @@
+
 # 共通のフィルター処理
 FILLER_WORDS = {
     "uh", "um", "you know", "like", "i mean", "you see", 
@@ -7,4 +8,4 @@ FILLER_WORDS = {
 
 def remove_fillers(text: str) -> str:
     tokens = text.lower().split()
-    return ' '.join([t for t in tokens if t not in FILLER_WORDS])ot in FILLER_WORDS])
+    return ' '.join([t for t in tokens if t not in FILLER_WORDS])
