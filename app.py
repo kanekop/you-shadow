@@ -13,6 +13,7 @@ def auth_required(f):
 from transcribe_utils import transcribe_audio
 import os
 from werkzeug.utils import secure_filename
+from pydub import AudioSegment
 from wer_utils import wer, calculate_wer
 from diff_viewer import diff_html
 import json
