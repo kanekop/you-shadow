@@ -3,6 +3,7 @@ class AudioRecorder {
     this.mediaRecorder = null;
     this.audioChunks = [];
     this.stream = null;
+    this.startTime = null;//追加
   }
 
   async startRecording() {
@@ -14,7 +15,6 @@ class AudioRecorder {
           autoGainControl: true,
           noiseSuppression: true,
           echoCancellation: true,
-          latency: 0
         }
       });
 
@@ -32,10 +32,9 @@ class AudioRecorder {
         }
       };
 
-      // Initialize recording with buffer
-      await new Promise(resolve => setTimeout(resolve, 500));
-      this.mediaRecorder.start(1000);
-      console.log('Recording started with buffer');
+      this.mediaRecorder.start();
+      this.startTime = Date.now(); // ⬅️ スタート時間を記録
+      console.log('Recording started');
     } catch (err) {
       console.error('Failed to start recording:', err);
       throw err;
@@ -50,8 +49,15 @@ class AudioRecorder {
     }
   }
 
-  getBlob() {
-    return new Blob(this.audioChunks, { type: 'audio/webm' });
+  getBlob(cutHeadMs = 500) {
+    const fullBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+  
+    if (cutHeadMs === 0) {
+      return fullBlob;
+    }
+  
+    // 💡 カット処理は後段で行うため、ここではそのまま返す
+    return fullBlob;
   }
 }
 

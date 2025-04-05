@@ -122,10 +122,16 @@ async function loadPreset() {
   }
 }
 
+//500ms待つ処理を入れた
 async function startRecording() {
   try {
     document.getElementById("originalAudio").currentTime = 0;
+
     await recorder.startRecording();
+
+    // 🎯 空録音時間として500ms待つ
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     document.getElementById("originalAudio").play();
 
     document.getElementById("startBtn").disabled = true;
@@ -135,7 +141,6 @@ async function startRecording() {
     console.error(err);
   }
 }
-
 function stopRecording() {
   recorder.stop();
   document.getElementById("startBtn").disabled = false;

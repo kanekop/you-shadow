@@ -486,16 +486,23 @@ def evaluate_shadowing():
     with open(script_path, "r", encoding="utf-8") as f:
         original_transcribed = f.read().strip()
 
-    # === ユーザー音声の文字起こし ===
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_user:
-        recorded_audio.save(tmp_user.name)
-        with open(tmp_user.name, "rb") as f:
-            user_result = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=f
-            )
-        user_transcribed = user_result.text
+    # === 録音ファイルの先頭500msをカット ===
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_in:
+        recorded_audio.save(tmp_in.name)
 
+    # pydubで加工 → 一時ファイルへ保存
+    audio = AudioSegment.from_file(tmp_in.name)
+    trimmed_audio = audio[500:]  # 500msカット
+    tmp_out_path = tmp_in.name.replace(".webm", "_cut.wav")
+    trimmed_audio.export(tmp_out_path, format="wav")
+
+    # Whisperで文字起こし
+    with open(tmp_out_path, "rb") as f:
+        user_result = client.audio.transcriptions.create(
+            model="whisper-1",
+            file=f
+        )
+    user_transcribed = user_result.text
     # === 精度評価
     wer_score = calculate_wer(original_transcribed, user_transcribed)
     diff_user = get_diff_html(original_transcribed, user_transcribed, mode='user')
