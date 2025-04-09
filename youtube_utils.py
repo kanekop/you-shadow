@@ -5,9 +5,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 import re
 from googleapiclient.discovery import build
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
+import os
 
 API_KEY = os.environ.get("YOUTUBE_API_KEY")
 

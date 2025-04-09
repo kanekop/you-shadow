@@ -22,7 +22,6 @@ import json
 import shutil  # ファイルコピー用のモジュールを追加
 from youtube_utils import youtube_bp
 from youtube_utils import check_captions
-from dotenv import load_dotenv
 from diff_viewer import get_diff_html
 
 from datetime import datetime, timedelta
@@ -31,7 +30,7 @@ import pandas as pd
 
 
 
-load_dotenv()  # .env ファイルの読み込み
+# .env ファイルの読み込みを削除
 
 api_key = os.environ.get("YOUTUBE_API_KEY")
 print(f"APIキー：{api_key}")  # 動作確認用（あとで削除してOK）
@@ -95,7 +94,7 @@ def generate_min_wer_matrix(username, logs):
     return pivot.fillna("")
 
 
-    
+
 
 
 def get_presets_structure(practice_type="shadowing"):
@@ -139,10 +138,10 @@ def save_preset_log(data, log_path="preset_log.json"):
 def index():
     user_id = request.headers.get('X-Replit-User-Id')
     user_name = request.headers.get('X-Replit-User-Name')
-    
+
     if not user_id:
         return render_template('index.html')
-    
+
     return render_template('index.html',
                          user_id=user_id,
                          user_name=user_name)
@@ -613,10 +612,10 @@ def compare_passages():
     data = request.json
     passage1 = data.get('passage1', '')
     passage2 = data.get('passage2', '')
-    
+
     wer_score = calculate_wer(passage1, passage2)
     diff_result = diff_html(passage1, passage2)
-    
+
     return jsonify({
         'wer': wer_score * 100,
         'diff_html': diff_result
