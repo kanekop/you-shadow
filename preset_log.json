@@ -412,5 +412,99 @@
     "original_transcribed": "(auto-unlocked)",
     "user_transcribed": "(auto-unlocked)",
     "timestamp": "2025-04-05T14:52:41.160964"
+  },
+  {
+    "timestamp": "2025-04-05T15:16:51.619775",
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 0.0,
+    "original_transcribed": "This is level 3.",
+    "user_transcribed": "This is level 3.",
+    "script_excerpt": "This is level 3."
+  },
+  {
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level3",
+    "wer": 0.0,
+    "original_transcribed": "This is level 3.",
+    "user_transcribed": "This is level 3.",
+    "timestamp": "2025-04-05T15:16:51.768308"
+  },
+  {
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level4",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-05T15:16:51.911509"
+  },
+  {
+    "timestamp": "2025-04-05T15:18:36.446734",
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level4",
+    "wer": 25.0,
+    "original_transcribed": "This is level 4.",
+    "user_transcribed": "this is remove 4",
+    "script_excerpt": "This is level 4."
+  },
+  {
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level4",
+    "wer": 25.0,
+    "original_transcribed": "This is level 4.",
+    "user_transcribed": "this is remove 4",
+    "timestamp": "2025-04-05T15:18:36.596815"
+  },
+  {
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level5",
+    "wer": 0.0,
+    "original_transcribed": "(auto-unlocked)",
+    "user_transcribed": "(auto-unlocked)",
+    "timestamp": "2025-04-05T15:18:36.743987"
+  },
+  {
+    "timestamp": "2025-04-05T15:19:00.388730",
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level4",
+    "wer": 100.0,
+    "original_transcribed": "This is level 4.",
+    "user_transcribed": "Bye. ",
+    "script_excerpt": "This is level 4."
+  },
+  {
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level4",
+    "wer": 100.0,
+    "original_transcribed": "This is level 4.",
+    "user_transcribed": "Bye. ",
+    "timestamp": "2025-04-05T15:19:00.534046"
+  },
+  {
+    "timestamp": "2025-04-05T15:19:26.745848",
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level4",
+    "wer": 50.0,
+    "original_transcribed": "This is level 4.",
+    "user_transcribed": "Level 4.",
+    "script_excerpt": "This is level 4."
+  },
+  {
+    "user": "yoshimunekaneko",
+    "genre": "genre1",
+    "level": "level4",
+    "wer": 50.0,
+    "original_transcribed": "This is level 4.",
+    "user_transcribed": "Level 4.",
+    "timestamp": "2025-04-05T15:19:26.909019"
   }
 ]

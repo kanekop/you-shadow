@@ -134,6 +134,13 @@ async function startRecording() {
     // 🎙️ 録音スタート
     await recorder.startRecording();
 
+    const USE_WAIT_BEFORE_REPLAY = true;
+    if (USE_WAIT_BEFORE_REPLAY) {
+      // 保険として、録音直後に500ms待ってから ah.mp3 を再生
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+
     // 🎧 ah.mp3 再生
     const ahAudio = new Audio("/static/audio/ah.mp3");
     ahAudio.play();
