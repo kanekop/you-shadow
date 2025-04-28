@@ -46,3 +46,5 @@ gunicorn==21.2.0
 pandas
 pydub
 pydub
+replit
+replit-object-storage
