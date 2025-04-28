@@ -233,12 +233,15 @@ audio {
   margin-left: 10px;
   cursor: pointer;
   border-radius: 4px;
-  border: 1px solid #ccc;
-  background: #f8f8f8;
+  border: 1px solid #666;
+  background: #fff;
+  color: #333;
+  font-weight: 500;
 }
 
 .toggle-btn:hover {
-  background: #eee;
+  background: #f0f0f0;
+  border-color: #333;
 }
 
 .diff-result .insert, .diff-result .delete {
