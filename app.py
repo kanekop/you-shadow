@@ -40,10 +40,13 @@ print(f"APIキー：{api_key}")  # 動作確認用（あとで削除してOK）
 # === Flask設定 ===
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['SECRET_KEY'] = os.urandom(24)  # For session support
+app.config['SECRET_KEY'] = 'your-secret-key-here'  # Fixed secret key
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB upload
 app.register_blueprint(youtube_bp)
 CORS(app) # Enable CORS
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+from flask import session
 
 #API化
 def generate_wer_matrix(username, logs):
@@ -467,31 +470,39 @@ def custom_shadowing_ui():
 
 @app.route('/upload_custom_audio', methods=['POST'])
 def upload_custom_audio():
-    if 'audio' not in request.files:
-        return jsonify({"error": "No audio file provided"}), 400
-
-    audio_file = request.files['audio']
-    if not audio_file.filename:
-        return jsonify({"error": "No file selected"}), 400
-
-    # Save uploaded file
-    filename = secure_filename(audio_file.filename)
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    audio_file.save(filepath)
-
-    # Transcribe audio using existing utility
     try:
-        transcription = transcribe_audio(filepath)
+        if 'audio' not in request.files:
+            return jsonify({"error": "音声ファイルが選択されていません"}), 400
+
+        audio_file = request.files['audio']
+        if not audio_file.filename:
+            return jsonify({"error": "ファイルが選択されていません"}), 400
+
+        # Check file extension
+        allowed_extensions = {'mp3', 'm4a', 'wav'}
+        if not any(audio_file.filename.lower().endswith(ext) for ext in allowed_extensions):
+            return jsonify({"error": "未対応のファイル形式です。MP3, M4A, WAV形式のファイルを使用してください。"}), 400
+
+        # Save uploaded file
+        filename = secure_filename(audio_file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        audio_file.save(filepath)
+
+        # Transcribe audio using existing utility
+        try:
+            transcription = transcribe_audio(filepath)
+            session['custom_transcription'] = transcription
+            return jsonify({
+                "audio_url": f"/uploads/{filename}",
+                "transcription": transcription
+            })
+        except Exception as e:
+            print(f"Transcription error: {str(e)}")
+            return jsonify({"error": "音声の文字起こしに失敗しました"}), 500
+
     except Exception as e:
-        return jsonify({"error": f"Transcription failed: {str(e)}"}), 500
-
-    # Save transcription in session for later use
-    session['custom_transcription'] = transcription
-
-    return jsonify({
-        "audio_url": f"/uploads/{filename}",
-        "transcription": transcription
-    })
+        print(f"Upload error: {str(e)}")
+        return jsonify({"error": "ファイルのアップロード中にエラーが発生しました"}), 500
 
 @app.route('/evaluate_custom_shadowing', methods=['POST'])
 def evaluate_custom_shadowing():
