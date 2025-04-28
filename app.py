@@ -38,7 +38,6 @@ import pandas as pd
 # .env ファイルの読み込みを削除
 
 api_key = os.environ.get("YOUTUBE_API_KEY")
-print(f"APIキー：{api_key}")  # 動作確認用（あとで削除してOK）
 
 
 
