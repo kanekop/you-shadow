@@ -12,6 +12,18 @@ document.addEventListener("DOMContentLoaded", () => {
       nameDisplay.textContent = `Welcome, ${savedName}!`;
     }
   }
+
+  // Toggle additional features
+  const toggleBtn = document.getElementById('toggleFeatures');
+  const additionalFeatures = document.getElementById('additionalFeatures');
+  
+  if (toggleBtn && additionalFeatures) {
+    toggleBtn.addEventListener('click', () => {
+      const isHidden = additionalFeatures.style.display === 'none';
+      additionalFeatures.style.display = isHidden ? 'block' : 'none';
+      toggleBtn.textContent = isHidden ? 'その他の機能を隠す' : 'その他の機能を表示';
+    });
+  }
 });
 
 function logout() {

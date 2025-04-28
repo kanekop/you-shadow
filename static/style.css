@@ -124,6 +124,26 @@ audio {
   text-decoration: line-through;
 }
 
+.toggle-features-btn {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.toggle-features-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.additional-features {
+  transition: all 0.3s ease;
+}
+
 /* Add your styles here */
 .sentence-item {
   padding: 15px;
