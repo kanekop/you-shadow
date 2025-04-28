@@ -1,5 +1,5 @@
 entrypoint = "app.py"
-modules = ["python-3.11"]
+modules = ["python-3.11", "postgresql-16"]
 
 [nix]
 channel = "stable-24_05"
@@ -33,3 +33,6 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python app.py"
+
+[objectStorage]
+defaultBucketID = "replit-objstore-ceedad51-75f3-450e-8467-4d6efc722d6f"
