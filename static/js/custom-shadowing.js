@@ -37,7 +37,9 @@ class CustomShadowing {
 
       // Show practice section and setup audio
       document.getElementById('practiceSection').style.display = 'block';
-      document.getElementById('originalAudio').src = data.audio_url;
+      const audio = document.getElementById('originalAudio');
+      audio.src = data.audio_url;
+      audio.load(); // Force reload of audio element
       document.getElementById('transcriptionText').textContent = data.transcription;
 
     } catch (error) {

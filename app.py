@@ -468,6 +468,10 @@ def shadowing_ui():
 def custom_shadowing_ui():
     return render_template('custom_shadowing.html')
 
+@app.route('/uploads/<path:filename>')
+def serve_upload(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 @app.route('/upload_custom_audio', methods=['POST'])
 def upload_custom_audio():
     try:
