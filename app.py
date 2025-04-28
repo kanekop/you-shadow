@@ -2,6 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 from flask_cors import CORS
 from functools import wraps
 from flask import send_from_directory
+import uuid
+from datetime import datetime
+from replit import db
+from replit.database import database
+from replit.object_storage import Client as ObjectStorageClient
 
 def auth_required(f):
     @wraps(f)
@@ -45,6 +50,9 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB upload
 app.register_blueprint(youtube_bp)
 CORS(app) # Enable CORS
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# Initialize Object Storage client
+storage_client = ObjectStorageClient()
 
 from flask import session
 
@@ -705,6 +713,100 @@ def log_attempt():
         json.dump(logs, f, indent=2, ensure_ascii=False)
 
     return jsonify({"message": "Logged successfully"})
+
+@app.route('/api/save_material', methods=['POST'])
+@auth_required
+def save_material():
+    try:
+        user_id = request.headers.get('X-Replit-User-Id')
+        if not user_id:
+            return jsonify({"error": "User not authenticated"}), 401
+
+        if 'audio' not in request.files:
+            return jsonify({"error": "No audio file provided"}), 400
+        
+        audio_file = request.files['audio']
+        material_name = request.form.get('material_name', '').strip()
+        
+        if not material_name:
+            return jsonify({"error": "Material name is required"}), 400
+            
+        if not audio_file.filename:
+            return jsonify({"error": "No audio file selected"}), 400
+
+        # Generate unique ID and prepare storage key
+        material_id = uuid.uuid4().hex
+        file_ext = os.path.splitext(audio_file.filename)[1].lower()
+        object_storage_key = f"user_audio/{user_id}/{material_id}{file_ext}"
+        
+        # Save audio to temporary path for transcription
+        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{material_id}{file_ext}")
+        audio_file.save(temp_path)
+        
+        # Upload to Object Storage
+        with open(temp_path, 'rb') as f:
+            storage_client.upload_file(object_storage_key, f)
+        
+        # Transcribe audio
+        transcript = transcribe_audio(temp_path)
+        
+        # Clean up temporary file
+        os.remove(temp_path)
+        
+        # Prepare and save material data
+        material_data = {
+            "user_id": user_id,
+            "material_name": material_name,
+            "object_storage_key": object_storage_key,
+            "transcript": transcript,
+            "upload_timestamp": datetime.now().isoformat()
+        }
+        
+        db[f"material_{user_id}_{material_id}"] = material_data
+        
+        return jsonify({
+            "success": True,
+            "material_id": material_id,
+            "material_name": material_name
+        })
+        
+    except Exception as e:
+        print(f"Error saving material: {str(e)}")
+        return jsonify({"error": "Failed to save material"}), 500
+
+@app.route('/api/my_materials', methods=['GET'])
+@auth_required
+def list_materials():
+    try:
+        user_id = request.headers.get('X-Replit-User-Id')
+        if not user_id:
+            return jsonify({"error": "User not authenticated"}), 401
+            
+        # Get all materials for this user
+        prefix = f"material_{user_id}_"
+        user_materials = []
+        
+        # Use prefix to find all materials for this user
+        for key in database.prefix(prefix):
+            material_data = db[key]
+            material_id = key.replace(prefix, '')
+            
+            user_materials.append({
+                "material_id": material_id,
+                "material_name": material_data["material_name"],
+                "upload_timestamp": material_data["upload_timestamp"]
+            })
+            
+        # Sort by upload timestamp, newest first
+        user_materials.sort(key=lambda x: x["upload_timestamp"], reverse=True)
+        
+        return jsonify({
+            "materials": user_materials
+        })
+        
+    except Exception as e:
+        print(f"Error listing materials: {str(e)}")
+        return jsonify({"error": "Failed to retrieve materials"}), 500
 
 @app.route('/sentence-practice')
 def sentence_practice():
