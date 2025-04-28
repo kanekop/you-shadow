@@ -52,10 +52,19 @@ class CustomShadowing {
   async startRecording() {
     try {
       const originalAudio = document.getElementById('originalAudio');
-      originalAudio.currentTime = 0;
+      const warmupAudio = new Audio('/static/audio/warm-up.mp3');
       
+      // Start recording
       await this.recorder.startRecording();
-      originalAudio.play();
+      
+      // Play warm-up audio first
+      warmupAudio.play();
+      
+      // When warm-up ends, play main audio
+      warmupAudio.onended = () => {
+        originalAudio.currentTime = 0;
+        originalAudio.play();
+      };
 
       document.getElementById('startBtn').disabled = true;
       document.getElementById('stopBtn').disabled = false;

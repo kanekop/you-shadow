@@ -516,6 +516,8 @@ def evaluate_custom_shadowing():
     if 'custom_transcription' not in session:
         return jsonify({"error": "Original transcription not found"}), 400
 
+    # Known warm-up transcript
+    WARMUP_TRANSCRIPT = "this is your warm up sentence lets get started on shadowing the main text is coming up"
     original_transcription = session['custom_transcription']
     recorded_audio = request.files['recorded_audio']
     
@@ -523,22 +525,27 @@ def evaluate_custom_shadowing():
     tmp_path = os.path.join(app.config['UPLOAD_FOLDER'], 'tmp_recording.webm')
     recorded_audio.save(tmp_path)
 
-    # Process recorded audio (trim + transcribe)
+    # Process recorded audio (just remove initial silence)
     audio = AudioSegment.from_file(tmp_path)
-    trimmed_audio = audio[500:]  # 500ms cut
-    trimmed_path = tmp_path.replace('.webm', '_trimmed.wav')
-    trimmed_audio.export(trimmed_path, format="wav")
+    processed_path = tmp_path.replace('.webm', '_processed.wav')
+    audio.export(processed_path, format="wav")
 
-    # Transcribe user's recording
-    user_transcription = transcribe_audio(trimmed_path)
-
-    # Calculate WER and generate diff
+    # Transcribe user's full recording
+    full_transcription = transcribe_audio(processed_path)
+    
+    # Remove warm-up portion from transcription
+    user_transcription = full_transcription.lower()
+    warmup_end = user_transcription.find(WARMUP_TRANSCRIPT)
+    if warmup_end != -1:
+        user_transcription = user_transcription[warmup_end + len(WARMUP_TRANSCRIPT):].strip()
+    
+    # Calculate WER and generate diff using main portion only
     wer_score = calculate_wer(original_transcription, user_transcription)
     diff_result = diff_html(original_transcription, user_transcription)
 
     # Cleanup temporary files
     os.remove(tmp_path)
-    os.remove(trimmed_path)
+    os.remove(processed_path)
 
     return jsonify({
         "wer": round(wer_score * 100, 2),
