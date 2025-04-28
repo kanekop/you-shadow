@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>カスタムシャドウイング練習</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="/static/js/audio-recorder.js"></script>
+  <script src="/static/js/custom-shadowing.js" defer></script>
+</head>
+<body>
+  <div class="nav-header">
+    <div class="container">
+      <a href="/" class="back-button">← ホームに戻る</a>
+      <h1>🎵 カスタムシャドウイング練習</h1>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="uploadSection">
+      <h3>1️⃣ 音声ファイルをアップロード</h3>
+      <input type="file" id="audioFileInput" accept=".mp3,.m4a,.wav">
+      <button id="uploadBtn">アップロード</button>
+      <p class="hint">対応形式: MP3, M4A, WAV</p>
+    </div>
+
+    <div id="practiceSection" style="display: none;">
+      <h3>2️⃣ 原稿</h3>
+      <div id="transcriptionText" class="display-text"></div>
+
+      <h3>3️⃣ シャドウイング練習</h3>
+      <audio id="originalAudio" controls></audio><br><br>
+
+      <button id="startBtn">▶️ 録音開始</button>
+      <button id="stopBtn" disabled>⏹ 停止</button>
+      <button id="submitBtn" disabled>📝 提出して評価</button>
+
+      <h3>🎤 録音音声</h3>
+      <audio id="recordedAudio" controls></audio>
+
+      <div id="resultBox" style="margin-top: 2em;"></div>
+    </div>
+  </div>
+</body>
+</html>

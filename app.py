@@ -40,6 +40,7 @@ print(f"APIキー：{api_key}")  # 動作確認用（あとで削除してOK）
 # === Flask設定 ===
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['SECRET_KEY'] = os.urandom(24)  # For session support
 app.register_blueprint(youtube_bp)
 CORS(app) # Enable CORS
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -459,6 +460,75 @@ def evaluate_read_aloud():
 @app.route('/shadowing')
 def shadowing_ui():
     return render_template('shadowing.html')
+
+@app.route('/custom-shadowing')
+def custom_shadowing_ui():
+    return render_template('custom_shadowing.html')
+
+@app.route('/upload_custom_audio', methods=['POST'])
+def upload_custom_audio():
+    if 'audio' not in request.files:
+        return jsonify({"error": "No audio file provided"}), 400
+
+    audio_file = request.files['audio']
+    if not audio_file.filename:
+        return jsonify({"error": "No file selected"}), 400
+
+    # Save uploaded file
+    filename = secure_filename(audio_file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    audio_file.save(filepath)
+
+    # Transcribe audio using existing utility
+    try:
+        transcription = transcribe_audio(filepath)
+    except Exception as e:
+        return jsonify({"error": f"Transcription failed: {str(e)}"}), 500
+
+    # Save transcription in session for later use
+    session['custom_transcription'] = transcription
+
+    return jsonify({
+        "audio_url": f"/uploads/{filename}",
+        "transcription": transcription
+    })
+
+@app.route('/evaluate_custom_shadowing', methods=['POST'])
+def evaluate_custom_shadowing():
+    if 'recorded_audio' not in request.files:
+        return jsonify({"error": "No recorded audio provided"}), 400
+    
+    if 'custom_transcription' not in session:
+        return jsonify({"error": "Original transcription not found"}), 400
+
+    original_transcription = session['custom_transcription']
+    recorded_audio = request.files['recorded_audio']
+    
+    # Save recorded audio
+    tmp_path = os.path.join(app.config['UPLOAD_FOLDER'], 'tmp_recording.webm')
+    recorded_audio.save(tmp_path)
+
+    # Process recorded audio (trim + transcribe)
+    audio = AudioSegment.from_file(tmp_path)
+    trimmed_audio = audio[500:]  # 500ms cut
+    trimmed_path = tmp_path.replace('.webm', '_trimmed.wav')
+    trimmed_audio.export(trimmed_path, format="wav")
+
+    # Transcribe user's recording
+    user_transcription = transcribe_audio(trimmed_path)
+
+    # Calculate WER and generate diff
+    wer_score = calculate_wer(original_transcription, user_transcription)
+    diff_result = diff_html(original_transcription, user_transcription)
+
+    # Cleanup temporary files
+    os.remove(tmp_path)
+    os.remove(trimmed_path)
+
+    return jsonify({
+        "wer": round(wer_score * 100, 2),
+        "diff_html": diff_result
+    })
 
 
 @app.route('/evaluate_shadowing', methods=['POST'])
