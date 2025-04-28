@@ -1,0 +1,35 @@
+Subject: Implement Workaround for Initial Recording Lag in Custom Shadowing Feature
+
+We need to implement a workaround for an issue in the "Custom Shadowing" feature of our application.
+
+**Problem:** The recording seems to lag for the first few seconds after hitting "Start Recording," causing the initial part of the user's shadowing attempt to be incorrectly evaluated.
+
+**Proposed Solution (Workaround): "Warm-up Audio"**
+
+Implement the following logic to mitigate this issue:
+
+1.  **Define Warm-up:**
+    * Choose or create a short, fixed "warm-up" audio file (e.g., MP3).
+    * Define the exact transcript for this warm-up audio. Let's assume the transcript is: `"This is your warm-up sentence! Let's get started on shadowing. The main text is coming up..."` (Please replace this with the actual transcript if you choose a different one).
+
+2.  **Modify Playback & Recording Flow (`custom-shadowing.js` / `.html`):**
+    * When the user uploads their main audio file and it's transcribed, store both the main audio URL and its transcript.
+    * When the user clicks "Start Recording & Play":
+        * **Start recording immediately.**
+        * First, play the predefined "warm-up" audio file.
+        * Immediately after the warm-up audio finishes, play the user's uploaded main audio file.
+        * The user should start shadowing from the beginning of the warm-up audio and continue through the main audio.
+    * The "Stop" button should stop both playback (if ongoing) and recording as usual.
+
+3.  **Modify Evaluation Logic (Backend Flask endpoint and potentially `wer_utils.py` caller):**
+    * When the user clicks "Submit & Evaluate," the entire recording (including the warm-up part) is sent to the backend.
+    * The backend transcribes the *entire* user recording using OpenAI Whisper.
+    * **Crucially, before calculating the WER and Diff:**
+        * Retrieve the known transcript of the "warm-up" audio (e.g., `"This is your warm-up sentence! ..."`).
+        * Retrieve the transcript of the user's *main* uploaded audio (obtained during the initial upload step).
+        * Retrieve the transcript of the user's *entire* recording (warm-up + main attempt).
+        * **Prepare for WER:**
+            * Original Text for comparison = Transcript of the *main* audio only.
+            * User's Text for comparison = Transcript of the user's recording, but *remove* the portion corresponding to the warm-up audio transcript from the beginning. (You might need string manipulation based on the known warm-up transcript length or content).
+        * Calculate WER and Diff using these adjusted "main audio only" texts.
+        * Return the results (WER score based on main audio, Diff view potentially highlighting differences in the main part) to the frontend.
