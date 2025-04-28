@@ -252,12 +252,12 @@ audio {
 }
 
 .diff-result .insert {
-  background-color: #d4fcdc;
+  background-color: #ffe0e0;
+  text-decoration: line-through;
 }
 
 .diff-result .delete {
-  background-color: #ffe0e0;
-  text-decoration: line-through;
+  background-color: #d4fcdc;
 }over {
   background-color: #f5f5f5;
 }
