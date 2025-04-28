@@ -517,7 +517,7 @@ def evaluate_custom_shadowing():
         return jsonify({"error": "Original transcription not found"}), 400
 
     # Known warm-up transcript
-    WARMUP_TRANSCRIPT = "this is your warm up sentence lets get started on shadowing the main text is coming up"
+    WARMUP_TRANSCRIPT = "10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0"
     original_transcription = session['custom_transcription']
     recorded_audio = request.files['recorded_audio']
     
