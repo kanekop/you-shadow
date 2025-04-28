@@ -533,11 +533,26 @@ def evaluate_custom_shadowing():
     # Transcribe user's full recording
     full_transcription = transcribe_audio(processed_path)
     
+    # Generate all possible suffixes of the warm-up transcript
+    numbers = WARMUP_TRANSCRIPT.split(", ")
+    suffixes = [", ".join(numbers[i:]) for i in range(len(numbers))]
+    suffixes.sort(key=len, reverse=True)  # Sort by length, longest first
+    
     # Remove warm-up portion from transcription
     user_transcription = full_transcription.lower()
-    warmup_end = user_transcription.find(WARMUP_TRANSCRIPT)
-    if warmup_end != -1:
-        user_transcription = user_transcription[warmup_end + len(WARMUP_TRANSCRIPT):].strip()
+    matched_suffix = None
+    
+    # Find the longest matching suffix at the start of transcription
+    for suffix in suffixes:
+        if user_transcription.strip().startswith(suffix.lower()):
+            matched_suffix = suffix
+            break
+    
+    # Remove the matched suffix if found
+    if matched_suffix:
+        start_pos = user_transcription.find(matched_suffix.lower())
+        if start_pos != -1:
+            user_transcription = user_transcription[start_pos + len(matched_suffix):].strip()
     
     # Calculate WER and generate diff using main portion only
     wer_score = calculate_wer(original_transcription, user_transcription)
