@@ -10,6 +10,7 @@ class CustomShadowing {
     document.getElementById('startBtn').addEventListener('click', () => this.startRecording());
     document.getElementById('stopBtn').addEventListener('click', () => this.stopRecording());
     document.getElementById('submitBtn').addEventListener('click', () => this.submitRecording());
+    document.getElementById('toggleTranscript').addEventListener('click', () => this.toggleTranscript());
   }
 
   async handleUpload() {
@@ -74,6 +75,18 @@ class CustomShadowing {
     const recordedBlob = this.recorder.getBlob();
     if (recordedBlob) {
       document.getElementById('recordedAudio').src = URL.createObjectURL(recordedBlob);
+    }
+  }
+
+  toggleTranscript() {
+    const transcriptText = document.getElementById('transcriptionText');
+    const toggleBtn = document.getElementById('toggleTranscript');
+    if (transcriptText.style.display === 'none') {
+      transcriptText.style.display = 'block';
+      toggleBtn.textContent = '非表示';
+    } else {
+      transcriptText.style.display = 'none';
+      toggleBtn.textContent = '表示';
     }
   }
 
