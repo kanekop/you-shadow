@@ -3,7 +3,7 @@ modules = ["python-3.11", "postgresql-16"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["cacert", "ffmpeg-full", "glibcLocales", "libxcrypt"]
+packages = ["cacert", "ffmpeg-full", "glibcLocales", "libxcrypt", "openssl"]
 
 [unitTest]
 language = "python3"
