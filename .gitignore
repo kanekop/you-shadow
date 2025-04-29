@@ -2,6 +2,13 @@
 __pycache__/
 *.py[cod]
 *$py.class
+credentials.json
+.env
+*.pem
+*.key
+log.json
+preset_log.json
+uploads/
 
 # C extensions
 *.so

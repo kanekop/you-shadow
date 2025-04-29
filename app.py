@@ -44,7 +44,7 @@ api_key = os.environ.get("YOUTUBE_API_KEY")
 # === Flask設定 ===
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['SECRET_KEY'] = 'your-secret-key-here'  # Fixed secret key
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev_key_only')  # Use environment variable
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB upload
 app.register_blueprint(youtube_bp)
 CORS(app) # Enable CORS
