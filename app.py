@@ -563,7 +563,7 @@ def evaluate_custom_shadowing():
     
     # Calculate WER and generate diff using main portion only
     wer_score = calculate_wer(original_transcription, user_transcription)
-    diff_result = diff_html(user_transcription, original_transcription)
+    diff_result = diff_html(original_transcription, user_transcription)
 
     # Cleanup temporary files
     os.remove(tmp_path)
