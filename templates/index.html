@@ -97,7 +97,8 @@
     {% endif %}
 
     <script>
-        function logout() {
+        async function logout() {
+            await fetch('/__replauthlogout');
             localStorage.removeItem('username');
             location.reload();
         }
