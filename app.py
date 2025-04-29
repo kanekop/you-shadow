@@ -145,6 +145,10 @@ def save_preset_log(data, log_path="preset_log.json"):
 
 
 # === ルート画面 ===
+@app.route('/__replauthlogout')
+def logout():
+    return '', 200
+
 @app.route('/')
 def index():
     user_id = request.headers.get('X-Replit-User-Id')

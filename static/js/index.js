@@ -30,6 +30,6 @@ function logout() {
   fetch('/__replauthlogout')
     .then(() => {
       localStorage.removeItem('username');
-      location.reload();
+      window.location.href = 'https://replit.com/logout';
     });
 }
