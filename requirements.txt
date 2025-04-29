@@ -48,5 +48,3 @@ pydub
 pydub
 replit
 replit-object-storage
-pyopenssl
-pyopenssl

@@ -563,7 +563,7 @@ def evaluate_custom_shadowing():
     
     # Calculate WER and generate diff using main portion only
     wer_score = calculate_wer(original_transcription, user_transcription)
-    diff_result = diff_html(user_transcription, original_transcription)
+    diff_result = diff_html(original_transcription, user_transcription)
 
     # Cleanup temporary files
     os.remove(tmp_path)
@@ -874,4 +874,5 @@ def get_sentences(genre, level):
 
 # === アプリ実行（Replitでは不要、ローカル用） ===
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, ssl_context='adhoc', debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Use port 5000 for development
+    app.run(host="0.0.0.0", port=port, debug=True)
