@@ -44,8 +44,18 @@ api_key = os.environ.get("YOUTUBE_API_KEY")
 # === Flask設定 ===
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['SECRET_KEY'] = 'your-secret-key-here'  # Fixed secret key
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'your-secret-key-here')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB upload
+app.config['ALLOWED_EXTENSIONS'] = {'mp3', 'm4a', 'wav', 'webm'}
+
+# Security headers
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Content-Security-Policy'] = "default-src 'self'"
+    return response
 app.register_blueprint(youtube_bp)
 CORS(app) # Enable CORS
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
