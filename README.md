@@ -1,130 +1,179 @@
 
-# Language Learning Assistant
+# Language Learning Assistant 🌍
 
-A comprehensive Flask-based web application designed to help users improve their language skills through various interactive exercises and real-time feedback mechanisms.
+A sophisticated Flask-based web application designed to help users improve their language pronunciation and speaking skills through interactive exercises, real-time feedback, and progress tracking.
 
-## 🌟 Core Features
+## 🌟 Key Features
 
-### 1. Shadowing Practice
-- **Preset Content**: Multiple genres and difficulty levels
-- **Audio Playback**: High-quality audio samples
-- **Real-time Recording**: Practice speaking alongside audio
-- **Accuracy Analysis**: WER (Word Error Rate) calculation
-- **Visual Feedback**: Color-coded diff view of transcriptions
-- **Progress Tracking**: Level-based advancement system
+### 1. Shadowing Practice System
+- **Preset Content Library**
+  - Multiple genres and progressive difficulty levels
+  - High-quality audio samples with professional recordings
+  - Customizable practice sessions
+  - Real-time performance feedback
+
+- **Advanced Recording System**  
+  - Synchronized audio playback and recording
+  - Automatic speech recognition
+  - Word Error Rate (WER) calculation
+  - Visual feedback with color-coded differences
+
+- **Progress Tracking**
+  - Level-based advancement system
+  - Performance metrics tracking
+  - Achievement unlocking
+  - Detailed practice history
 
 ### 2. Custom Shadowing
-- **Audio Upload**: Support for MP3, M4A, WAV formats
-- **Warm-up Feature**: Countdown sequence for preparation
-- **Transcription**: Automatic speech-to-text conversion
-- **Performance Analysis**: WER calculation and visual diff
+- **File Support**
+  - Multiple audio formats (MP3, M4A, WAV)
+  - Automatic transcription
+  - Custom practice material creation
+  
+- **Practice Features**
+  - Warm-up countdown system
+  - Audio playback controls
+  - Performance analysis
+  - WER calculation
 
-### 3. Read Aloud Practice
-- **Text Input**: Support for custom text or file upload
-- **Speech Recognition**: High-accuracy transcription
-- **Performance Metrics**: Detailed accuracy scoring
-- **Visual Feedback**: Word-level difference highlighting
+### 3. Sentence Practice
+- **Structured Learning**
+  - Progressive difficulty levels
+  - Genre-based content organization
+  - Professional audio recordings
+  - Text visibility toggles
 
-### 4. Sentence Practice
-- **Structured Learning**: Progressive difficulty levels
-- **Genre-based Content**: Various topics and styles
-- **Audio Integration**: Professional recordings
-- **Performance Tracking**: Progress monitoring
+- **Practice Modes**
+  - Playback only mode
+  - Shadowing practice mode
+  - Customizable WER targets
+  - Instant feedback system
 
-### 5. YouTube Integration
-- **Video Selection**: Practice with YouTube content
-- **Caption Verification**: Automatic subtitle checking
-- **Transcription**: Speech-to-text for practice sessions
+### 4. Read Aloud Practice
+- **Input Options**
+  - Direct text input
+  - Text file upload
+  - Custom practice material
+  
+- **Evaluation System**
+  - Speech recognition
+  - Accuracy scoring
+  - Word-level difference highlighting
+  - Performance metrics
 
-### 6. Analytics & Tracking
-- **User Dashboard**: Performance overview
-- **Progress Metrics**: WER tracking over time
-- **Achievement System**: Level unlocking
-- **Ranking System**: Compare with other users
+### 5. Analytics Dashboard
+- **User Progress**
+  - Practice streak tracking
+  - Performance visualization
+  - Level completion status
+  - Detailed practice logs
 
-## 🛠 Technical Architecture
+## 🛠️ Technical Architecture
 
 ### Backend (Python/Flask)
-- **Audio Processing**: pydub for audio manipulation
-- **Speech Recognition**: OpenAI Whisper API integration
-- **WER Calculation**: Custom implementation
-- **API Integration**: YouTube API, OpenAI API
-- **Session Management**: Flask sessions
-- **File Handling**: Secure file operations
+- **Core Components**
+  - Flask web framework
+  - OpenAI Whisper for speech recognition
+  - Custom WER calculation implementation
+  - JSON-based logging system
 
 ### Frontend
-- **Audio Recording**: Web Audio API
-- **Playback Control**: Custom audio player
-- **Real-time Updates**: AJAX/Fetch API
-- **Visual Feedback**: Dynamic UI updates
-- **Responsive Design**: Mobile-friendly interface
+- **Technologies**
+  - HTML5/CSS3
+  - Vanilla JavaScript
+  - Web Audio API
+  - Dynamic UI updates
 
-### Data Management
-- **User Progress**: JSON-based logging
-- **File Storage**: Organized preset structure
-- **Performance Data**: WER metrics tracking
-- **Authentication**: Replit authentication integration
+### Authentication
+- **Replit Auth Integration**
+  - Secure user authentication
+  - Session management
+  - User progress tracking
 
-## 📁 Project Structure
+## 📦 Project Structure
 ```
 project/
-├── app.py                 # Main application entry point
-├── static/               # Static assets
-│   ├── js/              # JavaScript modules
-│   ├── audio/           # Audio assets
-│   └── style.css        # Global styles
-├── templates/           # HTML templates
-├── presets/             # Practice materials
-│   ├── sentences/       # Sentence practice content
-│   └── shadowing/       # Shadowing practice content
+├── app.py                  # Main application entry point
+├── static/                # Static assets
+│   ├── js/               # JavaScript modules
+│   ├── audio/            # Audio resources
+│   └── style.css         # Global styles
+├── templates/            # HTML templates
+├── presets/              # Practice materials
+│   ├── sentences/        # Sentence practice content
+│   └── shadowing/        # Shadowing practice content
 └── utils/               # Utility modules
-    ├── audio_utils.py   # Audio processing
-    ├── wer_utils.py     # WER calculation
-    └── youtube_utils.py # YouTube integration
+    ├── audio_utils.py    # Audio processing
+    ├── wer_utils.py      # WER calculation
+    └── diff_viewer.py    # Difference visualization
 ```
 
-## 🚀 Features in Detail
+## 🚀 Getting Started
 
-### Shadowing Practice Workflow
-1. User selects genre and level
-2. Original audio plays
-3. User records shadowing attempt
-4. System processes recording
-5. WER calculation and feedback display
+1. **Setup**
+   - Clone the repository
+   - Install dependencies from `requirements.txt`
+   - Configure environment variables
 
-### Custom Shadowing Process
-1. User uploads audio file
-2. Automatic transcription
-3. Warm-up countdown
-4. Recording session
-5. Performance analysis
+2. **Running the Application**
+   - Execute `python app.py`
+   - Access the application at `http://0.0.0.0:5000`
 
-### Read Aloud Evaluation
-1. Text input/upload
-2. User recording
-3. Speech-to-text conversion
-4. Accuracy calculation
-5. Visual feedback generation
+## 🎯 Usage Guide
 
-## 🔧 Technical Requirements
-- Python 3.8+
-- Flask
-- OpenAI API access
-- YouTube API credentials
-- Modern web browser with audio support
+### Shadowing Practice
+1. Select genre and difficulty level
+2. Listen to the original audio
+3. Practice shadowing with recording
+4. Review performance feedback
+5. Track progress through levels
 
-## 🎯 Learning Path
-1. Start with sentence practice
-2. Progress to read aloud exercises
-3. Begin shadowing with lower levels
-4. Advance through difficulty levels
-5. Practice with custom content
+### Custom Shadowing
+1. Upload audio file
+2. Wait for transcription
+3. Use warm-up countdown
+4. Record shadowing attempt
+5. Review performance metrics
 
-## 📈 Performance Metrics
-- Word Error Rate (WER)
-- Completion rates
-- Level progression
-- Practice consistency
-- Genre diversity
+### Sentence Practice
+1. Choose genre and level
+2. Select practice mode
+3. Set WER target
+4. Practice with audio
+5. Review feedback
 
-The application emphasizes user progress and provides immediate feedback for continuous improvement in language learning.
+## 📊 Performance Metrics
+
+- **Word Error Rate (WER)**
+  - Measures pronunciation accuracy
+  - Tracks improvement over time
+  - Unlocks new levels
+
+- **Practice Statistics**
+  - Session frequency
+  - Completion rates
+  - Level progression
+  - Genre diversity
+
+## 🔒 Security Features
+
+- **Replit Authentication**
+  - Secure user sessions
+  - Progress persistence
+  - User-specific content
+
+## 🌱 Future Enhancements
+
+- Enhanced analytics dashboard
+- Additional practice modes
+- More content genres
+- Performance optimization
+- Mobile responsiveness improvements
+
+## 📝 Contributing
+
+We welcome contributions! Please feel free to submit pull requests or open issues for improvements.
+
+## 📄 License
+
+This project is proprietary and confidential. All rights reserved.
