@@ -8,6 +8,8 @@ import os
 import os
 
 API_KEY = os.environ.get("YOUTUBE_API_KEY")
+if not API_KEY:
+    raise ValueError("YOUTUBE_API_KEY environment variable is not set")
 
 def check_captions(video_id):
     youtube = build('youtube', 'v3', developerKey=API_KEY)
