@@ -52,16 +52,23 @@ class CustomShadowing {
       };
 
       const response = await new Promise((resolve, reject) => {
-        xhr.onload = () => resolve(xhr.response);
-        xhr.onerror = () => reject(xhr.statusText);
+        xhr.onload = () => {
+          if (xhr.status === 500) {
+            reject(new Error('Server error occurred during transcription. Please try again.'));
+            return;
+          }
+          resolve(xhr.response);
+        };
+        xhr.onerror = () => reject(new Error('Network error occurred'));
         xhr.responseType = 'json';
         xhr.open('POST', '/upload_custom_audio');
         xhr.send(formData);
+      }).catch(error => {
+        throw new Error(`Upload failed: ${error.message}`);
       });
 
       if (response.error) {
-        alert('エラー: ' + response.error);
-        return;
+        throw new Error(response.error);
       }
 
       // Show practice section and setup audio
@@ -73,7 +80,7 @@ class CustomShadowing {
 
     } catch (error) {
       console.error('Upload error:', error);
-      alert('アップロード中にエラーが発生しました');
+      alert(`Upload error: ${error.message}`);
     } finally {
       this.hideSpinner();
     }
