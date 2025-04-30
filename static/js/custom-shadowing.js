@@ -13,6 +13,22 @@ class CustomShadowing {
     document.getElementById('toggleTranscript').addEventListener('click', () => this.toggleTranscript());
   }
 
+  showSpinner(message = '') {
+    const spinner = document.getElementById('progressSpinner');
+    const spinnerText = spinner.querySelector('.spinner-text');
+    spinnerText.textContent = message;
+    spinner.style.display = 'flex';
+  }
+
+  updateProgress(percent) {
+    const spinnerText = document.querySelector('.spinner-text');
+    spinnerText.textContent = `${Math.round(percent)}%`;
+  }
+
+  hideSpinner() {
+    document.getElementById('progressSpinner').style.display = 'none';
+  }
+
   async handleUpload() {
     const fileInput = document.getElementById('audioFileInput');
     const file = fileInput.files[0];
@@ -25,27 +41,41 @@ class CustomShadowing {
     formData.append('audio', file);
 
     try {
-      const response = await fetch('/upload_custom_audio', {
-        method: 'POST',
-        body: formData
-      });
-      const data = await response.json();
+      this.showSpinner('0%');
+      
+      const xhr = new XMLHttpRequest();
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = (e.loaded / e.total) * 100;
+          this.updateProgress(percent);
+        }
+      };
 
-      if (data.error) {
-        alert('エラー: ' + data.error);
+      const response = await new Promise((resolve, reject) => {
+        xhr.onload = () => resolve(xhr.response);
+        xhr.onerror = () => reject(xhr.statusText);
+        xhr.responseType = 'json';
+        xhr.open('POST', '/upload_custom_audio');
+        xhr.send(formData);
+      });
+
+      if (response.error) {
+        alert('エラー: ' + response.error);
         return;
       }
 
       // Show practice section and setup audio
       document.getElementById('practiceSection').style.display = 'block';
       const audio = document.getElementById('originalAudio');
-      audio.src = data.audio_url;
-      audio.load(); // Force reload of audio element
-      document.getElementById('transcriptionText').textContent = data.transcription;
+      audio.src = response.audio_url;
+      audio.load();
+      document.getElementById('transcriptionText').textContent = response.transcription;
 
     } catch (error) {
       console.error('Upload error:', error);
       alert('アップロード中にエラーが発生しました');
+    } finally {
+      this.hideSpinner();
     }
   }
 
@@ -54,13 +84,10 @@ class CustomShadowing {
       const originalAudio = document.getElementById('originalAudio');
       const warmupAudio = new Audio('/static/audio/warm-up.mp3');
       
-      // Start recording
       await this.recorder.startRecording();
       
-      // Play warm-up audio first
       warmupAudio.play();
       
-      // When warm-up ends, play main audio
       warmupAudio.onended = () => {
         originalAudio.currentTime = 0;
         originalAudio.play();
@@ -110,6 +137,8 @@ class CustomShadowing {
     formData.append('recorded_audio', recordedBlob);
 
     try {
+      this.showSpinner('Evaluating...');
+
       const response = await fetch('/evaluate_custom_shadowing', {
         method: 'POST',
         body: formData
@@ -127,6 +156,8 @@ class CustomShadowing {
     } catch (error) {
       console.error('Evaluation error:', error);
       alert('評価中にエラーが発生しました');
+    } finally {
+      this.hideSpinner();
     }
   }
 }
