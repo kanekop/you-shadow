@@ -449,11 +449,11 @@ def evaluate_read_aloud():
     try:
         if 'audio' not in request.files:
             return jsonify({"error": "No audio file provided"}), 400
-            
+
         audio_file = request.files['audio']
         if not audio_file:
             return jsonify({"error": "Invalid audio file"}), 400
-            
+
         transcript_text = request.form.get('transcript')
         if not transcript_text:
             return jsonify({"error": "No transcript provided"}), 400
@@ -461,7 +461,7 @@ def evaluate_read_aloud():
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             return jsonify({"error": "OpenAI API key not configured"}), 500
-            
+
         client = OpenAI(api_key=api_key)
 
         # 一時ファイルに保存
@@ -469,13 +469,14 @@ def evaluate_read_aloud():
             audio_file.save(tmp.name)
             with open(tmp.name, "rb") as f:
                 response = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=f
-            )
-        transcribed = response.text
+                    model="whisper-1",
+                    file=f
+                )
+            transcribed = response.text
 
-    # WER計算
-    wer_score = calculate_wer(transcribed, transcript_text)
+        wer_score = calculate_wer(transcribed, transcript_text)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
     # 差分をHTMLで生成
     diff_result = diff_html(transcribed, transcript_text)
@@ -507,7 +508,7 @@ def upload_custom_audio():
         audio_file = request.files['audio']
         if not audio_file.filename:
             return jsonify({"error": "ファイルが選択されていません"}), 400
-            
+
         # Read file content to check if it's valid
         audio_content = audio_file.read()
         if len(audio_content) == 0:
@@ -523,7 +524,7 @@ def upload_custom_audio():
         if len(audio_content) > 25 * 1024 * 1024:
             return jsonify({"error": "ファイルサイズが大きすぎます。25MB以下のファイルを使用してください。"}), 400
         audio_file.seek(0)  # ★ save() 前に必ずリセット
-        
+
         # Save uploaded file
         filename = secure_filename(audio_file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -549,7 +550,7 @@ def upload_custom_audio():
 def evaluate_custom_shadowing():
     if 'recorded_audio' not in request.files:
         return jsonify({"error": "No recorded audio provided"}), 400
-    
+
     if 'custom_transcription' not in session:
         return jsonify({"error": "Original transcription not found"}), 400
 
@@ -557,7 +558,7 @@ def evaluate_custom_shadowing():
     WARMUP_TRANSCRIPT = "10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0"
     original_transcription = session['custom_transcription']
     recorded_audio = request.files['recorded_audio']
-    
+
     # Save recorded audio
     tmp_path = os.path.join(app.config['UPLOAD_FOLDER'], 'tmp_recording.webm')
     recorded_audio.save(tmp_path)
@@ -569,28 +570,28 @@ def evaluate_custom_shadowing():
 
     # Transcribe user's full recording
     full_transcription = transcribe_audio(processed_path)
-    
+
     # Generate all possible suffixes of the warm-up transcript
     numbers = WARMUP_TRANSCRIPT.split(", ")
     suffixes = [", ".join(numbers[i:]) for i in range(len(numbers))]
     suffixes.sort(key=len, reverse=True)  # Sort by length, longest first
-    
+
     # Remove warm-up portion from transcription
     user_transcription = full_transcription.lower()
     matched_suffix = None
-    
+
     # Find the longest matching suffix at the start of transcription
     for suffix in suffixes:
         if user_transcription.strip().startswith(suffix.lower()):
             matched_suffix = suffix
             break
-    
+
     # Remove the matched suffix if found
     if matched_suffix:
         start_pos = user_transcription.find(matched_suffix.lower())
         if start_pos != -1:
             user_transcription = user_transcription[start_pos + len(matched_suffix):].strip()
-    
+
     # Calculate WER and generate diff using main portion only
     # wer_score = calculate_wer(original_transcription, user_transcription)
     # diff_result = diff_html(original_transcription, user_transcription)
@@ -755,13 +756,13 @@ def save_material():
 
         if 'audio' not in request.files:
             return jsonify({"error": "No audio file provided"}), 400
-        
+
         audio_file = request.files['audio']
         material_name = request.form.get('material_name', '').strip()
-        
+
         if not material_name:
             return jsonify({"error": "Material name is required"}), 400
-            
+
         if not audio_file.filename:
             return jsonify({"error": "No audio file selected"}), 400
 
@@ -769,21 +770,21 @@ def save_material():
         material_id = uuid.uuid4().hex
         file_ext = os.path.splitext(audio_file.filename)[1].lower()
         object_storage_key = f"user_audio/{user_id}/{material_id}{file_ext}"
-        
+
         # Save audio to temporary path for transcription
         temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{material_id}{file_ext}")
         audio_file.save(temp_path)
-        
+
         # Upload to Object Storage
         with open(temp_path, 'rb') as f:
             storage_client.upload_file(object_storage_key, f)
-        
+
         # Transcribe audio
         transcript = transcribe_audio(temp_path)
-        
+
         # Clean up temporary file
         os.remove(temp_path)
-        
+
         # Prepare and save material data
         material_data = {
             "user_id": user_id,
@@ -792,15 +793,15 @@ def save_material():
             "transcript": transcript,
             "upload_timestamp": datetime.now().isoformat()
         }
-        
+
         db[f"material_{user_id}_{material_id}"] = material_data
-        
+
         return jsonify({
             "success": True,
             "material_id": material_id,
             "material_name": material_name
         })
-        
+
     except Exception as e:
         print(f"Error saving material: {str(e)}")
         return jsonify({"error": str(e)}), 500      # ← 原因をそのまま返す
@@ -812,29 +813,29 @@ def list_materials():
         user_id = request.headers.get('X-Replit-User-Id')
         if not user_id:
             return jsonify({"error": "User not authenticated"}), 401
-            
+
         # Get all materials for this user
         prefix = f"material_{user_id}_"
         user_materials = []
-        
+
         # Use prefix to find all materials for this user
         for key in database.prefix(prefix):
             material_data = db[key]
             material_id = key.replace(prefix, '')
-            
+
             user_materials.append({
                 "material_id": material_id,
                 "material_name": material_data["material_name"],
                 "upload_timestamp": material_data["upload_timestamp"]
             })
-            
+
         # Sort by upload timestamp, newest first
         user_materials.sort(key=lambda x: x["upload_timestamp"], reverse=True)
-        
+
         return jsonify({
             "materials": user_materials
         })
-        
+
     except Exception as e:
         print(f"Error listing materials: {str(e)}")
         return jsonify({"error": str(e)}), 500      # ← 原因をそのまま返す
