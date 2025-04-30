@@ -446,10 +446,23 @@ def evaluate_read_aloud():
     import tempfile
     from wer_utils import calculate_wer
 
-    audio_file = request.files['audio']
-    transcript_text = request.form['transcript']
+    try:
+        if 'audio' not in request.files:
+            return jsonify({"error": "No audio file provided"}), 400
+            
+        audio_file = request.files['audio']
+        if not audio_file:
+            return jsonify({"error": "Invalid audio file"}), 400
+            
+        transcript_text = request.form.get('transcript')
+        if not transcript_text:
+            return jsonify({"error": "No transcript provided"}), 400
 
-    client = OpenAI()
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            return jsonify({"error": "OpenAI API key not configured"}), 500
+            
+        client = OpenAI(api_key=api_key)
 
     # 一時ファイルに保存
     with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:

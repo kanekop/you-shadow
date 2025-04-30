@@ -3,14 +3,18 @@ import openai
 import os
 
 def transcribe_audio(filepath):
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError("OpenAI API key not found. Please make sure OPENAI_API_KEY is set in Secrets.")
-    
-    if not api_key.startswith("sk-"):
-        raise ValueError("Invalid OpenAI API key format. The key should start with 'sk-'")
+    try:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OpenAI API key not found. Please set OPENAI_API_KEY in deployment environment variables.")
+        
+        if not api_key.startswith("sk-"):
+            raise ValueError("Invalid OpenAI API key format. The key should start with 'sk-'")
 
-    client = openai.OpenAI(api_key=api_key)
+        client = openai.OpenAI(api_key=api_key)
+    except Exception as e:
+        print(f"OpenAI client initialization error: {str(e)}")
+        raise ValueError(f"Failed to initialize OpenAI client: {str(e)}")
 
     try:
         if not os.path.exists(filepath):
