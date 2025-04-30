@@ -1,4 +1,3 @@
-
 class CustomShadowing {
   constructor() {
     this.recorder = new AudioRecorder();
@@ -42,7 +41,7 @@ class CustomShadowing {
 
     try {
       this.showSpinner('0%');
-      
+
       const xhr = new XMLHttpRequest();
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
@@ -90,11 +89,11 @@ class CustomShadowing {
     try {
       const originalAudio = document.getElementById('originalAudio');
       const warmupAudio = new Audio('/static/audio/warm-up.mp3');
-      
+
       await this.recorder.startRecording();
-      
+
       warmupAudio.play();
-      
+
       warmupAudio.onended = () => {
         originalAudio.currentTime = 0;
         originalAudio.play();

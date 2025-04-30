@@ -495,9 +495,14 @@ def upload_custom_audio():
             return jsonify({"error": "ファイルが選択されていません"}), 400
 
         # Check file extension
-        allowed_extensions = {'mp3', 'm4a', 'wav'}
+        allowed_extensions = {'mp3', 'm4a', 'wav', 'webm'}  # Added webm support
         if not any(audio_file.filename.lower().endswith(ext) for ext in allowed_extensions):
-            return jsonify({"error": "未対応のファイル形式です。MP3, M4A, WAV形式のファイルを使用してください。"}), 400
+            return jsonify({"error": "未対応のファイル形式です。MP3, M4A, WAV, WEBM形式のファイルを使用してください。"}), 400
+
+        # Check file size (limit to 25MB)
+        if len(audio_file.read()) > 25 * 1024 * 1024:  # 25MB in bytes
+            return jsonify({"error": "ファイルサイズが大きすぎます。25MB以下のファイルを使用してください。"}), 400
+        audio_file.seek(0)  # Reset file pointer after reading
 
         # Save uploaded file
         filename = secure_filename(audio_file.filename)
