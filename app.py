@@ -493,6 +493,12 @@ def upload_custom_audio():
         audio_file = request.files['audio']
         if not audio_file.filename:
             return jsonify({"error": "ファイルが選択されていません"}), 400
+            
+        # Read file content to check if it's valid
+        audio_content = audio_file.read()
+        if len(audio_content) == 0:
+            return jsonify({"error": "アップロードされたファイルが空です"}), 400
+        audio_file.seek(0)  # Reset file pointer
 
         # Check file extension
         allowed_extensions = {'mp3', 'm4a', 'wav', 'webm'}  # Added webm support

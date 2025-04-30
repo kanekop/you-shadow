@@ -13,6 +13,13 @@ def transcribe_audio(filepath):
     client = openai.OpenAI(api_key=api_key)
 
     try:
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"Audio file not found at path: {filepath}")
+
+        file_size = os.path.getsize(filepath)
+        if file_size == 0:
+            raise ValueError("Audio file is empty")
+
         with open(filepath, "rb") as audio_file:
             transcript = client.audio.transcriptions.create(
                 model="whisper-1",
