@@ -141,6 +141,7 @@ def save_preset_log(data, log_path="preset_log.json"):
         print(f"[ログ保存成功] {data}")  # 👈 この行を追加！
     except Exception as e:
         print(f"[ログ保存エラー] {e}")
+        return jsonify({"error": str(e)}), 500      # ← 原因をそのまま返す
 
 
 
@@ -505,11 +506,11 @@ def upload_custom_audio():
         if not any(audio_file.filename.lower().endswith(ext) for ext in allowed_extensions):
             return jsonify({"error": "未対応のファイル形式です。MP3, M4A, WAV, WEBM形式のファイルを使用してください。"}), 400
 
-        # Check file size (limit to 25MB)
-        if len(audio_file.read()) > 25 * 1024 * 1024:  # 25MB in bytes
+        # Check file size (limit to 25MB)  ← 先ほど読み取った audio_content を再利用
+        if len(audio_content) > 25 * 1024 * 1024:
             return jsonify({"error": "ファイルサイズが大きすぎます。25MB以下のファイルを使用してください。"}), 400
-        audio_file.seek(0)  # Reset file pointer after reading
-
+        audio_file.seek(0)  # ★ save() 前に必ずリセット
+        
         # Save uploaded file
         filename = secure_filename(audio_file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -525,11 +526,11 @@ def upload_custom_audio():
             })
         except Exception as e:
             print(f"Transcription error: {str(e)}")
-            return jsonify({"error": "音声の文字起こしに失敗しました"}), 500
+            return jsonify({"error": str(e)}), 500      # ← 原因をそのまま返す
 
     except Exception as e:
         print(f"Upload error: {str(e)}")
-        return jsonify({"error": "ファイルのアップロード中にエラーが発生しました"}), 500
+        return jsonify({"error": str(e)}), 500      # ← 原因をそのまま返す
 
 @app.route('/evaluate_custom_shadowing', methods=['POST'])
 def evaluate_custom_shadowing():
@@ -789,7 +790,7 @@ def save_material():
         
     except Exception as e:
         print(f"Error saving material: {str(e)}")
-        return jsonify({"error": "Failed to save material"}), 500
+        return jsonify({"error": str(e)}), 500      # ← 原因をそのまま返す
 
 @app.route('/api/my_materials', methods=['GET'])
 @auth_required
@@ -823,7 +824,7 @@ def list_materials():
         
     except Exception as e:
         print(f"Error listing materials: {str(e)}")
-        return jsonify({"error": "Failed to retrieve materials"}), 500
+        return jsonify({"error": str(e)}), 500      # ← 原因をそのまま返す
 
 @app.route('/sentence-practice')
 def sentence_practice():
