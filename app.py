@@ -37,7 +37,10 @@ import openai
 # .env ファイルの読み込みを削除
 
 #api_key = os.environ.get("YOUTUBE_API_KEY")
-openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OPENAI_API_KEY environment variable is not set")
+openai_client = openai.OpenAI(api_key=api_key)
 
 
 # === Flask設定 ===

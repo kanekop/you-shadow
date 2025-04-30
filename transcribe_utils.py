@@ -29,8 +29,8 @@ def transcribe_audio(filepath):
         detailed_msg = f"Error Type: {error_type}\nError Details: {error_msg}"
         
         # API Key related errors
-        if "api_key" in error_msg.lower():
-            raise ValueError(f"Authentication Error:\n{detailed_msg}\nPlease check if your OpenAI API key is valid.")
+        if "api_key" in error_msg.lower() or "authentication" in error_msg.lower():
+            raise ValueError("Authentication Error: Please check if your OpenAI API key is valid and properly set in environment variables")
         
         # Network related errors
         elif "request failed" in error_msg.lower() or "connection" in error_msg.lower():
