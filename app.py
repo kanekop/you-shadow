@@ -457,13 +457,21 @@ def evaluate_read_aloud():
         if not transcript_text:
             return jsonify({"error": "No transcript provided"}), 400
 
-        try:
-            transcribed = transcribe_audio(audio_file.read())
-        except ValueError as e:
-            return jsonify({"error": str(e)}), 500
-        except Exception as e:
-            print(f"Transcription error: {str(e)}")
-            return jsonify({"error": "Failed to transcribe audio"}), 500
+        # Create temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as tmp:
+            audio_file.save(tmp.name)
+            try:
+                transcribed = transcribe_audio(tmp.name)
+            except ValueError as e:
+                return jsonify({"error": str(e)}), 500
+            except Exception as e:
+                print(f"Transcription error: {str(e)}")
+                return jsonify({"error": "Failed to transcribe audio"}), 500
+            finally:
+                # Clean up temp file
+                import os
+                if os.path.exists(tmp.name):
+                    os.remove(tmp.name)
 
         wer_score = calculate_wer(transcribed, transcript_text)
     except Exception as e:
