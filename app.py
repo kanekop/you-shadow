@@ -466,9 +466,9 @@ def evaluate_read_aloud():
 
         # 一時ファイルに保存
         with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
-        audio_file.save(tmp.name)
-        with open(tmp.name, "rb") as f:
-            response = client.audio.transcriptions.create(
+            audio_file.save(tmp.name)
+            with open(tmp.name, "rb") as f:
+                response = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=f
             )
