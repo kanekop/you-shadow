@@ -458,21 +458,13 @@ def evaluate_read_aloud():
         if not transcript_text:
             return jsonify({"error": "No transcript provided"}), 400
 
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            return jsonify({"error": "OpenAI API key not configured"}), 500
-
-        client = OpenAI(api_key=api_key)
-
-        # 一時ファイルに保存
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
-            audio_file.save(tmp.name)
-            with open(tmp.name, "rb") as f:
-                response = client.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=f
-                )
-            transcribed = response.text
+        try:
+            transcribed = transcribe_audio(audio_file.read())
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 500
+        except Exception as e:
+            print(f"Transcription error: {str(e)}")
+            return jsonify({"error": "Failed to transcribe audio"}), 500
 
         wer_score = calculate_wer(transcribed, transcript_text)
     except Exception as e:

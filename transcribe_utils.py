@@ -8,8 +8,8 @@ def transcribe_audio(filepath):
         if not api_key:
             raise ValueError("OpenAI API key not found. Please set OPENAI_API_KEY in deployment environment variables.")
         
-        if not api_key.startswith("sk-"):
-            raise ValueError("Invalid OpenAI API key format. The key should start with 'sk-'")
+        if not api_key.startswith("sk-") or len(api_key) < 40:
+            raise ValueError("Invalid OpenAI API key format. Please check your API key.")
 
         client = openai.OpenAI(api_key=api_key)
     except Exception as e:
