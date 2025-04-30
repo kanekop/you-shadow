@@ -464,8 +464,8 @@ def evaluate_read_aloud():
             
         client = OpenAI(api_key=api_key)
 
-    # 一時ファイルに保存
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
+        # 一時ファイルに保存
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
         audio_file.save(tmp.name)
         with open(tmp.name, "rb") as f:
             response = client.audio.transcriptions.create(
