@@ -11,10 +11,7 @@ def trim_audio(audio_file, trim_ms=500):
 
 def transcribe_with_whisper(audio_file):
     """Transcribe audio using OpenAI Whisper"""
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError("OpenAI API key not found")
-    client = OpenAI(api_key=api_key)
+    from app import openai_client as client
     with open(audio_file, "rb") as f:
         response = client.audio.transcriptions.create(
             model="whisper-1",
