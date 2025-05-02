@@ -96,15 +96,24 @@ project/
 ├── app.py                     # Main application entry point
 ├── static/                    # Static assets
 │   ├── js/                   # JavaScript modules
-│   │   ├── audio-recorder.js # Audio recording functionality
-│   │   ├── compare.js        # Text comparison logic
-│   │   ├── custom-shadowing.js
-│   │   ├── preset-manager.js # Preset content management
-│   │   ├── ranking.js        # User ranking functionality
-│   │   ├── sentence-practice.js
-│   │   └── shadowing-main.js
-│   ├── audio/               # Audio resources
-│   └── style.css           # Global styles
+│   │   ├── components/       # Reusable components
+│   │   │   ├── audio-recorder.js
+│   │   │   └── preset-manager.js
+│   │   ├── features/        # Feature-specific logic
+│   │   │   ├── compare.js
+│   │   │   ├── custom-shadowing.js
+│   │   │   ├── ranking.js
+│   │   │   ├── sentence-practice.js
+│   │   │   └── shadowing-main.js
+│   │   └── utils/          # Shared utilities
+│   │       └── common.js
+│   ├── css/                # Styles
+│   │   ├── components/     # Component styles
+│   │   ├── features/       # Feature styles
+│   │   └── main.css       # Global styles
+│   └── assets/            # Media and other assets
+│       ├── audio/         # Audio resources
+│       └── images/        # Image resources
 ├── templates/               # HTML templates
 │   ├── compare.html        # Text comparison page
 │   ├── custom_shadowing.html
@@ -122,12 +131,20 @@ project/
 │       ├── genre3/
 │       └── genre4/        # Includes special content like riddles
 ├── utils/                  # Core utilities
-│   ├── audio_utils.py     # Audio processing
-│   ├── transcribe_utils.py # Transcription handling
-│   ├── wer_utils.py       # WER calculation
-│   ├── diff_viewer.py     # Difference visualization
-│   ├── youtube_utils.py   # YouTube integration
-│   └── logger.py         # Logging functionality
+│   ├── audio/            # Audio-related utilities
+│   │   ├── __init__.py
+│   │   ├── processor.py  # Audio processing
+│   │   └── transcribe.py # Transcription handling
+│   ├── metrics/          # Evaluation metrics
+│   │   ├── __init__.py
+│   │   ├── wer.py       # WER calculation
+│   │   └── diff.py      # Difference visualization
+│   ├── integrations/     # External services
+│   │   ├── __init__.py
+│   │   └── youtube.py   # YouTube integration
+│   └── core/            # Core functionality
+│       ├── __init__.py
+│       └── logger.py    # Logging functionality
 ├── uploads/               # User uploaded files
 └── .replit               # Replit configuration
 ```
@@ -210,13 +227,28 @@ project/
   - Progress persistence
   - User-specific content
 
+## 💪 Performance Optimization
+
+- **Audio Processing**
+  - Lazy loading of audio resources
+  - Automatic audio format conversion
+  - Progressive audio loading
+  - Audio caching strategy
+
+- **Application Performance**
+  - Static asset optimization
+  - Response compression
+  - Database query optimization
+  - Browser caching implementation
+
 ## 🌱 Future Enhancements
 
 - Enhanced analytics dashboard
 - Additional practice modes
 - More content genres
-- Performance optimization
+- Advanced performance metrics
 - Mobile responsiveness improvements
+- Offline mode support
 
 ## 📝 Contributing
 
