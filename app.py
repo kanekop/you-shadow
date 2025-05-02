@@ -34,7 +34,25 @@ from collections import defaultdict
 import pandas as pd
 import openai
 
-# .env ファイルの読み込みを削除
+# OpenAI APIを呼び出す関数やルートの中
+try:
+    api_key = os.environ.get("OPENAI_API_KEY") # Secretsで設定した名前に合わせる
+    if api_key:
+        # 安全な部分だけをログに出力
+        log_message = f"Using OpenAI Key starting with: {api_key[:8]}, ending with: {api_key[-4:]}"
+        print(log_message) # 標準出力へ（Replitのログで確認できるはず）
+        # Flaskのロガーを使う場合: current_app.logger.info(log_message)
+
+        # ここでOpenAIクライアントを初期化したり、APIを呼び出す
+        # client = openai.OpenAI(api_key=api_key) # 例
+        # ...
+    else:
+        print("ERROR: OPENAI_API_KEY not found in environment variables!")
+        # エラー処理
+except Exception as e:
+    print(f"Error during OpenAI operation: {e}")
+    # エラー処理
+
 
 #api_key = os.environ.get("YOUTUBE_API_KEY")
 openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))

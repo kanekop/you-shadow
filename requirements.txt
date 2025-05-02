@@ -23,7 +23,7 @@ MarkupSafe==3.0.2
 numpy==2.2.4
 oauth2client==4.1.3
 oauthlib==3.2.2
-openai==1.68.2
+openai==1.76.2
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
 pydantic==2.10.6
