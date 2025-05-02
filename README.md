@@ -93,19 +93,35 @@ A sophisticated Flask-based web application designed to help users improve their
 ## 📦 Project Structure
 ```
 project/
-├── app.py                  # Main application entry point
-├── static/                # Static assets
-│   ├── js/               # JavaScript modules
-│   ├── audio/            # Audio resources
-│   └── style.css         # Global styles
-├── templates/            # HTML templates
-├── presets/              # Practice materials
-│   ├── sentences/        # Sentence practice content
-│   └── shadowing/        # Shadowing practice content
-└── utils/               # Utility modules
-    ├── audio_utils.py    # Audio processing
-    ├── wer_utils.py      # WER calculation
-    └── diff_viewer.py    # Difference visualization
+├── app.py                     # Main application entry point
+├── static/                    # Static assets
+│   ├── js/                   # JavaScript modules
+│   │   ├── audio-recorder.js # Audio recording functionality
+│   │   ├── custom-shadowing.js
+│   │   ├── sentence-practice.js
+│   │   ├── shadowing-main.js
+│   │   └── other modules
+│   ├── audio/               # Audio resources
+│   └── style.css           # Global styles
+├── templates/               # HTML templates
+│   ├── custom_shadowing.html
+│   ├── sentence_practice.html
+│   ├── shadowing.html
+│   └── other templates
+├── presets/                 # Practice materials
+│   ├── sentences/          # Sentence practice content
+│   │   └── genre1/        # Organized by genre and level
+│   └── shadowing/         # Shadowing practice content
+│       ├── genre1/
+│       ├── genre2/
+│       ├── genre3/
+│       └── genre4/
+├── utils/                  # Core utilities
+│   ├── audio_utils.py     # Audio processing
+│   ├── transcribe_utils.py # Transcription handling
+│   ├── wer_utils.py       # WER calculation
+│   └── diff_viewer.py     # Difference visualization
+└── uploads/               # User uploaded files
 ```
 
 ## 🚀 Getting Started
