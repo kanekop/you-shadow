@@ -135,11 +135,12 @@ project/
 ## 🔑 Key Features (Updated)
 
 ### 1. Core Learning Features
-- **Shadowing Practice** - Practice with preset audio content
-- **Custom Shadowing** - Upload and practice with your own audio
-- **Sentence Practice** - Progressive difficulty level practice
-- **Text Comparison** - Compare and analyze text differences
-- **Read Aloud Practice** - Practice with custom text input
+- **Shadowing Practice** - Practice with preset audio content, organized by genre and level
+- **Custom Shadowing** - Upload and practice with your own audio, with warm-up countdown
+- **Sentence Practice** - Progressive difficulty level practice with professional audio
+- **Text Comparison** - Compare and analyze text differences with WER calculation
+- **Read Aloud Practice** - Practice with custom text input and instant feedback
+- **YouTube Integration** - Practice with YouTube video transcripts
 
 ### 2. Progress Tracking
 - **User Dashboard** - Track your learning progress
@@ -149,10 +150,11 @@ project/
 
 ### 3. Technical Features
 - **Secure Authentication** - Replit Auth integration
-- **Audio Processing** - Support for multiple formats
-- **YouTube Integration** - Practice with YouTube content
-- **Object Storage** - Secure file management
-- **Real-time Feedback** - Instant performance metrics
+- **Audio Processing** - Support for MP3, M4A, WAV, and WEBM formats
+- **YouTube Integration** - Practice with YouTube video transcripts and captions
+- **Object Storage** - Secure file management with Replit Storage
+- **Real-time Feedback** - WER calculation and color-coded difference highlighting
+- **Logging System** - Comprehensive activity and performance tracking
 
 ## 🚀 Getting Started
 
