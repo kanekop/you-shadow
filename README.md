@@ -97,14 +97,19 @@ project/
 ├── static/                    # Static assets
 │   ├── js/                   # JavaScript modules
 │   │   ├── audio-recorder.js # Audio recording functionality
+│   │   ├── compare.js        # Text comparison logic
 │   │   ├── custom-shadowing.js
+│   │   ├── preset-manager.js # Preset content management
+│   │   ├── ranking.js        # User ranking functionality
 │   │   ├── sentence-practice.js
-│   │   ├── shadowing-main.js
-│   │   └── other modules
+│   │   └── shadowing-main.js
 │   ├── audio/               # Audio resources
 │   └── style.css           # Global styles
 ├── templates/               # HTML templates
+│   ├── compare.html        # Text comparison page
 │   ├── custom_shadowing.html
+│   ├── dashboard.html      # User progress dashboard
+│   ├── ranking.html        # User rankings
 │   ├── sentence_practice.html
 │   ├── shadowing.html
 │   └── other templates
@@ -115,14 +120,39 @@ project/
 │       ├── genre1/
 │       ├── genre2/
 │       ├── genre3/
-│       └── genre4/
+│       └── genre4/        # Includes special content like riddles
 ├── utils/                  # Core utilities
 │   ├── audio_utils.py     # Audio processing
 │   ├── transcribe_utils.py # Transcription handling
 │   ├── wer_utils.py       # WER calculation
-│   └── diff_viewer.py     # Difference visualization
-└── uploads/               # User uploaded files
+│   ├── diff_viewer.py     # Difference visualization
+│   ├── youtube_utils.py   # YouTube integration
+│   └── logger.py         # Logging functionality
+├── uploads/               # User uploaded files
+└── .replit               # Replit configuration
 ```
+
+## 🔑 Key Features (Updated)
+
+### 1. Core Learning Features
+- **Shadowing Practice** - Practice with preset audio content
+- **Custom Shadowing** - Upload and practice with your own audio
+- **Sentence Practice** - Progressive difficulty level practice
+- **Text Comparison** - Compare and analyze text differences
+- **Read Aloud Practice** - Practice with custom text input
+
+### 2. Progress Tracking
+- **User Dashboard** - Track your learning progress
+- **Performance Analytics** - WER scores and improvements
+- **Rankings** - Compare performance with other users
+- **Achievement System** - Level-based progression
+
+### 3. Technical Features
+- **Secure Authentication** - Replit Auth integration
+- **Audio Processing** - Support for multiple formats
+- **YouTube Integration** - Practice with YouTube content
+- **Object Storage** - Secure file management
+- **Real-time Feedback** - Instant performance metrics
 
 ## 🚀 Getting Started
 
