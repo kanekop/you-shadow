@@ -31,56 +31,25 @@ async function setupPresets() {
   const presets = await presetManager.fetchPresets();
   const username = localStorage.getItem("username") || "guest";
   highestLevels = await presetManager.fetchHighestLevels(username);
-
   setupGenreSelect(presets);
-}
-
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', async function() {
-  await loadLastPractice();
-  await setupPresets();
-  setupUI();
-  setupEventListeners();
-});
-
-async function loadLastPractice() {
-  try {
-    const response = await fetch('/api/recordings/last');
-    if (response.status === 204) {
-      return; // No last practice
-    }
-
-    if (response.ok) {
-      const data = await response.json();
-      const audioElement = document.getElementById('shadowing-audio');
-      const transcriptElement = document.getElementById('transcript-text');
-      const sectionElement = document.getElementById('last-practice-section');
-
-      audioElement.src = `/storage/${data.filename}`;
-      transcriptElement.textContent = data.transcript;
-      sectionElement.classList.remove('hidden');
-    }
-  } catch (error) {
-    console.error('Error loading last practice:', error);
-  }
 }
 
 function setupGenreSelect(presets) {
   const genreSelect = document.getElementById("genreSelect");
   genreSelect.innerHTML = '<option value="">-- ジャンル選択 --</option>';
 
-  for (const genre in presets) {
+  Object.keys(presets).forEach(genre => {
     const opt = document.createElement("option");
     opt.value = genre;
     opt.textContent = genre;
     genreSelect.appendChild(opt);
-  }
+  });
 
-  genreSelect.addEventListener("change", updateLevelSelect);
+  genreSelect.addEventListener("change", () => updateLevelSelect());
 }
 
 function setupUI() {
-  const username = localStorage.getItem("username") || "（未設定）";
+  const username = localStorage.getItem("username") || "anonymous";
   document.getElementById("userDisplay").textContent = `🧑‍💻 現在のユーザー：${username}`;
 }
 
@@ -114,7 +83,6 @@ async function updateLevelSelect() {
     .forEach(level => {
       const opt = document.createElement("option");
       opt.value = level;
-
       const levelNum = parseInt(level.replace("level", ""));
       if (levelNum <= maxUnlocked || levelNum === 1) {
         opt.textContent = level;
@@ -122,7 +90,6 @@ async function updateLevelSelect() {
         opt.textContent = `🔒 ${level}`;
         opt.disabled = true;
       }
-
       levelSelect.appendChild(opt);
     });
 }
@@ -133,40 +100,29 @@ async function loadPreset() {
 
   if (!genre || !level) return;
 
-  const audioUrl = `/presets/shadowing/${genre}/${level}/audio.mp3`;
-  const scriptUrl = `/presets/shadowing/${genre}/${level}/script.txt`;
-
   try {
-    console.log('Attempting to load audio and script from:', audioUrl, scriptUrl);
-    const [audioResponse, scriptResponse] = await Promise.all([
-      fetch(audioUrl),
-      fetch(scriptUrl)
-    ]);
+    const result = await presetManager.loadPreset(genre, level);
+    if (!result) return;
 
-    console.log('Audio fetch response:', audioResponse.status, audioResponse.statusText);
-    console.log('Script fetch response:', scriptResponse.status, scriptResponse.statusText);
-
-    if (!audioResponse.ok || !scriptResponse.ok) {
-      throw new Error(`Failed to fetch resources: Audio ${audioResponse.status}, Script ${scriptResponse.status}`);
-    }
-
-    const audioBlob = await audioResponse.blob();
-    const scriptText = await scriptResponse.text();
-
-
-    originalAudioBlob = audioBlob;
-    currentScript = scriptText;
-
-    console.log('Audio and script loaded successfully.');
+    originalAudioBlob = result.audioBlob;
+    currentScript = result.script;
 
     document.getElementById("originalAudio").src = URL.createObjectURL(originalAudioBlob);
     document.getElementById("displayScript").textContent = currentScript;
     document.getElementById("presetLoaded").style.display = "block";
   } catch (error) {
     console.error("Error loading preset:", error);
-    alert("プリセットの読み込みに失敗しました。");
+    alert("プリセットの読み込みに失敗しました");
   }
 }
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', async function() {
+  await loadLastPractice();
+  await setupPresets();
+  setupUI();
+  setupEventListeners();
+});
 
 //500ms待つ処理を外した。ah.mp3追加
 async function startRecording() {
