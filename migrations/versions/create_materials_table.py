@@ -25,5 +25,21 @@ def upgrade():
         sa.PrimaryKeyConstraint('id')
     )
 
+    op.create_table('practice_logs',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('user_id', sa.String(), nullable=False),
+        sa.Column('practice_type', sa.String(), nullable=False),
+        sa.Column('recording_id', sa.Integer(), nullable=True),
+        sa.Column('material_id', sa.Integer(), nullable=True),
+        sa.Column('wer', sa.Float(), nullable=False),
+        sa.Column('practiced_at', sa.DateTime(timezone=True), nullable=True),
+        sa.Column('original_text', sa.Text(), nullable=True),
+        sa.Column('user_text', sa.Text(), nullable=True),
+        sa.ForeignKeyConstraint(['material_id'], ['materials.id']),
+        sa.ForeignKeyConstraint(['recording_id'], ['audio_recordings.id']),
+        sa.PrimaryKeyConstraint('id')
+    )
+
 def downgrade():
+    op.drop_table('practice_logs')
     op.drop_table('materials')
