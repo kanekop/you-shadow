@@ -1,28 +1,32 @@
-from flask_migrate import Migrate
-from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
+# Standard library imports
+import os
+import uuid
+from datetime import datetime, timedelta
+from functools import wraps
+
+# Third-party imports
+import pandas as pd
+import openai
+from flask import (
+    Flask, render_template, request, redirect, url_for, 
+    jsonify, send_from_directory, session
+)
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from functools import wraps
-from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
-from flask import send_from_directory
-import uuid
-from datetime import datetime
+from werkzeug.utils import secure_filename
+from pydub import AudioSegment
 from replit import db
 from replit.database import database
 from replit.object_storage import Client as ObjectStorageClient
-# app.py の冒頭部分
-from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, session # session を追加
-# ... 他のimport文 ...
-from models import db, Material # Material をインポート
-from datetime import datetime
-import os
-from werkzeug.utils import secure_filename
-from transcribe_utils import transcribe_audio # これも確認
-from pydub import AudioSegment # /evaluate_custom_shadowing で使用
-import uuid # /evaluate_custom_shadowing の一時ファイル名生成で使用
-from wer_utils import calculate_wer # calculate_wer をインポート
-from diff_viewer import diff_html # diff_html をインポート
+
+# Local imports
+from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
+from models import db, AudioRecording, PracticeLog, Material
+from transcribe_utils import transcribe_audio
+from wer_utils import wer, calculate_wer
+from diff_viewer import diff_html, get_diff_html
+from youtube_utils import youtube_bp, check_captions
 
 def auth_required(f):
     @wraps(f)
@@ -50,18 +54,10 @@ from collections import defaultdict
 import pandas as pd
 import openai
 
-# app.py の冒頭
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-
+# Initialize Flask app and configure
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'  # 開発用
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-
-# モデルをインポート（マイグレーションでも参照されるように）
-from models import AudioRecording, PracticeLog, Material
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 
 # …既存のルーティングやユーティリティ…
 
