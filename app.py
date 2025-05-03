@@ -37,24 +37,22 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 import pandas as pd
 import openai
+from flask import session
 
 # app.py の冒頭
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
+# モデルをインポート（マイグレーションでも参照されるように）
+from models import AudioRecording, PracticeLog, Material
+from models import db, Material, PracticeLog # db もインポート
+
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'  # 開発用
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
-# モデルをインポート（マイグレーションでも参照されるように）
-from models import AudioRecording, PracticeLog, Material
-
-# …既存のルーティングやユーティリティ…
-
-
-
 
 # OpenAI APIを呼び出す関数やルートの中
 try:
@@ -79,31 +77,30 @@ except Exception as e:
 #api_key = os.environ.get("YOUTUBE_API_KEY")
 openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Flask configuration
+
+# === Flask設定 ===
 app = Flask(__name__)
-app.config.update(
-    UPLOAD_FOLDER=UPLOAD_FOLDER,
-    SECRET_KEY=SECRET_KEY,
-    MAX_CONTENT_LENGTH=MAX_CONTENT_LENGTH,
-    SQLALCHEMY_DATABASE_URI=SQLALCHEMY_DATABASE_URI,
-    SQLALCHEMY_TRACK_MODIFICATIONS=SQLALCHEMY_TRACK_MODIFICATIONS
-)
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev_key_only')
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 
 db = SQLAlchemy()
 migrate = Migrate()
 
 db.init_app(app)
 migrate.init_app(app, db)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB upload
 app.register_blueprint(youtube_bp)
-CORS(app)
+CORS(app) # Enable CORS
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
-
+# DB情報を追加
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize Object Storage client
 storage_client = ObjectStorageClient()
 
-from flask import session
 
 #API化
 def generate_wer_matrix(username, logs):
