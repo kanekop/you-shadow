@@ -11,6 +11,18 @@ from datetime import datetime
 from replit import db
 from replit.database import database
 from replit.object_storage import Client as ObjectStorageClient
+# app.py の冒頭部分
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, session # session を追加
+# ... 他のimport文 ...
+from models import db, Material # Material をインポート
+from datetime import datetime
+import os
+from werkzeug.utils import secure_filename
+from transcribe_utils import transcribe_audio # これも確認
+from pydub import AudioSegment # /evaluate_custom_shadowing で使用
+import uuid # /evaluate_custom_shadowing の一時ファイル名生成で使用
+from wer_utils import calculate_wer # calculate_wer をインポート
+from diff_viewer import diff_html # diff_html をインポート
 
 def auth_required(f):
     @wraps(f)
