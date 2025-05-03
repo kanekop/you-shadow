@@ -80,24 +80,29 @@ except Exception as e:
 openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
-# === Flask設定 ===
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev_key_only')
-app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
+# Import configurations
+from config import (
+    UPLOAD_FOLDER, SECRET_KEY, MAX_CONTENT_LENGTH,
+    SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
+)
+
+# Flask configuration
+app.config.update(
+    UPLOAD_FOLDER=UPLOAD_FOLDER,
+    SECRET_KEY=SECRET_KEY,
+    MAX_CONTENT_LENGTH=MAX_CONTENT_LENGTH,
+    SQLALCHEMY_DATABASE_URI=SQLALCHEMY_DATABASE_URI,
+    SQLALCHEMY_TRACK_MODIFICATIONS=SQLALCHEMY_TRACK_MODIFICATIONS
+)
 
 db = SQLAlchemy()
 migrate = Migrate()
 
 db.init_app(app)
 migrate.init_app(app, db)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB upload
 app.register_blueprint(youtube_bp)
 CORS(app) # Enable CORS
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-# DB情報を追加
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
 
