@@ -5,11 +5,6 @@ import os
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
-# Flask App Settings
-UPLOAD_FOLDER = 'uploads'
-SECRET_KEY = os.environ.get('FLASK_SECRET_KEY', 'dev_key_only')
-MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Max 16MB upload
-
 # Database
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
