@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 
 # Third-party imports
+import openai
 import pandas as pd
 from flask import (
     Flask, render_template, request, redirect, url_for, 
