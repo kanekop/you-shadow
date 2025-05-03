@@ -12,14 +12,6 @@ from replit import db
 from replit.database import database
 from replit.object_storage import Client as ObjectStorageClient
 
-def auth_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        user_id = request.headers.get('X-Replit-User-Id')
-        if not user_id:
-            return redirect('/')
-        return f(*args, **kwargs)
-    return decorated_function
 from transcribe_utils import transcribe_audio
 import os
 from werkzeug.utils import secure_filename
@@ -46,13 +38,41 @@ from flask_migrate import Migrate
 
 # モデルをインポート（マイグレーションでも参照されるように）
 from models import AudioRecording, PracticeLog
-from models import db, Material, PracticeLog # db もインポート
+from models import Material, db
+
+def auth_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user_id = request.headers.get('X-Replit-User-Id')
+        if not user_id:
+            return redirect('/')
+        return f(*args, **kwargs)
+    return decorated_function
 
 
+
+
+# === Flask設定 ===
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'  # 開発用
-db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev_key_only')
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
+
+db.init_app(app)
+migrate.init_app(app, db)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB upload
+app.register_blueprint(youtube_bp)
+CORS(app) # Enable CORS
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+# DB情報を追加
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize Object Storage client
+storage_client = ObjectStorageClient()
+
 
 # OpenAI APIを呼び出す関数やルートの中
 try:
@@ -78,28 +98,6 @@ except Exception as e:
 openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
-# === Flask設定 ===
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev_key_only')
-app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
-
-db = SQLAlchemy()
-migrate = Migrate()
-
-db.init_app(app)
-migrate.init_app(app, db)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB upload
-app.register_blueprint(youtube_bp)
-CORS(app) # Enable CORS
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-# DB情報を追加
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Initialize Object Storage client
-storage_client = ObjectStorageClient()
 
 
 #API化

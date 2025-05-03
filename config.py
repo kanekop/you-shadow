@@ -12,6 +12,8 @@ MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Max 16MB upload
 
 # Database
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'  # 開発用
+
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # File Paths

@@ -9,7 +9,7 @@ class AudioRecording(db.Model):
     # ... (既存の AudioRecording モデル) ...
     __tablename__ = 'audio_recordings'
     id            = db.Column(db.Integer, primary_key=True)
-    user_id       = db.Column(db.Integer, nullable=False) # user_id は String の方が Replit User ID と整合性が取れるかもしれません
+    user_id       = db.Column(db.String, nullable=False) 
     filename      = db.Column(db.String, nullable=False)
     transcript    = db.Column(db.Text, nullable=False)
     file_hash     = db.Column(db.String, unique=True, nullable=False) # Object Storage を使う場合、これは storage_key になる可能性があります
@@ -19,7 +19,7 @@ class Material(db.Model):
     # ... (既存の Material モデル) ...
     __tablename__ = 'materials'
     id               = db.Column(db.Integer, primary_key=True)
-    user_id          = db.Column(db.String, nullable=False) # user_id は String の方が Replit User ID と整合性が取れるかもしれません
+    user_id          = db.Column(db.String, nullable=False) 
     material_name    = db.Column(db.String, nullable=False)
     storage_key      = db.Column(db.String, nullable=False) # 例: 'uploads/filename.mp3' や Object Storage のキー
     transcript       = db.Column(db.Text, nullable=True)
@@ -29,7 +29,7 @@ class Material(db.Model):
 class PracticeLog(db.Model):
     __tablename__ = 'practice_logs'
     id             = db.Column(db.Integer, primary_key=True)
-    user_id        = db.Column(db.String, nullable=False) # user_id は String の方が Replit User ID と整合性が取れるかもしれません
+    user_id        = db.Column(db.String, nullable=False) 
 
     # --- 修正箇所 ---
     practice_type  = db.Column(db.String, nullable=False, default='preset') # 'preset' or 'custom'
