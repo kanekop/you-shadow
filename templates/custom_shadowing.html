@@ -19,9 +19,14 @@
   <div class="container">
     <div id="uploadSection">
       <h3>1️⃣ 音声ファイルをアップロード</h3>
-      <input type="file" id="audioFileInput" accept=".mp3,.m4a,.wav">
-      <button id="uploadBtn">アップロード</button>
-      <p class="hint">対応形式: MP3, M4A, WAV</p>
+      <div class="upload-area">
+        <input type="file" id="audioFileInput" accept=".mp3,.m4a,.wav">
+        <button id="uploadBtn" class="primary-btn">アップロード</button>
+        <div class="upload-info">
+          <p class="hint">✓ 対応形式: MP3, M4A, WAV</p>
+          <p class="hint">✓ 最大サイズ: 25MB</p>
+        </div>
+      </div>
     </div>
 
     <div id="practiceSection" style="display: none;">

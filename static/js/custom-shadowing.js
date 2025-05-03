@@ -12,11 +12,20 @@ class CustomShadowing {
     document.getElementById('toggleTranscript').addEventListener('click', () => this.toggleTranscript());
   }
 
-  showSpinner(message = '') {
+  showSpinner(message = '', showProgress = false) {
     const spinner = document.getElementById('progressSpinner');
     const spinnerText = spinner.querySelector('.spinner-text');
     spinnerText.textContent = message;
     spinner.style.display = 'flex';
+    
+    if (showProgress) {
+      spinnerText.innerHTML = `${message}<br><span class="progress">0%</span>`;
+    }
+  }
+
+  updateMessage(message) {
+    const spinnerText = document.querySelector('.spinner-text');
+    spinnerText.innerHTML = message;
   }
 
   updateProgress(percent) {
