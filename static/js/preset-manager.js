@@ -1,4 +1,3 @@
-
 class PresetManager {
   constructor() {
     this.presetData = {};
@@ -7,14 +6,13 @@ class PresetManager {
   }
 
   async fetchPresets() {
-    const res = await fetch("/api/presets?practice_type=shadowing");
-    this.presetData = await res.json();
-    return this.presetData;
+    const response = await fetch('/api/presets');
+    return await response.json();
   }
 
   async loadPreset(genre, level) {
     if (!genre || !level) return null;
-    
+
     const audioUrl = `/presets/shadowing/${genre}/${level}/audio.mp3`;
     const scriptUrl = `/presets/shadowing/${genre}/${level}/script.txt`;
 
@@ -28,20 +26,10 @@ class PresetManager {
   }
 
   async fetchHighestLevels(username) {
-    const res = await fetch(`/api/highest_levels/${username}`);
-    return await res.json();
-  }
-}
-
-window.PresetManager = PresetManager;
-class PresetManager {
-  async fetchPresets() {
-    const response = await fetch('/api/presets');
-    return await response.json();
-  }
-
-  async fetchHighestLevels(username) {
     const response = await fetch(`/api/highest_levels/${username}`);
     return await response.json();
   }
 }
+
+// Make PresetManager available globally
+window.PresetManager = PresetManager;
