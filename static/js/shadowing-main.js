@@ -27,13 +27,6 @@ async function loadLastPractice() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  loadLastPractice();
-  await setupPresets();
-  setupUI();
-  setupEventListeners();
-});
-
 async function setupPresets() {
   const presets = await presetManager.fetchPresets();
   const username = localStorage.getItem("username") || "guest";
@@ -41,6 +34,14 @@ async function setupPresets() {
 
   setupGenreSelect(presets);
 }
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', async function() {
+  await loadLastPractice();
+  await setupPresets();
+  setupUI();
+  setupEventListeners();
+});
 
 function setupGenreSelect(presets) {
   const genreSelect = document.getElementById("genreSelect");
@@ -328,15 +329,19 @@ async function updateHighestLevels() {
   }
 }
 
-async function logAttempt(recording_id, wer) {
+async function logAttempt(username, genre, level, wer, original_transcribed, user_transcribed) {
   const response = await fetch("/api/practice/logs", {
     method: "POST",
-    headers: { 
+    headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      recording_id: recording_id,
-      wer: wer
+      username: username,
+      genre: genre,
+      level: level,
+      wer: wer,
+      original_transcribed: original_transcribed,
+      user_transcribed: user_transcribed
     })
   });
 
