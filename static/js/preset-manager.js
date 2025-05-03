@@ -1,3 +1,4 @@
+
 class PresetManager {
   constructor() {
     this.presetData = {};
