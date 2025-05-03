@@ -1,69 +1,38 @@
 # Standard library imports
+import json
 import os
+import re
+import shutil
+import tempfile
+import traceback
 import uuid
+from collections import defaultdict
 from datetime import datetime, timedelta
 from functools import wraps
 
 # Third-party imports
 import pandas as pd
-import openai
 from flask import (
     Flask, render_template, request, redirect, url_for, 
     jsonify, send_from_directory, session
 )
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from werkzeug.utils import secure_filename
+from flask_sqlalchemy import SQLAlchemy
+from openai import OpenAI
 from pydub import AudioSegment
 from replit import db
 from replit.database import database
 from replit.object_storage import Client as ObjectStorageClient
+from werkzeug.utils import secure_filename
 
 # Local imports
 from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
+from diff_viewer import diff_html, get_diff_html
 from models import db, AudioRecording, PracticeLog, Material
 from transcribe_utils import transcribe_audio
 from wer_utils import wer, calculate_wer
-from diff_viewer import diff_html, get_diff_html
 from youtube_utils import youtube_bp, check_captions
-from transcribe_utils import transcribe_audio
-import os
-from werkzeug.utils import secure_filename
-from pydub import AudioSegment
-from wer_utils import wer, calculate_wer
-from diff_viewer import diff_html
-import json
-
-import shutil  # ファイルコピー用のモジュールを追加
-from youtube_utils import youtube_bp
-from youtube_utils import check_captions
-from diff_viewer import get_diff_html
-
-from datetime import datetime, timedelta
-from collections import defaultdict
-import pandas as pd
-import openai
-from flask import session
-from flask import render_template
-from collections import defaultdict
-import json
-from datetime import datetime, timedelta
-from openai import OpenAI
-import tempfile
-from wer_utils import calculate_wer
-import json
-from collections import defaultdict
-from openai import OpenAI
-import tempfile
-from wer_utils import calculate_wer
-from openai import OpenAI
-import tempfile
-from wer_utils import calculate_wer
-import json
-import re
-from collections import defaultdict
-import traceback
 
 
 
