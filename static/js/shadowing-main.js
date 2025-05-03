@@ -43,6 +43,28 @@ document.addEventListener('DOMContentLoaded', async function() {
   setupEventListeners();
 });
 
+async function loadLastPractice() {
+  try {
+    const response = await fetch('/api/recordings/last');
+    if (response.status === 204) {
+      return; // No last practice
+    }
+
+    if (response.ok) {
+      const data = await response.json();
+      const audioElement = document.getElementById('shadowing-audio');
+      const transcriptElement = document.getElementById('transcript-text');
+      const sectionElement = document.getElementById('last-practice-section');
+
+      audioElement.src = `/storage/${data.filename}`;
+      transcriptElement.textContent = data.transcript;
+      sectionElement.classList.remove('hidden');
+    }
+  } catch (error) {
+    console.error('Error loading last practice:', error);
+  }
+}
+
 function setupGenreSelect(presets) {
   const genreSelect = document.getElementById("genreSelect");
   genreSelect.innerHTML = '<option value="">-- ジャンル選択 --</option>';
