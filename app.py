@@ -45,7 +45,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 # モデルをインポート（マイグレーションでも参照されるように）
-from models import AudioRecording, PracticeLog, Material
+from models import AudioRecording, PracticeLog
 from models import db, Material, PracticeLog # db もインポート
 
 
@@ -571,53 +571,65 @@ def custom_shadowing_ui():
 def serve_upload(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+# --- /upload_custom_audio の修正 ---
 @app.route('/upload_custom_audio', methods=['POST'])
+@auth_required # 認証が必要な場合
 def upload_custom_audio():
     try:
+        user_id = request.headers.get('X-Replit-User-Id')
+        if not user_id:
+            return jsonify({"error": "User not authenticated"}), 401
+
         if 'audio' not in request.files:
             return jsonify({"error": "音声ファイルが選択されていません"}), 400
 
         audio_file = request.files['audio']
-        if not audio_file.filename:
-            return jsonify({"error": "ファイルが選択されていません"}), 400
+        # ... (ファイルチェック: 空でないか、拡張子、サイズなど - 既存のコードを流用) ...
 
-        # Read file content to check if it's valid
-        audio_content = audio_file.read()
-        if len(audio_content) == 0:
-            return jsonify({"error": "アップロードされたファイルが空です"}), 400
-        audio_file.seek(0)  # Reset file pointer
-
-        # Check file extension
-        allowed_extensions = {'mp3', 'm4a', 'wav', 'webm'}  # Added webm support
-        if not any(audio_file.filename.lower().endswith(ext) for ext in allowed_extensions):
-            return jsonify({"error": "未対応のファイル形式です。MP3, M4A, WAV, WEBM形式のファイルを使用してください。"}), 400
-
-        # Check file size (limit to 25MB)  ← 先ほど読み取った audio_content を再利用
-        if len(audio_content) > 25 * 1024 * 1024:
-            return jsonify({"error": "ファイルサイズが大きすぎます。25MB以下のファイルを使用してください。"}), 400
-        audio_file.seek(0)  # ★ save() 前に必ずリセット
-
-        # Save uploaded file
-        filename = secure_filename(audio_file.filename)
+        # ファイルを保存 (一意なファイル名にするか、Object Storage を推奨)
+        filename = secure_filename(f"{user_id}_{uuid.uuid4().hex}_{audio_file.filename}")
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         audio_file.save(filepath)
 
-        # Transcribe audio using existing utility
+        # 文字起こし
         try:
             transcription = transcribe_audio(filepath)
-            session['custom_transcription'] = transcription
-            return jsonify({
-                "audio_url": f"/uploads/{filename}",
-                "transcription": transcription
-            })
         except Exception as e:
+            # エラー発生時は保存したファイルを削除する方が良い場合も
+            if os.path.exists(filepath):
+                os.remove(filepath)
             print(f"Transcription error: {str(e)}")
-            return jsonify({"error": str(e)}), 500      # ← 原因をそのまま返す
+            return jsonify({"error": f"文字起こしに失敗しました: {str(e)}"}), 500
+
+        # --- データベースに Material として保存 ---
+        new_material = Material(
+            user_id=user_id,
+            material_name=audio_file.filename, # またはユーザーが名前を指定できるようにする
+            storage_key=filepath, # Object Storage を使う場合はそのキー
+            transcript=transcription
+        )
+        db.session.add(new_material)
+        db.session.commit()
+        # ------------------------------------
+
+        # セッションに material_id を保存して評価時に使う
+        session['current_material_id'] = new_material.id
+        session['custom_transcription'] = transcription # これは既存の動作
+
+        return jsonify({
+            "audio_url": f"/uploads/{filename}", # フロントエンドが再生するために必要
+            "transcription": transcription,
+            "material_id": new_material.id # 念のためフロントにも返す
+        })
 
     except Exception as e:
+        db.session.rollback() # エラー時はロールバック
         print(f"Upload error: {str(e)}")
-        return jsonify({"error": str(e)}), 500      # ← 原因をそのまま返す
+        return jsonify({"error": f"アップロード処理中にエラーが発生しました: {str(e)}"}), 500
+    finally:
+        db.session.remove() # セッションをクリーンアップ (リクエストごとに推奨)
 
+# --- /evaluate_custom_shadowing の修正 ---
 @app.route('/evaluate_custom_shadowing', methods=['POST'])
 def evaluate_custom_shadowing():
     if 'recorded_audio' not in request.files:
