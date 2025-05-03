@@ -1,7 +1,10 @@
 from flask_migrate import Migrate
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from functools import wraps
+from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
 from flask import send_from_directory
 import uuid
 from datetime import datetime
@@ -62,7 +65,12 @@ openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # === Flask設定 ===
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev_key_only')  # Use environment variable
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev_key_only')
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)  # Use environment variable
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB upload
 app.register_blueprint(youtube_bp)
 CORS(app) # Enable CORS
@@ -745,27 +753,18 @@ def log_attempt():
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
 
-    log_entry = {
-        "user": data["user"],
-        "genre": data["genre"],
-        "level": data["level"],
-        "wer": float(data["wer"]),
-        "original_transcribed": data["original_transcribed"],
-        "user_transcribed": data["user_transcribed"],
-        "timestamp": datetime.now().isoformat()
-    }
+    log_entry = PracticeLog(
+        user_id=data["user"],
+        genre=data["genre"],
+        level=data["level"],
+        wer=float(data["wer"]),
+        original_text=data["original_transcribed"],
+        user_text=data["user_transcribed"],
+        practiced_at=datetime.utcnow()
+    )
 
-    log_file = "preset_log.json"
-    if os.path.exists(log_file):
-        with open(log_file, "r", encoding="utf-8") as f:
-            logs = json.load(f)
-    else:
-        logs = []
-
-    logs.append(log_entry)
-
-    with open(log_file, "w", encoding="utf-8") as f:
-        json.dump(logs, f, indent=2, ensure_ascii=False)
+    db.session.add(log_entry)
+    db.session.commit()
 
     return jsonify({"message": "Logged successfully"})
 

@@ -5,6 +5,10 @@ import os
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
+# Database
+SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
 # File Paths
 UPLOAD_FOLDER = 'uploads'
 PRESET_FOLDER = 'presets'

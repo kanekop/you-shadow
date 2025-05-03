@@ -48,3 +48,7 @@ pydub
 pydub
 replit
 replit-object-storage
+Flask-Migrate
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-SQLAlchemy
