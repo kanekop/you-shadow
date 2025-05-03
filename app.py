@@ -69,8 +69,11 @@ app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev_key_only')
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)  # Use environment variable
+db = SQLAlchemy()
+migrate = Migrate()
+
+db.init_app(app)
+migrate.init_app(app, db)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB upload
 app.register_blueprint(youtube_bp)
 CORS(app) # Enable CORS

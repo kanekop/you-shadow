@@ -52,3 +52,7 @@ Flask-Migrate
 Flask-SQLAlchemy
 Flask-Migrate
 Flask-SQLAlchemy
+Flask-Migrate
+psycopg2-binary
+Flask-Migrate
+psycopg2-binary
