@@ -2,6 +2,151 @@
 
 A sophisticated Flask-based web application designed to help users improve their language pronunciation and speaking skills through interactive exercises, real-time feedback, and progress tracking.
 
+## 🗄️ Database Architecture
+
+### Database Schema and Features
+
+#### 1. AudioRecording
+Stores user-recorded audio files and their transcripts.
+```sql
+CREATE TABLE audio_recordings (
+    id INTEGER PRIMARY KEY,
+    user_id VARCHAR NOT NULL,           -- User identifier
+    filename VARCHAR NOT NULL,          -- Stored audio file name
+    transcript TEXT NOT NULL,           -- Speech-to-text transcript
+    file_hash VARCHAR UNIQUE NOT NULL,  -- Unique hash for deduplication
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+- Features:
+  - Unique file hashing to prevent duplicates
+  - Automatic timestamp tracking
+  - Direct mapping to filesystem storage
+  - Association with user sessions
+
+#### 2. Material
+Manages custom practice materials uploaded by users.
+```sql
+CREATE TABLE materials (
+    id INTEGER PRIMARY KEY,
+    user_id VARCHAR NOT NULL,           -- User identifier
+    material_name VARCHAR NOT NULL,     -- Display name
+    storage_key VARCHAR NOT NULL,       -- Storage location key
+    transcript TEXT,                    -- Optional transcript
+    upload_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+- Features:
+  - Flexible storage key system
+  - Optional transcript support
+  - Timestamp-based organization
+  - User-specific content management
+
+#### 3. PracticeLog
+Tracks user practice sessions and performance metrics.
+```sql
+CREATE TABLE practice_logs (
+    id INTEGER PRIMARY KEY,
+    user_id VARCHAR NOT NULL,           -- User identifier
+    practice_type VARCHAR NOT NULL,     -- 'preset' or 'custom'
+    recording_id INTEGER,               -- FK to audio_recordings
+    material_id INTEGER,                -- FK to materials
+    wer FLOAT NOT NULL,                -- Word Error Rate score
+    practiced_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    original_text TEXT,                 -- Reference text
+    user_text TEXT,                    -- User's spoken text
+    FOREIGN KEY (recording_id) REFERENCES audio_recordings(id),
+    FOREIGN KEY (material_id) REFERENCES materials(id),
+    CHECK ((recording_id IS NOT NULL AND material_id IS NULL) OR 
+           (recording_id IS NULL AND material_id IS NOT NULL))
+);
+```
+- Features:
+  - Dual practice type support
+  - Performance metrics storage
+  - Text comparison capability
+  - Referential integrity enforcement
+  - Constraint ensuring valid practice source
+
+### Database Implementation
+
+#### Project Structure
+```
+project/
+├── migrations/                     # Database migration files
+│   ├── versions/                  # Version-controlled schema changes
+│   │   └── [migration files].py
+│   └── env.py                     # Migration environment config
+├── models.py                      # SQLAlchemy model definitions
+├── config.py                      # Database configuration
+└── app.py                         # Main application with routes
+```
+
+#### Key Database Operations
+
+1. Recording Management
+```python
+# Save new recording
+recording = AudioRecording(
+    user_id=user_id,
+    filename=filename,
+    transcript=transcript,
+    file_hash=unique_hash
+)
+db.session.add(recording)
+db.session.commit()
+```
+
+2. Practice Logging
+```python
+# Log practice session
+log = PracticeLog(
+    user_id=user_id,
+    practice_type='preset',
+    recording_id=recording_id,
+    wer=wer_score,
+    original_text=reference_text,
+    user_text=spoken_text
+)
+db.session.add(log)
+db.session.commit()
+```
+
+3. Custom Material Management
+```python
+# Save custom material
+material = Material(
+    user_id=user_id,
+    material_name=name,
+    storage_key=storage_path,
+    transcript=transcript
+)
+db.session.add(material)
+db.session.commit()
+```
+
+### Database Usage in Application
+
+1. Shadow Practice Feature
+- Records user attempts in AudioRecording
+- Logs performance in PracticeLog
+- Associates with preset or custom materials
+
+2. Custom Practice Materials
+- Stores user uploads in Material table
+- Links practice sessions to materials
+- Maintains user-specific content
+
+3. Progress Tracking
+- Queries PracticeLog for performance history
+- Calculates improvement metrics
+- Generates user statistics
+
+4. Content Management
+- Manages both preset and custom content
+- Handles file storage references
+- Maintains practice history
+
 ## 🌟 Key Features
 
 ### 1. Database Integration
@@ -33,44 +178,6 @@ A sophisticated Flask-based web application designed to help users improve their
   - Performance metrics
   - WER scores
   - Custom material usage
-
-## 🗄️ Database Schema
-
-### AudioRecording
-```sql
-CREATE TABLE audio_recordings (
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    filename VARCHAR NOT NULL,
-    transcript TEXT NOT NULL,
-    file_hash VARCHAR UNIQUE NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### PracticeLog
-```sql
-CREATE TABLE practice_logs (
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    recording_id INTEGER NOT NULL,
-    wer FLOAT NOT NULL,
-    practiced_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (recording_id) REFERENCES audio_recordings(id)
-);
-```
-
-### Material
-```sql
-CREATE TABLE materials (
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    material_name VARCHAR NOT NULL,
-    storage_key VARCHAR NOT NULL,
-    transcript TEXT,
-    upload_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
 
 ## 📦 Project Structure
 ```
