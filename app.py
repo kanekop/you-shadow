@@ -38,6 +38,24 @@ from collections import defaultdict
 import pandas as pd
 import openai
 
+# app.py の冒頭
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'  # 開発用
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+# モデルをインポート（マイグレーションでも参照されるように）
+from models import AudioRecording, PracticeLog, Material
+
+# …既存のルーティングやユーティリティ…
+
+
+
+
 # OpenAI APIを呼び出す関数やルートの中
 try:
     api_key = os.environ.get("OPENAI_API_KEY") # Secretsで設定した名前に合わせる
