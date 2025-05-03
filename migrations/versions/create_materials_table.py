@@ -1,7 +1,7 @@
 
-"""create materials table
+"""create core tables
 
-Revision ID: create_materials_table
+Revision ID: create_core_tables
 Revises: 
 Create Date: 2025-05-03 12:50:00.000000
 
@@ -9,12 +9,24 @@ Create Date: 2025-05-03 12:50:00.000000
 from alembic import op
 import sqlalchemy as sa
 
-revision = 'create_materials_table'
+revision = 'create_core_tables'
 down_revision = None
 branch_labels = None
 depends_on = None
 
 def upgrade():
+    # Create audio_recordings table
+    op.create_table('audio_recordings',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('user_id', sa.String(), nullable=False),
+        sa.Column('filename', sa.String(), nullable=False),
+        sa.Column('transcript', sa.Text(), nullable=False),
+        sa.Column('file_hash', sa.String(), nullable=False, unique=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),
+        sa.PrimaryKeyConstraint('id')
+    )
+
+    # Create materials table
     op.create_table('materials',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('user_id', sa.String(), nullable=False),
@@ -25,6 +37,7 @@ def upgrade():
         sa.PrimaryKeyConstraint('id')
     )
 
+    # Create practice_logs table
     op.create_table('practice_logs',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('user_id', sa.String(), nullable=False),
@@ -43,3 +56,4 @@ def upgrade():
 def downgrade():
     op.drop_table('practice_logs')
     op.drop_table('materials')
+    op.drop_table('audio_recordings')
