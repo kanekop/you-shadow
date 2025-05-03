@@ -1,6 +1,6 @@
 # models.py
 # models.py の修正案
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -13,7 +13,7 @@ class AudioRecording(db.Model):
     filename      = db.Column(db.String, nullable=False)
     transcript    = db.Column(db.Text, nullable=False)
     file_hash     = db.Column(db.String, unique=True, nullable=False) # Object Storage を使う場合、これは storage_key になる可能性があります
-    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at    = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Material(db.Model):
     # ... (既存の Material モデル) ...
@@ -23,7 +23,7 @@ class Material(db.Model):
     material_name    = db.Column(db.String, nullable=False)
     storage_key      = db.Column(db.String, nullable=False) # 例: 'uploads/filename.mp3' や Object Storage のキー
     transcript       = db.Column(db.Text, nullable=True)
-    upload_timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    upload_timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     # 必要であれば、ファイルタイプや長さなどのメタデータを追加
 
 class PracticeLog(db.Model):
@@ -38,7 +38,7 @@ class PracticeLog(db.Model):
     # --------------
 
     wer            = db.Column(db.Float, nullable=False)
-    practiced_at   = db.Column(db.DateTime, default=datetime.utcnow)
+    practiced_at   = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     original_text  = db.Column(db.Text, nullable=True) # 元のテキストも保存
     user_text      = db.Column(db.Text, nullable=True) # ユーザーの発話テキストも保存
 
