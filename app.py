@@ -1,3 +1,4 @@
+from flask_migrate import Migrate
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 from flask_cors import CORS
 from functools import wraps
@@ -66,6 +67,11 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB upload
 app.register_blueprint(youtube_bp)
 CORS(app) # Enable CORS
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+# DB情報を追加
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+
 
 # Initialize Object Storage client
 storage_client = ObjectStorageClient()
