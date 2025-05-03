@@ -178,22 +178,47 @@ def get_presets_structure(practice_type="shadowing"):
     return presets
 
 #
-def save_preset_log(data, log_path="preset_log.json"):
+@app.route('/api/recordings/upload', methods=['POST'])
+@auth_required
+def upload_recording():
     try:
-        if os.path.exists(log_path):
-            with open(log_path, "r", encoding="utf-8") as f:
-                logs = json.load(f)
-        else:
-            logs = []
+        user_id = request.headers.get('X-Replit-User-Id')
+        if not user_id:
+            return jsonify({"error": "User not authenticated"}), 401
 
-        logs.append(data)
+        if 'audio' not in request.files:
+            return jsonify({"error": "No audio file provided"}), 400
 
-        with open(log_path, "w", encoding="utf-8") as f:
-            json.dump(logs, f, ensure_ascii=False, indent=2)
-        print(f"[ログ保存成功] {data}")  # 👈 この行を追加！
+        audio_file = request.files['audio']
+        if not audio_file.filename:
+            return jsonify({"error": "Invalid file"}), 400
+
+        # Save file and get transcript
+        filename = secure_filename(audio_file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        audio_file.save(filepath)
+        transcript = transcribe_audio(filepath)
+
+        # Create recording record
+        recording = AudioRecording(
+            user_id=user_id,
+            filename=filename,
+            transcript=transcript,
+            file_hash=str(uuid.uuid4())  # Generate unique hash
+        )
+        
+        db.session.add(recording)
+        db.session.commit()
+
+        return jsonify({
+            "id": recording.id,
+            "filename": recording.filename,
+            "transcript": recording.transcript
+        })
+
     except Exception as e:
-        print(f"[ログ保存エラー] {e}")
-        return jsonify({"error": str(e)}), 500      # ← 原因をそのまま返す
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 
 
@@ -952,3 +977,46 @@ def get_sentences(genre, level):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Use port 5000 for development
     app.run(host="0.0.0.0", port=port, debug=True)
+@app.route('/api/practice/logs', methods=['POST'])
+@auth_required
+def log_practice():
+    try:
+        user_id = request.headers.get('X-Replit-User-Id')
+        if not user_id:
+            return jsonify({"error": "User not authenticated"}), 401
+
+        data = request.json
+        if not data or 'recording_id' not in data or 'wer' not in data:
+            return jsonify({"error": "Missing required fields"}), 400
+
+        log = PracticeLog(
+            user_id=user_id,
+            recording_id=data['recording_id'],
+            wer=float(data['wer'])
+        )
+
+        db.session.add(log)
+        db.session.commit()
+
+        return jsonify({
+            "status": "ok",
+            "id": log.id
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/recordings', methods=['GET'])
+@auth_required
+def get_recordings():
+    user_id = request.headers.get('X-Replit-User-Id')
+    recordings = AudioRecording.query.filter_by(user_id=user_id).all()
+    return jsonify({
+        "recordings": [{
+            "id": r.id,
+            "filename": r.filename,
+            "transcript": r.transcript,
+            "created_at": r.created_at.isoformat()
+        } for r in recordings]
+    })

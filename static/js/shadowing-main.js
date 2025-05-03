@@ -305,17 +305,21 @@ async function updateHighestLevels() {
   }
 }
 
-async function logAttempt(username, genre, level, wer, original, user) {
-  await fetch("/api/log_attempt", {
+async function logAttempt(recording_id, wer) {
+  const response = await fetch("/api/practice/logs", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({
-      user: username,
-      genre: genre,
-      level: level,
-      wer: wer,
-      original_transcribed: original,
-      user_transcribed: user
+      recording_id: recording_id,
+      wer: wer
     })
   });
+  
+  if (!response.ok) {
+    throw new Error('Failed to log practice attempt');
+  }
+  
+  return await response.json();
 }
