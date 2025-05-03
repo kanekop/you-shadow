@@ -204,7 +204,7 @@ def upload_recording():
             transcript=transcript,
             file_hash=str(uuid.uuid4())  # Generate unique hash
         )
-        
+
         db.session.add(recording)
         db.session.commit()
 
@@ -1024,14 +1024,14 @@ def get_recordings():
 def get_last_practice():
     user_id = request.headers.get('X-Replit-User-Id')
     last_practice = PracticeLog.query.filter_by(user_id=user_id).order_by(PracticeLog.practiced_at.desc()).first()
-    
+
     if not last_practice:
         return '', 204
-        
+
     recording = AudioRecording.query.get(last_practice.recording_id)
     if not recording:
         return '', 204
-        
+
     return jsonify({
         "id": recording.id,
         "filename": recording.filename,
