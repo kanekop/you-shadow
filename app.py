@@ -630,67 +630,100 @@ def upload_custom_audio():
         db.session.remove() # セッションをクリーンアップ (リクエストごとに推奨)
 
 # --- /evaluate_custom_shadowing の修正 ---
+# --- /evaluate_custom_shadowing の修正 ---
 @app.route('/evaluate_custom_shadowing', methods=['POST'])
+@auth_required # 認証が必要な場合
 def evaluate_custom_shadowing():
+    user_id = request.headers.get('X-Replit-User-Id')
+    if not user_id:
+        return jsonify({"error": "User not authenticated"}), 401
+
     if 'recorded_audio' not in request.files:
         return jsonify({"error": "No recorded audio provided"}), 400
 
-    if 'custom_transcription' not in session:
-        return jsonify({"error": "Original transcription not found"}), 400
+    # --- セッションから Material 情報を取得 ---
+    material_id = session.get('current_material_id')
+    original_transcription = session.get('custom_transcription')
 
-    # Known warm-up transcript
-    WARMUP_TRANSCRIPT = "10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0"
-    original_transcription = session['custom_transcription']
+    if not material_id or not original_transcription:
+        return jsonify({"error": "Original material information not found in session"}), 400
+    # ------------------------------------
+
     recorded_audio = request.files['recorded_audio']
 
-    # Save recorded audio
-    tmp_path = os.path.join(app.config['UPLOAD_FOLDER'], 'tmp_recording.webm')
-    recorded_audio.save(tmp_path)
+    # ... (既存の録音音声の前処理と文字起こし) ...
+    # 例: 一時ファイルに保存 -> warm-up除去 -> Whisperで文字起こし -> user_transcription を得る
+    # この部分は既存のロジックを維持
+    tmp_path = os.path.join(app.config['UPLOAD_FOLDER'], f'tmp_recording_{user_id}_{uuid.uuid4().hex}.webm')
+    processed_path = tmp_path.replace('.webm', '_processed.wav') # 例
+    try:
+        recorded_audio.save(tmp_path)
+        # ---- Warm-up除去ロジック ----
+        WARMUP_TRANSCRIPT = "10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0" # これは設定ファイルなどから読み込むのが望ましい
+        audio = AudioSegment.from_file(tmp_path)
+        # 必要であればここで pydub を使った無音除去やトリミング
+        audio.export(processed_path, format="wav") # Whisperにかける前に適切な形式に
+        full_transcription = transcribe_audio(processed_path)
+        user_transcription = full_transcription # デフォルトはフル
 
-    # Process recorded audio (just remove initial silence)
-    audio = AudioSegment.from_file(tmp_path)
-    processed_path = tmp_path.replace('.webm', '_processed.wav')
-    audio.export(processed_path, format="wav")
+        numbers = WARMUP_TRANSCRIPT.split(", ")
+        suffixes = [", ".join(numbers[i:]) for i in range(len(numbers))]
+        suffixes.sort(key=len, reverse=True) # 長いものからチェック
 
-    # Transcribe user's full recording
-    full_transcription = transcribe_audio(processed_path)
+        matched_suffix = None
+        normalized_full_transcription = full_transcription.lower().strip()
 
-    # Generate all possible suffixes of the warm-up transcript
-    numbers = WARMUP_TRANSCRIPT.split(", ")
-    suffixes = [", ".join(numbers[i:]) for i in range(len(numbers))]
-    suffixes.sort(key=len, reverse=True)  # Sort by length, longest first
+        for suffix in suffixes:
+            if normalized_full_transcription.startswith(suffix.lower()):
+                matched_suffix = suffix
+                break # 最長のマッチが見つかったら終了
 
-    # Remove warm-up portion from transcription
-    user_transcription = full_transcription.lower()
-    matched_suffix = None
+        if matched_suffix:
+            start_pos = normalized_full_transcription.find(matched_suffix.lower())
+            if start_pos != -1: # 基本的に startswith でチェックしているので 0 のはずだが念のため
+                # マッチした部分を除去
+                user_transcription = full_transcription[start_pos + len(matched_suffix):].strip()
+        # --------------------------
 
-    # Find the longest matching suffix at the start of transcription
-    for suffix in suffixes:
-        if user_transcription.strip().startswith(suffix.lower()):
-            matched_suffix = suffix
-            break
+        wer_score = calculate_wer(user_transcription, original_transcription) # 比較順序注意
+        diff_result = diff_html(user_transcription, original_transcription) # 比較順序注意
 
-    # Remove the matched suffix if found
-    if matched_suffix:
-        start_pos = user_transcription.find(matched_suffix.lower())
-        if start_pos != -1:
-            user_transcription = user_transcription[start_pos + len(matched_suffix):].strip()
+        # --- データベースに PracticeLog を保存 ---
+        new_log = PracticeLog(
+            user_id=user_id,
+            practice_type='custom', # タイプを 'custom' に設定
+            material_id=material_id, # セッションから取得した material_id を使用
+            recording_id=None, # custom なので NULL
+            wer=round(wer_score * 100, 2),
+            original_text=original_transcription,
+            user_text=user_transcription # warm-up除去後のテキスト
+        )
+        db.session.add(new_log)
+        db.session.commit()
+        # ------------------------------------
 
-    # Calculate WER and generate diff using main portion only
-    # wer_score = calculate_wer(original_transcription, user_transcription)
-    # diff_result = diff_html(original_transcription, user_transcription)
-    wer_score = calculate_wer(user_transcription, original_transcription)
-    diff_result = diff_html(user_transcription, original_transcription)
+        # セッション情報をクリア (必要に応じて)
+        # session.pop('current_material_id', None)
+        # session.pop('custom_transcription', None)
 
-    # Cleanup temporary files
-    os.remove(tmp_path)
-    os.remove(processed_path)
+        return jsonify({
+            "wer": round(wer_score * 100, 2),
+            "diff_html": diff_result,
+            "original_transcription": original_transcription, # デバッグ用に返す
+            "user_transcription": user_transcription # デバッグ用に返す
+        })
 
-    return jsonify({
-        "wer": round(wer_score * 100, 2),
-        "diff_html": diff_result
-    })
-
+    except Exception as e:
+        db.session.rollback()
+        print(f"Evaluation error: {str(e)}")
+        return jsonify({"error": f"評価処理中にエラーが発生しました: {str(e)}"}), 500
+    finally:
+        # 一時ファイルを削除
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        if os.path.exists(processed_path):
+            os.remove(processed_path)
+        db.session.remove()
 
 @app.route('/evaluate_shadowing', methods=['POST'])
 def evaluate_shadowing():
