@@ -5,7 +5,30 @@ let originalAudioBlob = null;
 let currentScript = "";
 let highestLevels = {};
 
-document.addEventListener("DOMContentLoaded", async () => {
+async function loadLastPractice() {
+  try {
+    const response = await fetch('/api/recordings/last');
+    if (response.status === 204) {
+      return; // No last practice
+    }
+
+    if (response.ok) {
+      const data = await response.json();
+      const audioElement = document.getElementById('shadowing-audio');
+      const transcriptElement = document.getElementById('transcript-text');
+      const sectionElement = document.getElementById('last-practice-section');
+
+      audioElement.src = `/storage/${data.filename}`;
+      transcriptElement.textContent = data.transcript;
+      sectionElement.classList.remove('hidden');
+    }
+  } catch (error) {
+    console.error('Error loading last practice:', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadLastPractice();
   await setupPresets();
   setupUI();
   setupEventListeners();
@@ -316,10 +339,10 @@ async function logAttempt(recording_id, wer) {
       wer: wer
     })
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to log practice attempt');
   }
-  
+
   return await response.json();
 }
