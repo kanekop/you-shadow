@@ -34,3 +34,14 @@ class PresetManager {
 }
 
 window.PresetManager = PresetManager;
+class PresetManager {
+  async fetchPresets() {
+    const response = await fetch('/api/presets');
+    return await response.json();
+  }
+
+  async fetchHighestLevels(username) {
+    const response = await fetch(`/api/highest_levels/${username}`);
+    return await response.json();
+  }
+}
