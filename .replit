@@ -35,5 +35,14 @@ mode = "sequential"
 task = "shell.exec"
 args = "python app.py"
 
+[[workflows.workflow]]
+name = "Run Staging"
+author = 37948231
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "FLASK_ENV=staging python app.py"
+
 [objectStorage]
 defaultBucketID = "replit-objstore-ceedad51-75f3-450e-8467-4d6efc722d6f"
