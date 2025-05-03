@@ -6,13 +6,22 @@
   <title>カスタムシャドウイング練習</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="/static/js/audio-recorder.js"></script>
-  <script src="/static/js/custom-shadowing.js" defer></script>
+  <script src="/static/js/shadowing-main.js" defer></script>
 </head>
 <body>
   <div class="nav-header">
     <div class="container">
       <a href="/" class="back-button">← ホームに戻る</a>
       <h1>🎵 カスタムシャドウイング練習</h1>
+      <!-- ここから追加 -->
+      <section id="last-practice-section" class="hidden" style="margin-bottom: 2em;">
+        <h3>🕑 前回の練習</h3>
+        <audio id="shadowing-audio" controls style="width:100%;"></audio>
+        <pre id="transcript-text" style="background:#f9f9f9; padding:1em; white-space:pre-wrap;"></pre>
+      </section>
+      <!-- ここまで追加 -->
+   
+    
     </div>
   </div>
 
