@@ -579,64 +579,183 @@ def serve_upload(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # --- /upload_custom_audio の修正 ---
+# app.py
+
+# --- 定数 ---
+# OpenAI APIのファイルサイズ上限は約25MBなので、余裕を持たせる
+TARGET_CHUNK_SIZE_MB = 20
+TARGET_CHUNK_SIZE_BYTES = TARGET_CHUNK_SIZE_MB * 1024 * 1024
+# オーバーラップさせる時間（ミリ秒）
+CHUNK_OVERLAP_MS = 5000  # 5秒
+
 @app.route('/upload_custom_audio', methods=['POST'])
 @auth_required # 認証が必要な場合
 def upload_custom_audio():
+    user_id = request.headers.get('X-Replit-User-Id')
+    if not user_id:
+        return jsonify({"error": "User not authenticated"}), 401
+
+    if 'audio' not in request.files:
+        return jsonify({"error": "音声ファイルが選択されていません"}), 400
+
+    audio_file = request.files['audio']
+    if not audio_file or audio_file.filename == '':
+        return jsonify({"error": "無効なファイルです"}), 400
+
+    # --- 元ファイルを一時的に保存 ---
+    # 一意なファイル名を生成 (ユーザーID + UUID + 元の拡張子)
+    file_ext = os.path.splitext(audio_file.filename)[1].lower()
+    # Whisperが対応する形式かチェック (例: .mp3, .wav, .m4aなど)
+    allowed_extensions = ['.mp3', '.m4a', '.wav', '.mpga', '.mpeg', '.webm']
+    if file_ext not in allowed_extensions:
+        return jsonify({"error": f"サポートされていないファイル形式です: {file_ext}"}), 400
+
+    filename_base = secure_filename(f"{user_id}_{uuid.uuid4().hex}")
+    original_filename = f"{filename_base}_original{file_ext}"
+    original_filepath = os.path.join(app.config['UPLOAD_FOLDER'], original_filename)
+    audio_file.save(original_filepath)
+    print(f"一時ファイル保存先: {original_filepath}")
+
+    final_transcription = ""
+    processed_chunk_paths = [] # 処理したチャンクパスを記録（後で削除するため）
+
     try:
-        user_id = request.headers.get('X-Replit-User-Id')
-        if not user_id:
-            return jsonify({"error": "User not authenticated"}), 401
+        file_size = os.path.getsize(original_filepath)
+        print(f"ファイルサイズ: {file_size / (1024*1024):.2f} MB")
 
-        if 'audio' not in request.files:
-            return jsonify({"error": "音声ファイルが選択されていません"}), 400
+        # --- ファイルサイズに応じて処理を分岐 ---
+        if file_size > TARGET_CHUNK_SIZE_BYTES:
+            print("ファイルサイズが上限を超えています。分割処理を開始します...")
+            audio = AudioSegment.from_file(original_filepath)
+            duration_ms = len(audio)
+            print(f"音声の長さ: {duration_ms / 1000:.2f} 秒")
 
-        audio_file = request.files['audio']
-        # ... (ファイルチェック: 空でないか、拡張子、サイズなど - 既存のコードを流用) ...
+            # pydub は内部的にミリ秒で処理するため、バイト数から適切なミリ秒数を推定するのは難しい
+            # 代わりに、時間ベースで分割する (例: 10分ごと)
+            # 注意: 10分でもエンコードによっては25MBを超える可能性あり。より安全にするなら短くする(例: 5分)か、
+            #      分割後のファイルサイズをチェックするロジックが必要。
+            #      ここではシンプルに10分(600,000ms)で分割する例を示す。
+            chunk_length_ms = 600 * 1000 # 10分
+            # または make_chunks ユーティリティを使うことも可能
+            # chunks = make_chunks(audio, chunk_length_ms)
 
-        # ファイルを保存 (一意なファイル名にするか、Object Storage を推奨)
-        filename = secure_filename(f"{user_id}_{uuid.uuid4().hex}_{audio_file.filename}")
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        audio_file.save(filepath)
+            transcribed_parts = []
+            num_chunks = math.ceil(duration_ms / (chunk_length_ms - CHUNK_OVERLAP_MS)) # おおよそのチャンク数
+            print(f"推定チャンク数: {num_chunks}")
 
-        # 文字起こし
-        try:
-            transcription = transcribe_audio(filepath)
-        except Exception as e:
-            # エラー発生時は保存したファイルを削除する方が良い場合も
-            if os.path.exists(filepath):
-                os.remove(filepath)
-            print(f"Transcription error: {str(e)}")
-            return jsonify({"error": f"文字起こしに失敗しました: {str(e)}"}), 500
+            current_pos_ms = 0
+            chunk_index = 0
+            while current_pos_ms < duration_ms:
+                # オーバーラップを考慮したチャンクの開始・終了位置
+                start_ms = max(0, current_pos_ms - CHUNK_OVERLAP_MS)
+                end_ms = min(current_pos_ms + chunk_length_ms, duration_ms)
+                print(f"チャンク {chunk_index + 1}/{num_chunks}: {start_ms/1000:.1f}s - {end_ms/1000:.1f}s")
 
-        # --- データベースに Material として保存 ---
+                chunk = audio[start_ms:end_ms]
+
+                # 一時チャンクファイルを作成 (Whisperが読み込める形式で)
+                # NamedTemporaryFileを使うと管理が楽になる
+                with tempfile.NamedTemporaryFile(
+                    prefix=f"{filename_base}_chunk_{chunk_index}_",
+                    suffix=".mp3", # Whisperに渡す形式 (mp3, wav等)
+                    dir=app.config['UPLOAD_FOLDER'],
+                    delete=False # 後で明示的に削除するため
+                ) as tmp_chunk_file:
+                    chunk_filepath = tmp_chunk_file.name
+                    print(f"  チャンクファイル書き出し中: {chunk_filepath}")
+                    chunk.export(chunk_filepath, format="mp3") # formatを指定
+                    processed_chunk_paths.append(chunk_filepath) # 削除リストに追加
+
+                # --- 各チャンクを文字起こし ---
+                print(f"  チャンク {chunk_index + 1} 文字起こし中...")
+                try:
+                    # transcribe_utils.py の関数を呼び出す
+                    transcript_part = transcribe_audio(chunk_filepath)
+                    transcribed_parts.append(transcript_part)
+                    print(f"  チャンク {chunk_index + 1} 文字起こし完了.")
+                except Exception as transcribe_err:
+                    print(f"!! チャンク {chunk_index + 1} の文字起こしエラー: {transcribe_err}")
+                    # エラー処理: スキップするか、全体をエラーとするかなど
+                    # ここではエラーを再発生させて全体を中断
+                    raise transcribe_err
+
+                # 次のチャンクの開始位置へ（オーバーラップを考慮しない位置）
+                current_pos_ms += chunk_length_ms
+                chunk_index += 1
+
+            # --- 全ての文字起こし結果を結合 ---
+            # TODO: オーバーラップ部分の重複除去ロジックをここに入れる (オプション)
+            #       単純結合でよければ以下でOK
+            final_transcription = " ".join(transcribed_parts).strip()
+            print("全てのチャンクの文字起こしを結合しました。")
+
+        else:
+            # --- ファイルサイズが小さい場合は直接文字起こし ---
+            print("ファイルサイズは上限内です。直接文字起こしします...")
+            final_transcription = transcribe_audio(original_filepath)
+            print("直接文字起こし完了。")
+
+        # --- Material データベースへの保存 ---
+        print("データベースにMaterialを保存します...")
         new_material = Material(
             user_id=user_id,
-            material_name=audio_file.filename, # またはユーザーが名前を指定できるようにする
-            storage_key=filepath, # Object Storage を使う場合はそのキー
-            transcript=transcription
+            material_name=audio_file.filename, # 元のファイル名を使用
+            # storage_key は元ファイルのパスまたはObject Storageのキーなど、運用に合わせて設定
+            # ここでは元ファイルのパスを保存する例
+            storage_key=original_filepath,
+            transcript=final_transcription,
+            upload_timestamp=datetime.utcnow() # タイムゾーン付きUTC推奨
         )
         db.session.add(new_material)
         db.session.commit()
-        # ------------------------------------
+        print(f"Material ID: {new_material.id} でデータベースに保存しました。")
 
-        # セッションに material_id を保存して評価時に使う
+        # --- セッションに情報を保存 ---
         session['current_material_id'] = new_material.id
-        session['custom_transcription'] = transcription # これは既存の動作
+        session['custom_transcription'] = final_transcription
 
+        # --- フロントエンドへのレスポンス ---
         return jsonify({
-            "audio_url": f"/uploads/{filename}", # フロントエンドが再生するために必要
-            "transcription": transcription,
-            "material_id": new_material.id # 念のためフロントにも返す
+            # フロントで再生するのは元の（分割前）ファイル
+            "audio_url": url_for('serve_upload', filename=original_filename),
+            "transcription": final_transcription,
+            "material_id": new_material.id
         })
 
     except Exception as e:
-        db.session.rollback() # エラー時はロールバック
-        print(f"Upload error: {str(e)}")
-        return jsonify({"error": f"アップロード処理中にエラーが発生しました: {str(e)}"}), 500
-    finally:
-        db.session.remove() # セッションをクリーンアップ (リクエストごとに推奨)
+        db.session.rollback() # エラー時はDB変更をロールバック
+        print(f"!! /upload_custom_audio でエラー発生: {str(e)}")
+        import traceback
+        traceback.print_exc() # 詳細なトレースバックを出力
+        # フロントエンドには一般的なエラーメッセージを返す
+        return jsonify({"error": f"処理中にエラーが発生しました。詳細はサーバーログを確認してください。"}), 500
 
-# --- /evaluate_custom_shadowing の修正 ---
+    finally:
+        # --- 一時ファイル(チャンク)の削除 ---
+        print("一時チャンクファイルを削除します...")
+        for path in processed_chunk_paths:
+            if os.path.exists(path):
+                try:
+                    os.remove(path)
+                    print(f"  削除: {path}")
+                except OSError as del_err:
+                    print(f"!! 一時ファイル削除エラー ({path}): {del_err}")
+        # 元ファイルを削除するかどうかは運用による
+        # transcribe_audio が元ファイルを必要とする場合や、
+        # storage_keyとしてパスをDBに保存している場合は削除しない。
+        # ここでは削除しないでおく。
+        # if os.path.exists(original_filepath):
+        #     os.remove(original_filepath)
+
+        # DBセッションをクリーンアップ
+        db.session.remove()
+
+# /uploads/<filename> ルートがなければ追加 (serve_upload として定義済みなら不要)
+# @app.route('/uploads/<path:filename>')
+# def serve_upload(filename):
+#     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+
 # --- /evaluate_custom_shadowing の修正 ---
 @app.route('/evaluate_custom_shadowing', methods=['POST'])
 @auth_required # 認証が必要な場合
