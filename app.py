@@ -71,7 +71,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 
 db.init_app(app)
 migrate.init_app(app, db)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB upload
+app.config['MAX_CONTENT_LENGTH'] = 250 * 1024 * 1024  # Max 16MB upload #かねこ
 app.register_blueprint(youtube_bp)
 CORS(app) # Enable CORS
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
