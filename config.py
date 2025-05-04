@@ -8,7 +8,7 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 # Flask App Settings
 UPLOAD_FOLDER = 'uploads'
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY', 'dev_key_only')
-MAX_CONTENT_LENGTH = 25 * 1024 * 1024  # Max 25MB upload
+MAX_CONTENT_LENGTH = 250 * 1024 * 1024  # Max 25MB upload
 
 # Database
 SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
