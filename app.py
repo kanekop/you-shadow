@@ -1,16 +1,25 @@
+import os
+import uuid
+import math
+import tempfile
 from flask_migrate import Migrate
-from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, session
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from functools import wraps
-from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
+from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, UPLOAD_FOLDER, SECRET_KEY
 from flask import send_from_directory
-import uuid
+from werkzeug.utils import secure_filename
+from pydub import AudioSegment
+from pydub.utils import make_chunks
 from datetime import datetime
 from replit import db
 from replit.database import database
 from replit.object_storage import Client as ObjectStorageClient
+
+from models import db, Material
+from transcribe_utils import transcribe_audio
 
 from transcribe_utils import transcribe_audio
 import os
