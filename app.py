@@ -1,54 +1,45 @@
 import os
 import uuid
 import math
+import json
 import tempfile
-from flask_migrate import Migrate
-from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, session
+import pandas as pd
+from datetime import datetime, timedelta
+from collections import defaultdict
+
+# Flask imports
+from flask import (
+    Flask, render_template, request, redirect, url_for, 
+    jsonify, send_from_directory, session
+)
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from functools import wraps
-from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, UPLOAD_FOLDER, SECRET_KEY
-from flask import send_from_directory
 from werkzeug.utils import secure_filename
+
+# Audio processing
 from pydub import AudioSegment
 from pydub.utils import make_chunks
-from datetime import datetime
-from replit import db
-from replit.database import database
-from replit.object_storage import Client as ObjectStorageClient
-
-from models import db, Material
-from transcribe_utils import transcribe_audio
-
-from transcribe_utils import transcribe_audio
-import os
-from werkzeug.utils import secure_filename
-from pydub import AudioSegment
-from wer_utils import wer, calculate_wer
-from diff_viewer import diff_html
-import json
-
-import shutil  # ファイルコピー用のモジュールを追加
-from youtube_utils import youtube_bp
-from youtube_utils import check_captions
-from diff_viewer import get_diff_html
-
-from datetime import datetime, timedelta
-from collections import defaultdict
-import pandas as pd
 import openai
-from flask import session
 
-# app.py の冒頭
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+# Local imports
+from models import db, Material, AudioRecording, PracticeLog
+from config import (
+    SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS,
+    UPLOAD_FOLDER, SECRET_KEY
+)
+from transcribe_utils import transcribe_audio
+from wer_utils import wer, calculate_wer
+from diff_viewer import diff_html, get_diff_html
+from youtube_utils import youtube_bp, check_captions
 
-# モデルをインポート（マイグレーションでも参照されるように）
-from models import AudioRecording, PracticeLog
-from models import Material, db
+# Constants
+TARGET_CHUNK_SIZE_MB = 20
+TARGET_CHUNK_SIZE_BYTES = TARGET_CHUNK_SIZE_MB * 1024 * 1024
+CHUNK_OVERLAP_MS = 5000
 
+# Authentication decorator
 def auth_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -58,58 +49,32 @@ def auth_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-
-
-
-# === Flask設定 ===
+# Flask app initialization
 app = Flask(__name__)
 migrate = Migrate(app, db)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SECRET_KEY'] = SECRET_KEY
-app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 
+# App configuration
+app.config.update(
+    UPLOAD_FOLDER=UPLOAD_FOLDER,
+    SECRET_KEY=SECRET_KEY,
+    SQLALCHEMY_DATABASE_URI=SQLALCHEMY_DATABASE_URI,
+    SQLALCHEMY_TRACK_MODIFICATIONS=SQLALCHEMY_TRACK_MODIFICATIONS,
+    MAX_CONTENT_LENGTH=25 * 1024 * 1024  # 25MB upload limit
+)
+
+# Initialize extensions
 db.init_app(app)
 migrate.init_app(app, db)
-app.config['MAX_CONTENT_LENGTH'] = 250 * 1024 * 1024  # Max 16MB upload #かねこ
 app.register_blueprint(youtube_bp)
-CORS(app) # Enable CORS
+CORS(app)
+
+# Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-# DB情報を追加
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize Object Storage client
-storage_client = ObjectStorageClient()
-
-
-# OpenAI APIを呼び出す関数やルートの中
-try:
-    api_key = os.environ.get("OPENAI_API_KEY") # Secretsで設定した名前に合わせる
-    if api_key:
-        # 安全な部分だけをログに出力
-        log_message = f"Using OpenAI Key starting with: {api_key[:8]}, ending with: {api_key[-4:]}"
-        print(log_message) # 標準出力へ（Replitのログで確認できるはず）
-        # Flaskのロガーを使う場合: current_app.logger.info(log_message)
-
-        # ここでOpenAIクライアントを初期化したり、APIを呼び出す
-        # client = openai.OpenAI(api_key=api_key) # 例
-        # ...
-    else:
-        print("ERROR: OPENAI_API_KEY not found in environment variables!")
-        # エラー処理
-except Exception as e:
-    print(f"Error during OpenAI operation: {e}")
-    # エラー処理
-
-
-#api_key = os.environ.get("YOUTUBE_API_KEY")
+# OpenAI configuration
 openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-
-
-
-#API化
+# Utility functions
 def generate_wer_matrix(username, logs):
     user_logs = [log for log in logs if log.get("user", "").lower() == username.lower()]
     wer_matrix = {}
@@ -132,7 +97,6 @@ def generate_wer_matrix(username, logs):
     pivot = df.pivot(index="Level", columns="Genre", values="WER").sort_index()
     return pivot.fillna("")
 
-# ジャンル×レベルごとの最小WERクロス表を生成する関数
 def generate_min_wer_matrix(username, logs):
     user_logs = [log for log in logs if log.get("user", "").lower() == username.lower()]
     wer_matrix = {}
@@ -158,10 +122,6 @@ def generate_min_wer_matrix(username, logs):
     pivot = df.pivot(index="Level", columns="Genre", values="WER").sort_index()
     return pivot.fillna("")
 
-
-
-
-
 def get_presets_structure(practice_type="shadowing"):
     base_path = os.path.join("presets", practice_type)
     presets = {}
@@ -179,77 +139,18 @@ def get_presets_structure(practice_type="shadowing"):
 
     return presets
 
-#
-@app.route('/api/recordings/upload', methods=['POST'])
-@auth_required
-def upload_recording():
-    try:
-        user_id = request.headers.get('X-Replit-User-Id')
-        if not user_id:
-            return jsonify({"error": "User not authenticated"}), 401
-
-        if 'audio' not in request.files:
-            return jsonify({"error": "No audio file provided"}), 400
-
-        audio_file = request.files['audio']
-        if not audio_file.filename:
-            return jsonify({"error": "Invalid file"}), 400
-
-        # Save file and get transcript
-        filename = secure_filename(audio_file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        audio_file.save(filepath)
-        transcript = transcribe_audio(filepath)
-
-        # Create recording record
-        recording = AudioRecording(
-            user_id=user_id,
-            filename=filename,
-            transcript=transcript,
-            file_hash=str(uuid.uuid4())  # Generate unique hash
-        )
-
-        db.session.add(recording)
-        db.session.commit()
-
-        return jsonify({
-            "id": recording.id,
-            "filename": recording.filename,
-            "transcript": recording.transcript
-        })
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 500
-
-
-
-# === ルート画面 ===
+# Basic routes
 @app.route('/__replauthlogout')
 def logout():
-    response = '', 200
-    return response
+    return '', 200
 
 @app.route('/')
 def index():
     user_id = request.headers.get('X-Replit-User-Id')
     user_name = request.headers.get('X-Replit-User-Name')
+    return render_template('index.html', user_id=user_id, user_name=user_name)
 
-    if not user_id:
-        return render_template('index.html')
-
-    return render_template('index.html',
-                         user_id=user_id,
-                         user_name=user_name)
-
-
-from flask import render_template
-from collections import defaultdict
-import json
-from datetime import datetime, timedelta
-
-
-# /dashboard/<username> のルート定義
+# Dashboard routes
 @app.route("/dashboard/<username>")
 @auth_required
 def dashboard(username):
@@ -259,34 +160,32 @@ def dashboard(username):
     except Exception as e:
         return f"Error loading log: {e}"
 
-    # 連続記録日数を計算
     user_logs = [log for log in logs if log.get("user", "").lower() == username.lower()]
     date_set = {datetime.fromisoformat(log["timestamp"]).date() for log in user_logs if "timestamp" in log}
+
     streak = 0
     today = datetime.utcnow().date()
     while today in date_set:
         streak += 1
         today -= timedelta(days=1)
 
-    # WERマトリクスの取得（最小WER）
     wer_table = generate_min_wer_matrix(username, logs)
     genres = list(wer_table.columns)
     levels = list(wer_table.index)
     wer_values = wer_table.values.tolist()
 
     return render_template("dashboard.html",
-                           username=username,
-                           streak=streak,
-                           genres=genres,
-                           levels=levels,
-                           wer_values=wer_values)
+                         username=username,
+                         streak=streak,
+                         genres=genres,
+                         levels=levels,
+                         wer_values=wer_values)
 
 @app.route("/details/<username>/<genre>/<level>")
 def detail_view(username, genre, level):
     with open("preset_log.json", "r", encoding="utf-8") as f:
         logs = json.load(f)
 
-    # 該当ログだけ抽出
     user_logs = [
         log for log in logs
         if log.get("user", "").lower() == username.lower()
@@ -294,7 +193,6 @@ def detail_view(username, genre, level):
         and log.get("level") == level
     ]
 
-    # 新しいテンプレートに渡す
     return render_template("detail.html",
                            username=username,
                            genre=genre,
@@ -302,37 +200,30 @@ def detail_view(username, genre, level):
                            logs=user_logs)
 
 
-
 @app.route("/read-aloud", methods=["GET", "POST"])
 def read_aloud():
     if request.method == "GET":
         return render_template("read_aloud.html")
 
-    # === 正解テキストの取得 ===
     reference_text = request.form.get("reference_text", "").strip()
     reference_file = request.files.get("reference_file")
     if reference_file and reference_file.filename.endswith(".txt"):
         reference_text = reference_file.read().decode("utf-8").strip()
 
-    # === 音声ファイルの取得 ===
     audio_file = request.files["audio_file"]
     audio_path = os.path.join(app.config["UPLOAD_FOLDER"], secure_filename(audio_file.filename))
     audio_file.save(audio_path)
 
-    # === 音声の文字起こし ===
     recognized_text = transcribe_audio(audio_path)
 
-    # === 精度チェック（WER & 差分） ===
     wer_score = wer(reference_text, recognized_text)
     diff_result = diff_html(reference_text, recognized_text)
 
-    # === 結果ページに渡す ===
     return render_template("result.html",
                            ref_text=reference_text,
                            hyp_text=recognized_text,
                            wer_score=wer_score,
                            diff_result=diff_result)
-
 
 @app.route('/youtube')
 def youtube_ui():
@@ -340,14 +231,13 @@ def youtube_ui():
 
 @app.route('/evaluate_youtube', methods=['POST'])
 def evaluate_youtube():
-    from openai import OpenAI
     import tempfile
+    from openai import OpenAI
     from wer_utils import calculate_wer
 
     audio_file = request.files['audio']
     transcript_text = request.form['transcript']
 
-    # Whisper 1.0 形式のクライアントを使う
     client = OpenAI()
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
@@ -369,9 +259,7 @@ def evaluate_youtube():
         "diff_html": diff_result
     })
 
-
-#Flaskに「/presets/ は静的ファイルです」と教える
-@app.route("/presets/<path:filename>")
+@app.route('/presets/<path:filename>')
 def serve_presets(filename):
     return send_from_directory("presets", filename)
 
@@ -391,7 +279,6 @@ def show_ranking():
     with open(log_path, "r", encoding="utf-8") as f:
         logs = json.load(f)
 
-    # 🔍 ログイン中ユーザー名をlocalStorageから取得して送る（JS側で取得→埋め込む方法にする）
     current_user = request.cookies.get("username", "anonymous")
 
     matched = [entry for entry in logs if entry["genre"] == genre and entry["level"] == level]
@@ -402,7 +289,6 @@ def show_ranking():
                            genre=genre, level=level,
                            current_user=current_user)
 
-#Userのアンロックレベルを確認
 @app.route("/api/unlocked_levels/<username>")
 def get_unlocked_levels(username):
     import json
@@ -423,19 +309,14 @@ def get_unlocked_levels(username):
         level = entry["level"].strip().lower()
         result[genre].add(level)
 
-    # セットをリストに変換
     result = {genre: sorted(list(levels)) for genre, levels in result.items()}
-    return result
+    return jsonify(result)
 
-
-#
 @app.route("/api/presets")
 def api_presets():
     structure = get_presets_structure()
     return jsonify(structure)
 
-
-# === 音声ファイルと入力の受信 ===
 @app.route('/submit', methods=['POST'])
 def submit():
     user_id = request.form['user_id']
@@ -446,20 +327,15 @@ def submit():
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     file.save(filepath)
 
-    # 🔄 static にコピー（上書き）
     static_path = os.path.join("static", "recorded.webm")
-    shutil.copy(filepath, static_path)  # ← 変更ポイント！
+    shutil.copy(filepath, static_path)
 
-    # 🔍 Whisperで文字起こし
     transcript = transcribe_audio(filepath)
 
-    # 📊 WER計算
     wer_score, subs, dels, ins, word_count = wer(script, transcript)
 
-    # HTML差分を生成
     diff_result = diff_html(script, transcript)
 
-    # 📁 ログ情報
     log_entry = {
         "user_id": user_id,
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -485,9 +361,6 @@ def submit():
     with open(log_path, "w", encoding="utf-8") as f:
         json.dump(logs, f, indent=2, ensure_ascii=False)
 
-
-    # 結果を表示
-    # 結果ページに必要な情報を渡す
     return render_template(
         "result.html",
         user_id=user_id,
@@ -502,9 +375,47 @@ def submit():
         diff_result=diff_result
     )
 
+@app.route('/api/recordings/upload', methods=['POST'])
+@auth_required
+def upload_recording():
+    try:
+        user_id = request.headers.get('X-Replit-User-Id')
+        if not user_id:
+            return jsonify({"error": "User not authenticated"}), 401
 
+        if 'audio' not in request.files:
+            return jsonify({"error": "No audio file provided"}), 400
 
-@app.route("/check_subtitles", methods=["GET"])
+        audio_file = request.files['audio']
+        if not audio_file.filename:
+            return jsonify({"error": "Invalid file"}), 400
+
+        filename = secure_filename(audio_file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        audio_file.save(filepath)
+        transcript = transcribe_audio(filepath)
+
+        recording = AudioRecording(
+            user_id=user_id,
+            filename=filename,
+            transcript=transcript,
+            file_hash=str(uuid.uuid4())
+        )
+
+        db.session.add(recording)
+        db.session.commit()
+
+        return jsonify({
+            "id": recording.id,
+            "filename": recording.filename,
+            "transcript": recording.transcript
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/check_subtitles', methods=["GET"])
 def check_subtitles():
     video_id = request.args.get("video_id")
     if not video_id:
@@ -521,8 +432,8 @@ def check_subtitles():
 
 @app.route('/evaluate_read_aloud', methods=['POST'])
 def evaluate_read_aloud():
-    from openai import OpenAI
     import tempfile
+    from openai import OpenAI
     from wer_utils import calculate_wer
 
     try:
@@ -537,7 +448,6 @@ def evaluate_read_aloud():
         if not transcript_text:
             return jsonify({"error": "No transcript provided"}), 400
 
-        # Create temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as tmp:
             audio_file.save(tmp.name)
             try:
@@ -548,7 +458,6 @@ def evaluate_read_aloud():
                 print(f"Transcription error: {str(e)}")
                 return jsonify({"error": "Failed to transcribe audio"}), 500
             finally:
-                # Clean up temp file
                 import os
                 if os.path.exists(tmp.name):
                     os.remove(tmp.name)
@@ -557,7 +466,6 @@ def evaluate_read_aloud():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-    # 差分をHTMLで生成
     diff_result = diff_html(transcribed, transcript_text)
 
     return jsonify({
@@ -578,18 +486,8 @@ def custom_shadowing_ui():
 def serve_upload(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-# --- /upload_custom_audio の修正 ---
-# app.py
-
-# --- 定数 ---
-# OpenAI APIのファイルサイズ上限は約25MBなので、余裕を持たせる
-TARGET_CHUNK_SIZE_MB = 20
-TARGET_CHUNK_SIZE_BYTES = TARGET_CHUNK_SIZE_MB * 1024 * 1024
-# オーバーラップさせる時間（ミリ秒）
-CHUNK_OVERLAP_MS = 5000  # 5秒
-
 @app.route('/upload_custom_audio', methods=['POST'])
-@auth_required # 認証が必要な場合
+@auth_required
 def upload_custom_audio():
     user_id = request.headers.get('X-Replit-User-Id')
     if not user_id:
@@ -602,10 +500,7 @@ def upload_custom_audio():
     if not audio_file or audio_file.filename == '':
         return jsonify({"error": "無効なファイルです"}), 400
 
-    # --- 元ファイルを一時的に保存 ---
-    # 一意なファイル名を生成 (ユーザーID + UUID + 元の拡張子)
     file_ext = os.path.splitext(audio_file.filename)[1].lower()
-    # Whisperが対応する形式かチェック (例: .mp3, .wav, .m4aなど)
     allowed_extensions = ['.mp3', '.m4a', '.wav', '.mpga', '.mpeg', '.webm']
     if file_ext not in allowed_extensions:
         return jsonify({"error": f"サポートされていないファイル形式です: {file_ext}"}), 400
@@ -617,121 +512,92 @@ def upload_custom_audio():
     print(f"一時ファイル保存先: {original_filepath}")
 
     final_transcription = ""
-    processed_chunk_paths = [] # 処理したチャンクパスを記録（後で削除するため）
+    processed_chunk_paths = []
 
     try:
         file_size = os.path.getsize(original_filepath)
         print(f"ファイルサイズ: {file_size / (1024*1024):.2f} MB")
 
-        # --- ファイルサイズに応じて処理を分岐 ---
         if file_size > TARGET_CHUNK_SIZE_BYTES:
             print("ファイルサイズが上限を超えています。分割処理を開始します...")
             audio = AudioSegment.from_file(original_filepath)
             duration_ms = len(audio)
             print(f"音声の長さ: {duration_ms / 1000:.2f} 秒")
 
-            # pydub は内部的にミリ秒で処理するため、バイト数から適切なミリ秒数を推定するのは難しい
-            # 代わりに、時間ベースで分割する (例: 10分ごと)
-            # 注意: 10分でもエンコードによっては25MBを超える可能性あり。より安全にするなら短くする(例: 5分)か、
-            #      分割後のファイルサイズをチェックするロジックが必要。
-            #      ここではシンプルに10分(600,000ms)で分割する例を示す。
             chunk_length_ms = 600 * 1000 # 10分
-            # または make_chunks ユーティリティを使うことも可能
-            # chunks = make_chunks(audio, chunk_length_ms)
-
             transcribed_parts = []
-            num_chunks = math.ceil(duration_ms / (chunk_length_ms - CHUNK_OVERLAP_MS)) # おおよそのチャンク数
+            num_chunks = math.ceil(duration_ms / (chunk_length_ms - CHUNK_OVERLAP_MS))
             print(f"推定チャンク数: {num_chunks}")
 
             current_pos_ms = 0
             chunk_index = 0
             while current_pos_ms < duration_ms:
-                # オーバーラップを考慮したチャンクの開始・終了位置
                 start_ms = max(0, current_pos_ms - CHUNK_OVERLAP_MS)
                 end_ms = min(current_pos_ms + chunk_length_ms, duration_ms)
                 print(f"チャンク {chunk_index + 1}/{num_chunks}: {start_ms/1000:.1f}s - {end_ms/1000:.1f}s")
 
                 chunk = audio[start_ms:end_ms]
 
-                # 一時チャンクファイルを作成 (Whisperが読み込める形式で)
-                # NamedTemporaryFileを使うと管理が楽になる
                 with tempfile.NamedTemporaryFile(
                     prefix=f"{filename_base}_chunk_{chunk_index}_",
-                    suffix=".mp3", # Whisperに渡す形式 (mp3, wav等)
+                    suffix=".mp3",
                     dir=app.config['UPLOAD_FOLDER'],
-                    delete=False # 後で明示的に削除するため
+                    delete=False
                 ) as tmp_chunk_file:
                     chunk_filepath = tmp_chunk_file.name
                     print(f"  チャンクファイル書き出し中: {chunk_filepath}")
-                    chunk.export(chunk_filepath, format="mp3") # formatを指定
-                    processed_chunk_paths.append(chunk_filepath) # 削除リストに追加
+                    chunk.export(chunk_filepath, format="mp3")
+                    processed_chunk_paths.append(chunk_filepath)
 
-                # --- 各チャンクを文字起こし ---
                 print(f"  チャンク {chunk_index + 1} 文字起こし中...")
                 try:
-                    # transcribe_utils.py の関数を呼び出す
                     transcript_part = transcribe_audio(chunk_filepath)
                     transcribed_parts.append(transcript_part)
                     print(f"  チャンク {chunk_index + 1} 文字起こし完了.")
                 except Exception as transcribe_err:
                     print(f"!! チャンク {chunk_index + 1} の文字起こしエラー: {transcribe_err}")
-                    # エラー処理: スキップするか、全体をエラーとするかなど
-                    # ここではエラーを再発生させて全体を中断
                     raise transcribe_err
 
-                # 次のチャンクの開始位置へ（オーバーラップを考慮しない位置）
                 current_pos_ms += chunk_length_ms
                 chunk_index += 1
 
-            # --- 全ての文字起こし結果を結合 ---
-            # TODO: オーバーラップ部分の重複除去ロジックをここに入れる (オプション)
-            #       単純結合でよければ以下でOK
             final_transcription = " ".join(transcribed_parts).strip()
             print("全てのチャンクの文字起こしを結合しました。")
 
         else:
-            # --- ファイルサイズが小さい場合は直接文字起こし ---
             print("ファイルサイズは上限内です。直接文字起こしします...")
             final_transcription = transcribe_audio(original_filepath)
             print("直接文字起こし完了。")
 
-        # --- Material データベースへの保存 ---
         print("データベースにMaterialを保存します...")
         new_material = Material(
             user_id=user_id,
-            material_name=audio_file.filename, # 元のファイル名を使用
-            # storage_key は元ファイルのパスまたはObject Storageのキーなど、運用に合わせて設定
-            # ここでは元ファイルのパスを保存する例
+            material_name=audio_file.filename,
             storage_key=original_filepath,
             transcript=final_transcription,
-            upload_timestamp=datetime.utcnow() # タイムゾーン付きUTC推奨
+            upload_timestamp=datetime.utcnow()
         )
         db.session.add(new_material)
         db.session.commit()
         print(f"Material ID: {new_material.id} でデータベースに保存しました。")
 
-        # --- セッションに情報を保存 ---
         session['current_material_id'] = new_material.id
         session['custom_transcription'] = final_transcription
 
-        # --- フロントエンドへのレスポンス ---
         return jsonify({
-            # フロントで再生するのは元の（分割前）ファイル
             "audio_url": url_for('serve_upload', filename=original_filename),
             "transcription": final_transcription,
             "material_id": new_material.id
         })
 
     except Exception as e:
-        db.session.rollback() # エラー時はDB変更をロールバック
+        db.session.rollback()
         print(f"!! /upload_custom_audio でエラー発生: {str(e)}")
         import traceback
-        traceback.print_exc() # 詳細なトレースバックを出力
-        # フロントエンドには一般的なエラーメッセージを返す
+        traceback.print_exc()
         return jsonify({"error": f"処理中にエラーが発生しました。詳細はサーバーログを確認してください。"}), 500
 
     finally:
-        # --- 一時ファイル(チャンク)の削除 ---
         print("一時チャンクファイルを削除します...")
         for path in processed_chunk_paths:
             if os.path.exists(path):
@@ -740,25 +606,11 @@ def upload_custom_audio():
                     print(f"  削除: {path}")
                 except OSError as del_err:
                     print(f"!! 一時ファイル削除エラー ({path}): {del_err}")
-        # 元ファイルを削除するかどうかは運用による
-        # transcribe_audio が元ファイルを必要とする場合や、
-        # storage_keyとしてパスをDBに保存している場合は削除しない。
-        # ここでは削除しないでおく。
-        # if os.path.exists(original_filepath):
-        #     os.remove(original_filepath)
 
-        # DBセッションをクリーンアップ
         db.session.remove()
 
-# /uploads/<filename> ルートがなければ追加 (serve_upload として定義済みなら不要)
-# @app.route('/uploads/<path:filename>')
-# def serve_upload(filename):
-#     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
-
-# --- /evaluate_custom_shadowing の修正 ---
 @app.route('/evaluate_custom_shadowing', methods=['POST'])
-@auth_required # 認証が必要な場合
+@auth_required
 def evaluate_custom_shadowing():
     user_id = request.headers.get('X-Replit-User-Id')
     if not user_id:
@@ -767,34 +619,27 @@ def evaluate_custom_shadowing():
     if 'recorded_audio' not in request.files:
         return jsonify({"error": "No recorded audio provided"}), 400
 
-    # --- セッションから Material 情報を取得 ---
     material_id = session.get('current_material_id')
     original_transcription = session.get('custom_transcription')
 
     if not material_id or not original_transcription:
         return jsonify({"error": "Original material information not found in session"}), 400
-    # ------------------------------------
 
     recorded_audio = request.files['recorded_audio']
 
-    # ... (既存の録音音声の前処理と文字起こし) ...
-    # 例: 一時ファイルに保存 -> warm-up除去 -> Whisperで文字起こし -> user_transcription を得る
-    # この部分は既存のロジックを維持
     tmp_path = os.path.join(app.config['UPLOAD_FOLDER'], f'tmp_recording_{user_id}_{uuid.uuid4().hex}.webm')
-    processed_path = tmp_path.replace('.webm', '_processed.wav') # 例
+    processed_path = tmp_path.replace('.webm', '_processed.wav')
     try:
         recorded_audio.save(tmp_path)
-        # ---- Warm-up除去ロジック ----
-        WARMUP_TRANSCRIPT = "10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0" # これは設定ファイルなどから読み込むのが望ましい
+        WARMUP_TRANSCRIPT = "10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0"
         audio = AudioSegment.from_file(tmp_path)
-        # 必要であればここで pydub を使った無音除去やトリミング
-        audio.export(processed_path, format="wav") # Whisperにかける前に適切な形式に
+        audio.export(processed_path, format="wav")
         full_transcription = transcribe_audio(processed_path)
-        user_transcription = full_transcription # デフォルトはフル
+        user_transcription = full_transcription
 
         numbers = WARMUP_TRANSCRIPT.split(", ")
         suffixes = [", ".join(numbers[i:]) for i in range(len(numbers))]
-        suffixes.sort(key=len, reverse=True) # 長いものからチェック
+        suffixes.sort(key=len, reverse=True)
 
         matched_suffix = None
         normalized_full_transcription = full_transcription.lower().strip()
@@ -802,41 +647,33 @@ def evaluate_custom_shadowing():
         for suffix in suffixes:
             if normalized_full_transcription.startswith(suffix.lower()):
                 matched_suffix = suffix
-                break # 最長のマッチが見つかったら終了
+                break
 
         if matched_suffix:
             start_pos = normalized_full_transcription.find(matched_suffix.lower())
-            if start_pos != -1: # 基本的に startswith でチェックしているので 0 のはずだが念のため
-                # マッチした部分を除去
+            if start_pos != -1:
                 user_transcription = full_transcription[start_pos + len(matched_suffix):].strip()
-        # --------------------------
 
-        wer_score = calculate_wer(user_transcription, original_transcription) # 比較順序注意
-        diff_result = diff_html(user_transcription, original_transcription) # 比較順序注意
+        wer_score = calculate_wer(user_transcription, original_transcription)
+        diff_result = diff_html(user_transcription, original_transcription)
 
-        # --- データベースに PracticeLog を保存 ---
         new_log = PracticeLog(
             user_id=user_id,
-            practice_type='custom', # タイプを 'custom' に設定
-            material_id=material_id, # セッションから取得した material_id を使用
-            recording_id=None, # custom なので NULL
+            practice_type='custom',
+            material_id=material_id,
+            recording_id=None,
             wer=round(wer_score * 100, 2),
             original_text=original_transcription,
-            user_text=user_transcription # warm-up除去後のテキスト
+            user_text=user_transcription
         )
         db.session.add(new_log)
         db.session.commit()
-        # ------------------------------------
-
-        # セッション情報をクリア (必要に応じて)
-        # session.pop('current_material_id', None)
-        # session.pop('custom_transcription', None)
 
         return jsonify({
             "wer": round(wer_score * 100, 2),
             "diff_html": diff_result,
-            "original_transcription": original_transcription, # デバッグ用に返す
-            "user_transcription": user_transcription # デバッグ用に返す
+            "original_transcription": original_transcription,
+            "user_transcription": user_transcription
         })
 
     except Exception as e:
@@ -844,7 +681,6 @@ def evaluate_custom_shadowing():
         print(f"Evaluation error: {str(e)}")
         return jsonify({"error": f"評価処理中にエラーが発生しました: {str(e)}"}), 500
     finally:
-        # 一時ファイルを削除
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
         if os.path.exists(processed_path):
@@ -862,47 +698,39 @@ def evaluate_shadowing():
 
     client = OpenAI()
 
-    # === フォームから情報取得 ===
     genre = request.form.get("genre", "")
     level = request.form.get("level", "")
     username = request.form.get("username", "anonymous")
 
-    # === 教材スクリプトを script.txt から取得（Whisperは使わない）
     script_path = os.path.join("presets", "shadowing", genre, level, "script.txt")
-    if not os.path.exists(script_path):
-        return jsonify({"error": f"Script not found at: {script_path}"}), 400
     if not os.path.exists(script_path):
         return jsonify({"error": f"Script not found at: {script_path}"}), 400
 
     with open(script_path, "r", encoding="utf-8") as f:
         original_transcribed = f.read().strip()
 
-    # === 録音ファイルの先頭500msをカット ===
     with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_in:
         recorded_audio.save(tmp_in.name)
 
-    # pydubで加工 → 一時ファイルへ保存
     audio = AudioSegment.from_file(tmp_in.name)
-    trimmed_audio = audio[500:]  # 500msカット
+    trimmed_audio = audio[500:]
     tmp_out_path = tmp_in.name.replace(".webm", "_cut.wav")
     trimmed_audio.export(tmp_out_path, format="wav")
 
-    # Whisperで文字起こし
     with open(tmp_out_path, "rb") as f:
         user_result = client.audio.transcriptions.create(
             model="whisper-1",
             file=f
         )
     user_transcribed = user_result.text
-    # === 精度評価
+
     wer_score = calculate_wer(original_transcribed, user_transcribed)
     diff_user = get_diff_html(original_transcribed, user_transcribed, mode='user')
     diff_original = get_diff_html(original_transcribed, user_transcribed, mode='original')
 
-    # ログを保存
     log_entry = {
         "timestamp": datetime.utcnow().isoformat(),
-        "user": request.form.get("username", "anonymous"),  # ←ここが動的に！
+        "user": request.form.get("username", "anonymous"),
         "genre": request.form.get("genre", ""),
         "level": request.form.get("level", ""),
         "wer": round(wer_score * 100, 2),
@@ -956,7 +784,6 @@ def get_highest_levels(username):
     return jsonify(result)
 
 
-
 @app.route("/api/log_attempt", methods=["POST"])
 def log_attempt():
     data = request.json
@@ -1000,26 +827,20 @@ def save_material():
         if not audio_file.filename:
             return jsonify({"error": "No audio file selected"}), 400
 
-        # Generate unique ID and prepare storage key
         material_id = uuid.uuid4().hex
         file_ext = os.path.splitext(audio_file.filename)[1].lower()
         object_storage_key = f"user_audio/{user_id}/{material_id}{file_ext}"
 
-        # Save audio to temporary path for transcription
         temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{material_id}{file_ext}")
         audio_file.save(temp_path)
 
-        # Upload to Object Storage
         with open(temp_path, 'rb') as f:
             storage_client.upload_file(object_storage_key, f)
 
-        # Transcribe audio
         transcript = transcribe_audio(temp_path)
 
-        # Clean up temporary file
         os.remove(temp_path)
 
-        # Prepare and save material data
         material_data = {
             "user_id": user_id,
             "material_name": material_name,
@@ -1038,7 +859,7 @@ def save_material():
 
     except Exception as e:
         print(f"Error saving material: {str(e)}")
-        return jsonify({"error": str(e)}), 500      # ← 原因をそのまま返す
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/my_materials', methods=['GET'])
 @auth_required
@@ -1048,11 +869,9 @@ def list_materials():
         if not user_id:
             return jsonify({"error": "User not authenticated"}), 401
 
-        # Get all materials for this user
         prefix = f"material_{user_id}_"
         user_materials = []
 
-        # Use prefix to find all materials for this user
         for key in database.prefix(prefix):
             material_data = db[key]
             material_id = key.replace(prefix, '')
@@ -1063,7 +882,6 @@ def list_materials():
                 "upload_timestamp": material_data["upload_timestamp"]
             })
 
-        # Sort by upload timestamp, newest first
         user_materials.sort(key=lambda x: x["upload_timestamp"], reverse=True)
 
         return jsonify({
@@ -1072,7 +890,7 @@ def list_materials():
 
     except Exception as e:
         print(f"Error listing materials: {str(e)}")
-        return jsonify({"error": str(e)}), 500      # ← 原因をそのまま返す
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/sentence-practice')
 def sentence_practice():
@@ -1138,11 +956,10 @@ def get_sentences(genre, level):
 
     return jsonify(sentences)
 
-
-# === アプリ実行（Replitでは不要、ローカル用） ===
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Use port 5000 for development
-    app.run(host="0.0.0.0", port=port, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
 @app.route('/api/practice/logs', methods=['POST'])
 @auth_required
 def log_practice():
