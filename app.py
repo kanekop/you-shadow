@@ -466,17 +466,266 @@ def evaluate_read_aloud():
         "diff_html": diff_result
     })
 
+# === Shadowing Routes ===
 @app.route('/shadowing')
 def shadowing_ui():
     return render_template('shadowing.html')
 
+@app.route('/evaluate_shadowing', methods=['POST'])
+def evaluate_shadowing():
+    from openai import OpenAI
+    import tempfile
+    from wer_utils import calculate_wer
+
+    original_audio = request.files['original_audio']
+    recorded_audio = request.files['recorded_audio']
+    genre = request.form.get("genre", "")
+    level = request.form.get("level", "")
+    username = request.form.get("username", "anonymous")
+
+    script_path = os.path.join("presets", "shadowing", genre, level, "script.txt")
+    if not os.path.exists(script_path):
+        return jsonify({"error": f"Script not found at: {script_path}"}), 400
+
+    with open(script_path, "r", encoding="utf-8") as f:
+        original_transcribed = f.read().strip()
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_in:
+        recorded_audio.save(tmp_in.name)
+
+    audio = AudioSegment.from_file(tmp_in.name)
+    trimmed_audio = audio[500:]
+    tmp_out_path = tmp_in.name.replace(".webm", "_cut.wav")
+    trimmed_audio.export(tmp_out_path, format="wav")
+
+    transcribed = transcribe_audio(tmp_out_path)
+    wer_score = calculate_wer(original_transcribed, transcribed)
+    
+    diff_user = get_diff_html(original_transcribed, transcribed, mode='user')
+    diff_original = get_diff_html(original_transcribed, transcribed, mode='original')
+
+    log_entry = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "user": username,
+        "genre": genre,
+        "level": level,
+        "wer": round(wer_score * 100, 2),
+        "original_transcribed": original_transcribed,
+        "user_transcribed": transcribed,
+        "script_excerpt": original_transcribed[:100]
+    }
+
+    save_preset_log(log_entry)
+
+    try:
+        os.remove(tmp_in.name)
+        os.remove(tmp_out_path)
+    except:
+        pass
+
+    return jsonify({
+        "original_transcribed": original_transcribed,
+        "user_transcribed": transcribed,
+        "wer": round(wer_score * 100, 2),
+        "diff_user": diff_user,
+        "diff_original": diff_original
+    })
+
+# === Custom Shadowing Routes ===
 @app.route('/custom-shadowing')
 def custom_shadowing_ui():
     return render_template('custom_shadowing.html')
 
+@app.route('/upload_custom_audio', methods=['POST'])
+@auth_required
+def upload_custom_audio():
+    user_id = request.headers.get('X-Replit-User-Id')
+    if not user_id:
+        return jsonify({"error": "User not authenticated"}), 401
+
+    if 'audio' not in request.files:
+        return jsonify({"error": "音声ファイルが選択されていません"}), 400
+
+    audio_file = request.files['audio']
+    if not audio_file or audio_file.filename == '':
+        return jsonify({"error": "無効なファイルです"}), 400
+
+    file_ext = os.path.splitext(audio_file.filename)[1].lower()
+    allowed_extensions = ['.mp3', '.m4a', '.wav', '.mpga', '.mpeg', '.webm']
+    if file_ext not in allowed_extensions:
+        return jsonify({"error": f"サポートされていないファイル形式です: {file_ext}"}), 400
+
+    try:
+        filename_base = secure_filename(f"{user_id}_{uuid.uuid4().hex}")
+        original_filename = f"{filename_base}_original{file_ext}"
+        original_filepath = os.path.join(app.config['UPLOAD_FOLDER'], original_filename)
+        audio_file.save(original_filepath)
+
+        transcript = transcribe_audio(original_filepath)
+
+        new_material = Material(
+            user_id=user_id,
+            material_name=audio_file.filename,
+            storage_key=original_filepath,
+            transcript=transcript,
+            upload_timestamp=datetime.utcnow()
+        )
+        db.session.add(new_material)
+        db.session.commit()
+
+        session['current_material_id'] = new_material.id
+        session['custom_transcription'] = transcript
+
+        return jsonify({
+            "audio_url": url_for('serve_upload', filename=original_filename),
+            "transcription": transcript,
+            "material_id": new_material.id
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/evaluate_custom_shadowing', methods=['POST'])
+@auth_required
+def evaluate_custom_shadowing():
+    user_id = request.headers.get('X-Replit-User-Id')
+    if not user_id:
+        return jsonify({"error": "User not authenticated"}), 401
+
+    if 'recorded_audio' not in request.files:
+        return jsonify({"error": "No recorded audio provided"}), 400
+
+    material_id = session.get('current_material_id')
+    original_transcription = session.get('custom_transcription')
+
+    if not material_id or not original_transcription:
+        return jsonify({"error": "Original material information not found in session"}), 400
+
+    recorded_audio = request.files['recorded_audio']
+    tmp_path = os.path.join(app.config['UPLOAD_FOLDER'], f'tmp_recording_{user_id}_{uuid.uuid4().hex}.webm')
+    processed_path = tmp_path.replace('.webm', '_processed.wav')
+
+    try:
+        recorded_audio.save(tmp_path)
+        audio = AudioSegment.from_file(tmp_path)
+        audio.export(processed_path, format="wav")
+        
+        transcribed = transcribe_audio(processed_path)
+        wer_score = calculate_wer(transcribed, original_transcription)
+        diff_result = diff_html(transcribed, original_transcription)
+
+        new_log = PracticeLog(
+            user_id=user_id,
+            practice_type='custom',
+            material_id=material_id,
+            wer=round(wer_score * 100, 2),
+            original_text=original_transcription,
+            user_text=transcribed
+        )
+        db.session.add(new_log)
+        db.session.commit()
+
+        return jsonify({
+            "wer": round(wer_score * 100, 2),
+            "diff_html": diff_result,
+            "original_transcription": original_transcription,
+            "user_transcription": transcribed
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        if os.path.exists(processed_path):
+            os.remove(processed_path)
+        db.session.remove()
+
+# === File Serving Routes ===
 @app.route('/uploads/<path:filename>')
 def serve_upload(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/presets/<path:filename>')
+def serve_presets(filename):
+    return send_from_directory("presets", filename)
+
+# === Recording Management Routes ===
+@app.route('/api/recordings/upload', methods=['POST'])
+@auth_required
+def upload_recording():
+    try:
+        user_id = request.headers.get('X-Replit-User-Id')
+        if not user_id:
+            return jsonify({"error": "User not authenticated"}), 401
+
+        if 'audio' not in request.files:
+            return jsonify({"error": "No audio file provided"}), 400
+
+        audio_file = request.files['audio']
+        if not audio_file.filename:
+            return jsonify({"error": "Invalid file"}), 400
+
+        filename = secure_filename(audio_file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        audio_file.save(filepath)
+        transcript = transcribe_audio(filepath)
+
+        recording = AudioRecording(
+            user_id=user_id,
+            filename=filename,
+            transcript=transcript,
+            file_hash=str(uuid.uuid4())
+        )
+
+        db.session.add(recording)
+        db.session.commit()
+
+        return jsonify({
+            "id": recording.id,
+            "filename": recording.filename,
+            "transcript": recording.transcript
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/recordings', methods=['GET'])
+@auth_required
+def get_recordings():
+    user_id = request.headers.get('X-Replit-User-Id')
+    recordings = AudioRecording.query.filter_by(user_id=user_id).all()
+    return jsonify({
+        "recordings": [{
+            "id": r.id,
+            "filename": r.filename,
+            "transcript": r.transcript,
+            "created_at": r.created_at.isoformat()
+        } for r in recordings]
+    })
+
+@app.route('/api/recordings/last', methods=['GET'])
+@auth_required
+def get_last_practice():
+    user_id = request.headers.get('X-Replit-User-Id')
+    last_practice = PracticeLog.query.filter_by(user_id=user_id).order_by(PracticeLog.practiced_at.desc()).first()
+
+    if not last_practice:
+        return '', 204
+
+    recording = AudioRecording.query.get(last_practice.recording_id)
+    if not recording:
+        return '', 204
+
+    return jsonify({
+        "id": recording.id,
+        "filename": recording.filename,
+        "transcript": recording.transcript,
+        "practiced_at": last_practice.practiced_at.isoformat()
+    })
 
 @app.route('/upload_custom_audio', methods=['POST'])
 @auth_required
