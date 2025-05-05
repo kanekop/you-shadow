@@ -51,16 +51,8 @@ def auth_required(f):
 
 # Flask app initialization
 app = Flask(__name__)
+app.config.from_object('config')
 migrate = Migrate(app, db)
-
-# App configuration
-app.config.update(
-    UPLOAD_FOLDER=UPLOAD_FOLDER,
-    SECRET_KEY=SECRET_KEY,
-    SQLALCHEMY_DATABASE_URI=SQLALCHEMY_DATABASE_URI,
-    SQLALCHEMY_TRACK_MODIFICATIONS=SQLALCHEMY_TRACK_MODIFICATIONS,
-    MAX_CONTENT_LENGTH=25 * 1024 * 1024  # 25MB upload limit
-)
 
 # Initialize extensions
 db.init_app(app)
