@@ -649,11 +649,6 @@ def evaluate_custom_shadowing():
         wer_score = calculate_wer(user_transcription, original_transcription)
         diff_result = diff_html(user_transcription, original_transcription)
 
-        # Save the processed audio file permanently
-        audio_filename = f'custom_practice_{user_id}_{uuid.uuid4().hex}.wav'
-        permanent_audio_path = os.path.join(app.config['UPLOAD_FOLDER'], audio_filename)
-        shutil.copy2(processed_path, permanent_audio_path)
-
         new_log = PracticeLog(
             user_id=user_id,
             practice_type='custom',
@@ -661,8 +656,7 @@ def evaluate_custom_shadowing():
             recording_id=None,
             wer=round(wer_score * 100, 2),
             original_text=original_transcription,
-            user_text=user_transcription,
-            audio_storage_key=audio_filename
+            user_text=user_transcription
         )
         db.session.add(new_log)
         db.session.commit()

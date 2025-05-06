@@ -41,7 +41,6 @@ class PracticeLog(db.Model):
     practiced_at   = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     original_text  = db.Column(db.Text, nullable=True) # 元のテキストも保存
     user_text      = db.Column(db.Text, nullable=True) # ユーザーの発話テキストも保存
-    audio_storage_key = db.Column(db.String, nullable=True) # 録音音声ファイルの保存パス
 
     # --- リレーションシップの調整 ---
     # backref は一意である必要があるので、必要に応じて調整
