@@ -697,7 +697,10 @@ def upload_custom_audio():
         return api_error_response("無効なファイルです", 400)
 
     # ファイル拡張子チェック
-    file_ext = os.path.splitext(audio_file.filename)[1].lower()
+    _, file_ext = os.path.splitext(audio_file.filename)
+    if not file_ext:
+        return api_error_response("ファイル拡張子がありません", 400)
+    file_ext = file_ext.lower()
     allowed_extensions = ['.mp3', '.m4a', '.wav', '.mpga', '.mpeg', '.webm']
     if file_ext not in allowed_extensions:
         return api_error_response(f"サポートされていないファイル形式です: {file_ext}", 400)
