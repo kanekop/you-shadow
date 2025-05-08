@@ -368,3 +368,89 @@ audio {
   background: #cccccc;
   cursor: not-allowed;
 }
+
+
+.choice-buttons {
+  display: flex;
+  gap: 1em; /* ボタン間のスペース */
+  margin-bottom: 1em;
+}
+
+.choice-buttons button {
+  flex-grow: 1; /* ボタンが利用可能なスペースを均等に分け合う */
+}
+
+.secondary-btn {
+  background-color: #6c757d; /* Bootstrapのセカンダリカラーに近い色 */
+  color: white;
+}
+.secondary-btn:hover {
+  background-color: #5a6268;
+}
+.secondary-btn:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+}
+
+
+#previousMaterialInfo {
+  background-color: #f8f9fa; /* 薄い背景色 */
+}
+
+#previousMaterialInfo p strong {
+  min-width: 100px; /* ラベルの幅をある程度揃える */
+  display: inline-block;
+}
+
+/* ユーザーメッセージ表示エリアのスタイル */
+.alert {
+  padding: 10px 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #fff;
+  text-align: center;
+}
+.alert-info {
+  background-color: #17a2b8; /* Bootstrap info color */
+}
+.alert-success {
+  background-color: #28a745; /* Bootstrap success color */
+}
+.alert-error {
+  background-color: #dc3545; /* Bootstrap danger color */
+}
+.alert-warning {
+  background-color: #ffc107; /* Bootstrap warning color */
+  color: #212529; /* 警告の場合は文字色を濃くする */
+}
+
+/* スピナー内のプログレス表示用 */
+.spinner-text .progress-percentage {
+  font-size: 0.9em;
+  color: #555;
+  font-weight: normal;
+}
+
+/* 練習教材タイトル */
+#practiceMaterialTitle {
+    font-weight: bold;
+    color: #333;
+}
+
+/* ボタン全般のスタイル調整（必要に応じて） */
+button {
+  padding: 0.6em 1.2em; /* 少しパディングを調整 */
+  font-size: 0.95rem;
+  border-radius: 5px; /* 角丸を少し大きく */
+}
+
+.button-group {
+    display: flex;
+    gap: 10px; /* ボタン間のスペース */
+    margin-bottom: 1em;
+}
+
+.button-group button {
+    flex: 1; /* ボタンを均等幅に */
+}

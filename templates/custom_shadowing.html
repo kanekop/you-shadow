@@ -5,7 +5,6 @@
   <title>カスタムシャドウイング練習</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="/static/js/audio-recorder.js"></script>
-  <script src="/static/js/preset-manager.js"></script>
   <script src="/static/js/custom-shadowing.js" defer></script>
 </head>
 <body>
@@ -13,44 +12,50 @@
     <div class="container">
       <a href="/" class="back-button">← ホームに戻る</a>
       <h1>🎵 カスタムシャドウイング練習</h1>
-      <!-- ここから追加 -->
-      <section id="last-practice-section" class="hidden" style="margin-bottom: 2em;">
-        <h3>🕑 前回の練習</h3>
-        <audio id="shadowing-audio" controls style="width:100%;"></audio>
-        <pre id="transcript-text" style="background:#f9f9f9; padding:1em; white-space:pre-wrap;"></pre>
-      </section>
-      <!-- ここまで追加 -->
-
-
     </div>
   </div>
 
   <div class="container">
-    <div id="uploadSection">
-      <h3>1️⃣ 音声ファイルをアップロード</h3>
+    <div id="userMessageArea" style="padding: 10px; margin-bottom: 15px; border-radius: 5px; display: none; color: white; text-align: center;"></div>
+
+    <div id="initialChoiceSection">
+      <h3>練習方法を選択してください</h3>
+      <div class="choice-buttons">
+        <button id="usePreviousMaterialBtn" class="primary-btn">🔁 前回の教材で練習する</button>
+        <button id="uploadNewMaterialBtn" class="secondary-btn">⬆️ 新しい教材をアップロード</button>
+      </div>
+      <div id="previousMaterialInfo" style="display:none; margin-top: 1em; padding: 1em; border: 1px solid #eee; border-radius: 5px;">
+        <h4>前回の教材情報：</h4>
+        <p><strong>ファイル名:</strong> <span id="prevMaterialFilename">-</span></p>
+        <p><strong>スクリプト冒頭:</strong> <span id="prevMaterialScriptPreview">-</span>...</p>
+        <p><small>（これはダミー表示です。実際の機能実装時に前回のデータが読み込まれます。）</small></p>
+      </div>
+    </div>
+    <div id="uploadSection" style="display: none;"> <h3>1️⃣ 音声ファイルをアップロード</h3>
       <div class="upload-area">
-        <input type="file" id="audioFileInput" accept=".mp3,.m4a,.wav">
-        <button id="uploadBtn" class="primary-btn">アップロード</button>
+        <input type="file" id="audioFileInput" accept=".mp3,.m4a,.wav,.mpga,.mpeg,.webm"> <button id="uploadBtn" class="primary-btn">アップロードして練習開始</button>
         <div class="upload-info">
-          <p class="hint">✓ 対応形式: MP3, M4A, WAV</p>
+          <p class="hint">✓ 対応形式: MP3, M4A, WAV, WebM など</p>
           <p class="hint">✓ 最大サイズ: 25MB</p>
         </div>
       </div>
     </div>
 
     <div id="practiceSection" style="display: none;">
-      <h3>2️⃣ 原稿 <button id="toggleTranscript" class="toggle-btn">表示</button></h3>
-      <div id="transcriptionText" class="display-text" style="display: none;"></div>
+      <h3><span id="practiceMaterialTitle">現在の教材</span> <button id="toggleTranscript" class="toggle-btn">スクリプト表示</button></h3>
+      <div id="transcriptionText" class="display-text" style="display: none; white-space: pre-wrap; max-height: 200px; overflow-y: auto;"></div>
 
-      <h3>3️⃣ シャドウイング練習</h3>
-      <audio id="originalAudio" controls></audio><br><br>
+      <h3>🎧 シャドウイング練習</h3>
+      <audio id="originalAudio" controls style="width: 100%;"></audio><br><br>
 
-      <button id="startBtn">▶️ 録音開始</button>
-      <button id="stopBtn" disabled>⏹ 停止</button>
-      <button id="submitBtn" disabled>📝 提出して評価</button>
+      <div class="button-group">
+        <button id="startBtn" class="primary-btn">▶️ 録音開始</button>
+        <button id="stopBtn" class="secondary-btn" disabled>⏹ 停止</button>
+        <button id="submitBtn" class="secondary-btn" disabled>📝 提出して評価</button>
+      </div>
 
-      <h3>🎤 録音音声</h3>
-      <audio id="recordedAudio" controls></audio>
+      <h3>🎤 あなたの録音</h3>
+      <audio id="recordedAudio" controls style="width: 100%; margin-top: 0.5em;"></audio>
 
       <div id="resultBox" style="margin-top: 2em;"></div>
     </div>
@@ -62,5 +67,13 @@
       <div class="spinner-text">0%</div>
     </div>
   </div>
+
+  <script>
+    // JavaScript側で Replit のユーザー情報を取得できるようにする
+    // const requestHeaders = new Headers(); // これは custom-shadowing.js 内に移動またはそこで直接定義
+    // {% if user_id %}
+    //   requestHeaders.set('X-Replit-User-Id', '{{ user_id }}');
+    // {% endif %}
+  </script>
 </body>
 </html>
