@@ -3,7 +3,7 @@ import tempfile
 import uuid # ファイル名の一意性確保のために使用する場合
 from flask import current_app # app.config や app.logger を使うため
 from pydub import AudioSegment, exceptions as pydub_exceptions # pydub の例外もインポート
-from transcribe_utils import transcribe_audio # transcribe_utils.py の場所に合わせてインポート
+from core.services.transcribe_utils import transcribe_audio # transcribe_utils.py の場所に合わせてインポート
 
 # エラーの種類を明確にするためのカスタム例外 (任意)
 class AudioProcessingError(Exception):
