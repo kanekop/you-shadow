@@ -366,63 +366,7 @@ def api_presets():
     structure = get_presets_structure()
     return jsonify(structure)
 
-@app.route('/submit', methods=['POST'])
-def submit():
-    user_id = request.form['user_id']
-    script = request.form['script']
-    file = request.files['audio']
 
-    filename = secure_filename(file.filename)
-    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-    file.save(filepath)
-
-    static_path = os.path.join("static", "recorded.webm")
-    shutil.copy(filepath, static_path)
-
-    transcript = transcribe_audio(filepath)
-
-    wer_score, subs, dels, ins, word_count = wer(script, transcript)
-
-    diff_result = diff_html(script, transcript)
-
-    log_entry = {
-        "user_id": user_id,
-        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "script": script,
-        "transcript": transcript,
-        "wer": round(wer_score, 1),
-        "substitutions": subs,
-        "deletions": dels,
-        "insertions": ins,
-        "words": word_count,
-        "note": ""
-    }
-
-    log_path = "log.json"
-    if os.path.exists(log_path):
-        with open(log_path, "r", encoding="utf-8") as f:
-            logs = json.load(f)
-    else:
-        logs = []
-
-    logs.append(log_entry)
-
-    with open(log_path, "w", encoding="utf-8") as f:
-        json.dump(logs, f, indent=2, ensure_ascii=False)
-
-    return render_template(
-        "result.html",
-        user_id=user_id,
-        filename=filename,
-        script=script,
-        transcript=transcript,
-        wer_score=wer_score,
-        subs=subs,
-        dels=dels,
-        ins=ins,
-        word_count=word_count,
-        diff_result=diff_result
-    )
 
 @app.route('/api/recordings/upload', methods=['POST'])
 @auth_required
