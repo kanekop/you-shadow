@@ -49,12 +49,20 @@ A **Flask–based web application** that helps users improve pronunciation and s
 ```
 Browser → Flask (app.py)
            ├─ Core modules
-           │   ├─ audio_utils.py      ──► FFmpeg / pydub
-           │   ├─ transcribe_utils.py ──► OpenAI Whisper
+           │   ├─ audio_utils.py      ──► FFmpeg / pydub (Audio processing)
+           │   └─ responses.py        ──► API Response handling
+           ├─ Utils
+           │   ├─ transcribe_utils.py ──► OpenAI Whisper (Speech-to-Text)
            │   ├─ wer_utils.py        ──► WER calculation
-           │   └─ diff_viewer.py      ──► HTML diff
-           ├─ Models (SQLAlchemy)
-           └─ PostgreSQL / SQLite
+           │   ├─ diff_viewer.py      ──► HTML diff generation
+           │   ├─ youtube_utils.py    ──► YouTube API integration
+           │   └─ utils.py            ──► Common utilities
+           ├─ Static assets
+           │   ├─ JS modules          ──► Frontend functionality
+           │   └─ Audio files         ──► System audio (warm-up, etc.)
+           ├─ Templates               ──► Jinja2 HTML views
+           ├─ Models (SQLAlchemy)     ──► Database schema
+           └─ PostgreSQL / SQLite     ──► Data persistence
 ```
 
 ---
@@ -111,33 +119,32 @@ $ python app.py  # http://localhost:5000
 
 ```
 project/
-├── app.py                    # Main application file (Flask routes, initialization)
-├── config.py               # Configuration classes (Dev, Prod, etc.)
-├── models.py                # SQLAlchemy database models (AudioRecording, Material, PracticeLog)
-├── requirements.txt         # Python dependencies
-├── transcribe_utils.py    # Handles OpenAI Whisper API calls and related logic
-├── wer_utils.py             # Calculates Word Error Rate (WER)
-├── diff_viewer.py          # Generates HTML diffs between texts
-├── youtube_utils.py      # Handles YouTube API interactions (transcript fetching)
-├── utils.py                 # General utility functions (e.g., remove_fillers)
-├── core/                    # Core application modules
-│   ├── audio_utils.py       # Audio processing helpers (e.g., process_and_transcribe_audio)
-│   └── responses.py         # Standardized API response functions (success/error)
-├── instance/                # Instance folder (e.g., for SQLite DB in dev)
-│   └── dev.db               # Example development database location
-├── migrations/              # Flask-Migrate database migration scripts
-│   ├── versions/
-│   └── ...
-├── presets/                 # Default practice materials
-│   ├── sentences/
-│   └── shadowing/
-├── static/                  # Frontend assets (CSS, JS, Audio)
-│   ├── audio/               # Static audio files (e.g., warm-up)
-│   ├── js/                  # JavaScript files for different pages/features
-│   └── style.css            # Main CSS stylesheet
-├── templates/               # Jinja2 HTML templates for web pages
-├── uploads/                 # Directory for user-uploaded audio files
-└── README.md                # This file
+├── app.py                # Main Flask application & routes
+├── config.py             # Environment configurations
+├── models.py             # SQLAlchemy database models
+├── utils.py             # Common utility functions
+├── core/                # Core application modules
+│   ├── audio_utils.py   # Audio processing & FFmpeg operations
+│   └── responses.py     # API response standardization
+├── static/              # Frontend assets
+│   ├── audio/          # System audio files (warm-up.mp3, etc.)
+│   ├── js/             # Frontend JavaScript modules
+│   │   ├── audio-recorder.js    # Audio recording functionality
+│   │   ├── preset-manager.js    # Practice material management
+│   │   ├── shadowing-main.js    # Main shadowing feature
+│   │   └── [feature].js         # Feature-specific modules
+│   └── style.css        # Global stylesheet
+├── templates/           # Jinja2 HTML templates
+│   ├── shadowing.html   # Shadowing practice view
+│   ├── custom_shadowing.html    # Custom practice view
+│   └── [feature].html   # Feature-specific views
+├── presets/             # Practice materials
+│   ├── sentences/       # Read-aloud materials
+│   └── shadowing/       # Shadowing materials by genre/level
+├── migrations/          # Database migration scripts
+├── instance/           # Instance-specific files (SQLite, etc.)
+├── uploads/            # User-uploaded audio files
+└── requirements.txt    # Python dependencies
 ```
 
 ---
