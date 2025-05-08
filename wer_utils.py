@@ -1,40 +1,9 @@
 import numpy as np
 import re
-from utils import remove_fillers
+from utils import remove_fillers, normalize_text
 import difflib
 
-# Common number mappings and speech variations
-NUMBER_MAP = {
-    'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
-    'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9'
-}
 
-def normalize_text(text):
-    """
-    Enhanced text normalization with number mapping
-    """
-    if isinstance(text, list):
-        return text
-
-    # Convert to lowercase
-    text = text.lower()
-
-    # Split into words
-    words = text.split()
-
-    # Apply number mapping
-    words = [NUMBER_MAP.get(word, word) for word in words]
-
-    # Join back and normalize
-    text = ' '.join(words)
-
-    # Remove punctuation
-    text = re.sub(r'[^\w\s]', '', text)
-
-    # Remove multiple spaces and trim
-    text = ' '.join(text.split())
-
-    return text.split()
 
 def strip_punct(word):
     return ''.join(c for c in word if c not in '.!?,;:-')
@@ -43,13 +12,13 @@ def wer(reference, hypothesis, lenient=False):
     """
     Calculate WER and related metrics
     """
-    # Normalize first, then remove fillers
-    r = normalize_text(reference)
-    h = normalize_text(hypothesis)
-    
-    # Join words, remove fillers, then split again
-    r = remove_fillers(' '.join(r)).split()
-    h = remove_fillers(' '.join(h)).split()
+    # ここはそのまま使えるはず
+    r_normalized_list = normalize_text(reference)
+    h_normalized_list = normalize_text(hypothesis)
+
+    # remove_fillers は文字列を引数に取るので、一度結合してから再度分割
+    r = remove_fillers(' '.join(r_normalized_list)).split() if r_normalized_list else []
+    h = remove_fillers(' '.join(h_normalized_list)).split() if h_normalized_list else []
 
     rows = len(r) + 1
     cols = len(h) + 1

@@ -23,22 +23,17 @@ from werkzeug.utils import secure_filename
 
 # Local imports
 from models import db, Material, AudioRecording, PracticeLog
-from config import (
-    SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS,
-    UPLOAD_FOLDER, SECRET_KEY
-)
 from transcribe_utils import transcribe_audio
 from wer_utils import wer, calculate_wer
 from diff_viewer import diff_html, get_diff_html
 from youtube_utils import youtube_bp, check_captions
+from config import config_by_name # config.pyから設定辞書をインポート
 
 import os # osモジュールのインポートを確認
 import uuid # uuidモジュールのインポートを確認
 from flask import jsonify, request, session # sessionをインポート
 from pydub import AudioSegment # pydubのインポートを確認
 # (他の必要なインポートも確認してください: app, db, PracticeLog, transcribe_audio, calculate_wer, diff_html, auth_required, handle_transcription_error など)
-
-
 
 # Constants
 TARGET_CHUNK_SIZE_MB = 20
@@ -58,6 +53,24 @@ def auth_required(f):
 # Flask app initialization
 app = Flask(__name__)
 app.config.from_object('config')
+# 環境変数 FLASK_CONFIG (ReplitのSecretsで設定) に基づいて設定を読み込む
+# Secretsに FLASK_CONFIG がなければ 'dev' (開発モード) をデフォルトとする
+config_name = os.getenv('FLASK_CONFIG', 'dev')
+app.config.from_object(config_by_name[config_name])
+
+# Configクラスのinit_appメソッドを呼び出す (フォルダ作成などを行う場合)
+# この呼び出しは、app.configに設定がロードされた後に行う
+config_by_name[config_name].init_app(app)
+
+
+# APIキーの存在チェック (特に本番環境で重要)
+if config_name == 'prod':
+    if not app.config.get('OPENAI_API_KEY'):
+        app.logger.error("FATAL: OPENAI_API_KEY is not set for production.")
+        # ここでアプリケーションを停止させるか、エラー処理を行う
+    if not app.config.get('SECRET_KEY') or app.config.get('SECRET_KEY') == 'a_very_secret_key_that_should_be_changed':
+        app.logger.warning("WARNING: SECRET_KEY is not set or is using the default weak key in production.")
+
 migrate = Migrate(app, db)
 
 # Initialize extensions

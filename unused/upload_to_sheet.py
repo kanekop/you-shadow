@@ -1,3 +1,10 @@
+#これはPythonスクリプトで、log.json の内容をGoogle Sheetsにアップロードするものです。credentials.json を必要としますが、このファイルは提供されていません。
+#Webアプリケーションのコア機能ではなく、別途手動で実行するユーティリティスクリプトである可能性が高いです。
+#判断: このスクリプトが現在も必要で運用されているか確認してください。
+#必要であれば、依存する log.json の扱いや credentials.json の設定方法を明確にする必要があります。Webアプリケーションのコード整理とは別軸で管理することも考えられます。
+
+
+
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json

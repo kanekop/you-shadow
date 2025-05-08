@@ -1,43 +1,9 @@
 
 from difflib import SequenceMatcher
 import difflib
-from utils import remove_fillers
-import unicodedata
+from utils import remove_fillers, normalize_text
 
-# Common number mappings
-NUMBER_MAP = {
-    'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
-    'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9'
-}
 
-def normalize_text(text: str) -> list:
-    import unicodedata
-    text = text.lower()
-
-    # Split into words and apply number mapping
-    words = text.split()
-    normalized = []
-    
-    for i, word in enumerate(words):
-        # Handle number mapping
-        word = NUMBER_MAP.get(word, word)
-        
-        # Handle genre variations
-        if word == "gen" and i + 1 < len(words) and words[i + 1].isdigit():
-            word = "genre"
-        elif word.startswith("genre"):
-            word = "genre"
-            
-        # Clean punctuation
-        word = word.strip('.,;:!?(){}[]"\'')
-        
-        # Special cases
-        if word == "im":
-            word = "i'm"
-            
-        normalized.append(word)
-
-    return normalized
 
 def color_diff(correct_script, user_transcript):
     # First normalize, then remove fillers
