@@ -7,7 +7,6 @@ import math
 import json
 import tempfile
 from datetime import datetime, timedelta
-from collections import defaultdict
 from functools import wraps
 
 # Third-party imports
@@ -15,11 +14,10 @@ import pandas as pd
 import openai
 from pydub import AudioSegment
 from flask import (
-    Flask, render_template, request, redirect, url_for, 
+    Flask, render_template, request, url_for, 
     jsonify, send_from_directory, session, current_app
 )
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import desc
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename

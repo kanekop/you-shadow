@@ -1,17 +1,27 @@
+# app.py
 
-from flask import Blueprint, jsonify, request, session, current_app, url_for
-from datetime import datetime
+# Standard library imports
 import os
-import json
 import uuid
-from models import db, AudioRecording, PracticeLog, Material
+import json
+from datetime import datetime
+from functools import wraps
+
+# Third-party imports
+from flask import (
+    request, jsonify, current_app
+)
+from werkzeug.utils import secure_filename
+
+# Local imports
+from models import db, AudioRecording, PracticeLog
 from core.services.transcribe_utils import transcribe_audio
 from core.wer_utils import calculate_wer
 from core.diff_viewer import diff_html
 from core.responses import api_error_response, api_success_response
-from core.audio_utils import process_and_transcribe_audio, AudioProcessingError
-from werkzeug.utils import secure_filename
-from functools import wraps
+from collections import defaultdict
+
+from flask import Blueprint
 from core.services.youtube_utils import check_captions
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -157,19 +167,43 @@ def log_practice():
         db.session.rollback()
         return api_error_response("ログの保存中にエラーが発生しました。", 500, exception_info=e)
 
+# ... Blueprint定義 ...
 @api_bp.route('/compare_passages', methods=['POST'])
 def compare_passages():
+    # request.json が None かどうかをチェック
     data = request.json
+    if data is None:
+        # エラーメッセージを返す (400 Bad Request が適切)
+        current_app.logger.warning("Request to /api/compare_passages did not contain valid JSON data or correct Content-Type header.")
+        return api_error_response("リクエストボディにJSONデータが見つからないか、Content-Typeヘッダーが 'application/json' ではありません。", 400)
+
+    # data が None でなければ、安全に .get() を使用できる
     passage1 = data.get('passage1', '')
     passage2 = data.get('passage2', '')
 
-    wer_score = calculate_wer(passage1, passage2)
-    diff_result = diff_html(passage1, passage2)
+    # 念のため、passage1 や passage2 が空でないかもチェックするとより丁寧
+    if not passage1 or not passage2:
+        return api_error_response("比較する両方の文章を入力してください。", 400)
 
-    return jsonify({
-        'wer': wer_score * 100,
-        'diff_html': diff_result
-    })
+    # calculate_wer と diff_html のインポートを確認してください
+    # from ..core.wer_utils import calculate_wer
+    # from ..core.diff_viewer import diff_html
+    try:
+        wer_score = calculate_wer(passage1, passage2)
+        diff_result = diff_html(passage1, passage2)
+
+        # jsonify は api_success_response を使っても良い
+        # from ..core.responses import api_success_response
+        # return api_success_response({ ... })
+        return jsonify({
+            'wer': wer_score * 100,
+            'diff_html': diff_result
+        })
+    except Exception as e:
+        # WER計算やDiff生成でエラーが起きた場合
+        current_app.logger.error(f"Error during WER/diff calculation: {e}", exc_info=True)
+        return api_error_response("評価結果の計算中にエラーが発生しました。", 500)
+
 
 @api_bp.route('/sentence_structure')
 def get_sentence_structure():
