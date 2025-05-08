@@ -161,7 +161,7 @@ def logout():
 @app.route('/')
 def index():
     user_id = request.headers.get('X-Replit-User-Id')
-    user_name = request.headers.get('X-Replit-User-Name')
+    user_name = request.headers.get('X-Replit-User-Name', 'Guest')
     return render_template('index.html', user_id=user_id, user_name=user_name)
 
 # Dashboard routes
