@@ -20,23 +20,19 @@ from flask import (
 )
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import SQLAlchemyError # DBエラーを具体的に捕捉する場合
-from sqlalchemy import desc # 降順ソート用
+from sqlalchemy import desc
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
 
 # Local imports
 from models import db, Material, AudioRecording, PracticeLog
-from transcribe_utils import transcribe_audio
-from wer_utils import wer, calculate_wer
-from diff_viewer import diff_html, get_diff_html
-from youtube_utils import youtube_bp, check_captions
-from config import config_by_name # config.pyから設定辞書をインポート
+from core.services.transcribe_utils import transcribe_audio
+from core.wer_utils import wer, calculate_wer
+from core.diff_viewer import diff_html, get_diff_html
+from core.services.youtube_utils import youtube_bp, check_captions
+from config import config_by_name
 from core.responses import api_error_response, api_success_response
-from core.audio_utils import process_and_transcribe_audio, AudioProcessingError # インポート
-#from core.evaluation_utils import generate_evaluation_metrics # 次の提案で使用
-
-
+from core.audio_utils import process_and_transcribe_audio, AudioProcessingError
 
 
 # Constants
@@ -50,16 +46,10 @@ def auth_required(f):
     def decorated_function(*args, **kwargs):
         user_id = request.headers.get('X-Replit-User-Id')
         if not user_id:
-            # APIエンドポイント (@app.route('/api/...') など) で使うことが多い場合は、
-            # リダイレクトではなくエラーを返す方がクライアント側で扱いやすいです。
-            # Webページ用のルート (@app.route('/dashboard/...') など) ならリダイレクトでOK。
-            # ここではAPIでの使用を想定し、api_error_response を使う例を示します。
-            # import されていることが前提です: from core.responses import api_error_response
             return api_error_response("ユーザー認証が必要です。", 401)
-            # もしWebページへのリダイレクトで良いなら元の redirect('/') のままでもOK
-            # return redirect('/')
         return f(*args, **kwargs)
-    return decorated_function # ★★★ 修正: ラップされた関数を返す ★★★
+    return decorated_function
+
 # Flask app initialization
 app = Flask(__name__)
 app.config.from_object('config')
@@ -333,7 +323,6 @@ def evaluate_youtube():
                 current_app.logger.error(f"Error deleting temp file {tmp_path}", exc_info=e_os)
 
 
-
 @app.route('/presets/<path:filename>')
 def serve_presets(filename):
     return send_from_directory("presets", filename)
@@ -523,7 +512,6 @@ def upload_recording():
         pass
 
 
-
 @app.route('/check_subtitles', methods=["GET"])
 def check_subtitles():
     video_id = request.args.get("video_id")
@@ -638,6 +626,7 @@ def evaluate_read_aloud():
         # 必要であれば reference_text もレスポンスに含める
         # "reference_text": reference_text
     })
+
 @app.route('/shadowing')
 def shadowing_ui():
     return render_template('shadowing.html')
@@ -696,7 +685,6 @@ def custom_shadowing_ui():
     return render_template('custom_shadowing.html',
                            last_material_info=last_material_info,
                            replit_user_id=user_id) # ★ replit_user_id を渡す
-
 
 
 
@@ -1043,10 +1031,10 @@ def evaluate_shadowing():
         return api_error_response(f"入力エラー: {ve}", 400)
     except AudioProcessingError as ape: # 音声処理中のエラー
         # ★ handle_transcription_error ではなく api_error_response を使う
-        return handle_transcription_error(ape, f"/evaluate_shadowing での音声処理エラー ({genre}/{level})")
+        return api_error_response(f"音声処理エラー: {ape}", 500, log_prefix=f"/evaluate_shadowing での音声処理エラー ({genre}/{level})")
     except Exception as e: # 文字起こしAPIエラーなど
         # ★ handle_transcription_error ではなく api_error_response を使う
-        return handle_transcription_error(e, f"/evaluate_shadowing での文字起こしエラー ({genre}/{level})")
+        return api_error_response(f"文字起こしエラー: {e}", 500, log_prefix=f"/evaluate_shadowing での文字起こしエラー ({genre}/{level})")
 
     # 4. WER計算とDiff生成
     try:
@@ -1091,9 +1079,6 @@ def evaluate_shadowing():
         "diff_user": diff_user, # shadowing.html が期待するキー名に合わせる
         "diff_original": diff_original # shadowing.html が期待するキー名に合わせる
     })
-
-
-
 
 
 
@@ -1289,7 +1274,7 @@ if __name__ == "__main__":
 @auth_required
 def log_practice():
         data = request.json
-        user_id = data.get("user") # 'user' が存在しない場合の考慮が必要
+        user_id= data.get("user") # 'user' が存在しない場合の考慮が必要な場合
 
         # ★ 認証: @auth_required を使うか、ここで user_id をヘッダーから取得/検証する
         # if not user_id:
