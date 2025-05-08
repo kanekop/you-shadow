@@ -1,13 +1,17 @@
+# Standard library imports
 import os
 import uuid
 import math
 import json
 import tempfile
-import pandas as pd
 from datetime import datetime, timedelta
 from collections import defaultdict
+from functools import wraps
 
-# Flask imports
+# Third-party imports
+import pandas as pd
+import openai
+from pydub import AudioSegment
 from flask import (
     Flask, render_template, request, redirect, url_for, 
     jsonify, send_from_directory, session
@@ -15,13 +19,7 @@ from flask import (
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from functools import wraps
 from werkzeug.utils import secure_filename
-
-# Audio processing
-from pydub import AudioSegment
-from pydub.utils import make_chunks
-import openai
 
 # Local imports
 from models import db, Material, AudioRecording, PracticeLog
