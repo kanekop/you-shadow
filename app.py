@@ -380,22 +380,22 @@ def api_presets():
 
 
 @app.route('/api/recordings/upload', methods=['POST'])
-@auth_required # 修正後の auth_required を想定
+@auth_required  # 修正後の auth_required を想定
 def upload_recording():
     try:
         user_id = request.headers.get('X-Replit-User-Id')
-            # user_id の存在チェックはデコレータで行われるはずだが、念のため残しても良い
-            # if not user_id:
-            #     return api_error_response("User not authenticated", 401)
+        # user_id の存在チェックはデコレータで行われるはずだが、念のため残しても良い
+        # if not user_id:
+        #     return api_error_response("User not authenticated", 401)
 
-            if 'audio' not in request.files:
-                return api_error_response("No audio file provided", 400)
+        if 'audio' not in request.files:
+            return api_error_response("No audio file provided", 400)
 
-            audio_file = request.files['audio']
-            if not audio_file.filename:
-                return api_error_response("Invalid file", 400)
+        audio_file = request.files['audio']
+        if not audio_file.filename:
+            return api_error_response("Invalid file", 400)
 
-            filename = secure_filename(audio_file.filename)
+        filename = secure_filename(audio_file.filename)
             # ★注意: 同じファイル名で上書きされる可能性がある。一意なファイル名にする推奨。
             # 例: filename = f"{user_id}_{uuid.uuid4().hex}_{secure_filename(audio_file.filename)}"
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
