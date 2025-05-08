@@ -1,0 +1,111 @@
+## 依頼内容: Flaskアプリケーションのエラーハンドリング改善
+
+現在開発中のFlaskアプリケーション (`app.py`) のエラーハンドリングを一貫性のある形にリファクタリングしたいと考えています。
+以下の指示に従って、`app.py` ファイル内のエラーレスポンス処理を修正してください。
+
+### 背景
+
+現在、`app.py` の各APIエンドポイントでは、エラーが発生した際に `jsonify({"error": "メッセージ文字列"}), HTTPステータスコード` という形で直接レスポンスを生成しています。これを、あらかじめ定義された共通のヘルパー関数を使用する形に統一し、コードの可読性と保守性を向上させることが目的です。
+
+### 事前準備: ヘルパー関数の定義
+
+以下の2つのヘルパー関数が利用可能であると仮定します。（core/responses.py`）
+
+**1. `api_error_response(message, status_code=400)` 関数:**
+   - 機能: 標準的なAPIエラーレスポンス（JSON形式）を生成します。
+   - 引数:
+     - `message (str)`: クライアントに表示するエラーメッセージ。
+     - `status_code (int)`: HTTPステータスコード (デフォルト: 400)。
+   - 戻り値: FlaskのJSONレスポンスオブジェクト (`jsonify({"error": message}), status_code`)。
+   - 配置場所の候補: `app.py` の上部、または `core/responses.py` (その場合は `from core.responses import api_error_response` のようにインポートが必要)。
+
+**2. `handle_transcription_error(exception_object, context_message="文字起こしエラー")` 関数:**
+   - 機能: 文字起こしや関連する音声処理で発生した例外を捕捉し、適切なエラーログを記録しつつ、`api_error_response` を利用してユーザーフレンドリーなエラーレスポンスを生成します。
+   - 引数:
+     - `exception_object (Exception)`: 捕捉された例外オブジェクト。
+     - `context_message (str)`: エラーが発生した処理の文脈を示すメッセージ (例: "/upload_custom_audio でのエラー")。
+   - 処理内容:
+     - `exception_object` の型 (`FileNotFoundError`, `ValueError`, `PermissionError`, `ConnectionError`, `openai.APIError` など) を判定し、適切なHTTPステータスコードとユーザー向けメッセージを決定します。
+     - `current_app.logger.error()` を使用して、詳細なエラー情報（エラー型、詳細メッセージ、コンテキスト）をサーバーログに出力します。
+     - 決定したユーザー向けメッセージとステータスコードで `api_error_response` を呼び出し、その結果を返します。
+     - 500番台のエラーの場合は、ユーザーに「サーバー内部でエラーが発生しました...」のような汎用的なメッセージを返すことを検討してください。
+   - 配置場所の候補: `app.py` のヘルパー関数セクション。
+
+### `app.py` の具体的な修正指示
+
+`app.py` ファイル内の全てのルート関数（`@app.route(...)` で定義された関数）を確認し、以下のパターンに該当する箇所を修正してください。
+
+**パターン1: 単純なエラーレスポンスの置き換え**
+   - 検索対象: `return jsonify({"error": "..."}), HTTPステータスコード` という形式のコード。
+   - 修正方法: `return api_error_response("...", HTTPステータスコード)` に置き換えてください。
+     - 例:
+       ```python
+       # 修正前
+       if 'audio' not in request.files:
+           return jsonify({"error": "音声ファイルが提供されていません"}), 400
+       
+       # 修正後
+       if 'audio' not in request.files:
+           return api_error_response("音声ファイルが提供されていません") # デフォルトで400
+       ```
+       ```python
+       # 修正前
+       if not user_id:
+           return jsonify({"error": "User not authenticated"}), 401
+
+       # 修正後
+       if not user_id: # @auth_required がある場合は不要かもしれないが、念のため
+           return api_error_response("User not authenticated", 401)
+       ```
+
+**パターン2: `try...except` ブロック内の広範なエラーキャッチの置き換え**
+   - 検索対象: `try...except Exception as e:` のように広範な例外をキャッチし、その中で `jsonify({"error": ...})` を返している箇所。特に、文字起こし処理 (`transcribe_audio` の呼び出し周辺) やファイル処理に関連するエラーハンドリング。
+   - 修正方法: `except` ブロックで捕捉した例外オブジェクト `e` を `handle_transcription_error(e, "適切なコンテキストメッセージ")` に渡して、その戻り値を `return` するように修正してください。データベース操作がある場合は、`db.session.rollback()` も適切に呼び出してください。
+     - 例 (`/evaluate_custom_shadowing` のようなエンドポイントの `except` ブロック):
+       ```python
+       # 修正前
+       # except Exception as e:
+       #     db.session.rollback()
+       #     current_app.logger.error(f"!! Unexpected error: {e}")
+       #     return jsonify({"error": "評価処理中に予期せぬエラーが発生しました。"}), 500
+
+       # 修正後
+       except ValueError as ve: # 具体的なビジネスロジック上のエラー (例: 不正な入力)
+           db.session.rollback() # 必要であれば
+           return api_error_response(str(ve), 400) # ValueError はクライアントエラーとして扱う
+       except FileNotFoundError as fnfe:
+           db.session.rollback() # 必要であれば
+           return handle_transcription_error(fnfe, "ファイル処理エラー")
+       except ConnectionError as ce:
+           db.session.rollback() # 必要であれば
+           return handle_transcription_error(ce, "外部サービス接続エラー")
+       # except openai.APIError as oae: # OpenAI स्पेसिफिकエラー
+       #     db.session.rollback() # 必要であれば
+       #     return handle_transcription_error(oae, "OpenAI APIエラー")
+       except Exception as e: # その他の予期せぬエラー
+           db.session.rollback() # 必要であれば
+           return handle_transcription_error(e, f"{request.path} での予期せぬサーバーエラー") # request.pathでエンドポイント名を動的に含める
+       ```
+       **注意:** `handle_transcription_error` が適切にエラーの詳細をログに出力し、ユーザーフレンドリーなメッセージを生成するため、`except` ブロック内での個別の `print` や `logger.error` は `handle_transcription_error` に任せることができます。
+
+### 対象となる主なエンドポイント（確認と修正をお願いします）
+
+以下のエンドポイントおよび、その他同様のパターンを持つエンドポイントで修正を行ってください。
+
+* `/upload_custom_audio`
+* `/evaluate_custom_shadowing`
+* `/evaluate_shadowing`
+* `/evaluate_read_aloud`
+* `/evaluate_youtube`
+* `/api/recordings/upload`
+* `/api/save_material` (もしエラーレスポンスがあれば)
+* `/api/my_materials` (もしエラーレスポンスがあれば)
+* `/api/practice/logs` (もしエラーレスポンスがあれば)
+* `/api/log_attempt` (もしエラーレスポンスがあれば)
+
+### その他
+
+* 必要なインポート文 (`from flask import jsonify, current_app` や、ヘルパー関数を別ファイルにした場合のインポート文) が `app.py` の先頭に追加されていることを確認してください。
+* 変更後は、アプリケーションを起動していくつかのエラーケース（例: ファイル未選択でのアップロード、不正なファイル形式など）を実際に試して、エラーレスポンスが新しい形式で正しく返されることを確認してください。
+
+よろしくお願いします。

@@ -14,7 +14,7 @@ import openai
 from pydub import AudioSegment
 from flask import (
     Flask, render_template, request, redirect, url_for, 
-    jsonify, send_from_directory, session
+    jsonify, send_from_directory, session, current_app
 )
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -28,6 +28,7 @@ from wer_utils import wer, calculate_wer
 from diff_viewer import diff_html, get_diff_html
 from youtube_utils import youtube_bp, check_captions
 from config import config_by_name # config.pyから設定辞書をインポート
+from core.responses import api_error_response # core/responses.py を作成した場合
 
 import os # osモジュールのインポートを確認
 import uuid # uuidモジュールのインポートを確認
@@ -152,26 +153,54 @@ def get_presets_structure(practice_type="shadowing"):
 
 # 共通のエラーハンドリング用ヘルパー関数 (任意だが推奨)
 def handle_transcription_error(e, context_message="文字起こしエラー"):
-    error_message = str(e)
-    status_code = 500
+    error_message_detail = str(e)
+    error_type_name = type(e).__name__
+    status_code = 500  # デフォルトはサーバーエラー
+
+    # エラーの型に応じたステータスコードとユーザー向けメッセージの調整
+    user_friendly_message = f"{context_message}: 予期せぬエラーが発生しました。"
+
     if isinstance(e, FileNotFoundError):
-        status_code = 404 # または 400
-    elif isinstance(e, ValueError):
+        status_code = 404
+        user_friendly_message = f"{context_message}: 指定されたファイルが見つかりません。"
+    elif isinstance(e, ValueError):  # 例: ファイルが空、サイズ超過、不正な値など
         status_code = 400
-    elif isinstance(e, PermissionError):
-         status_code = 401
-    elif isinstance(e, ConnectionError):
-         status_code = 503 # Service Unavailable
+        user_friendly_message = f"{context_message}: リクエスト内容が正しくありません ({error_message_detail})。"
+    elif isinstance(e, PermissionError):  # 例: OpenAI APIキー関連など
+        status_code = 401 # または 403 Forbidden
+        user_friendly_message = f"{context_message}: 処理に必要な権限がありません。"
+    elif isinstance(e, ConnectionError):  # 例: OpenAI API接続エラーなど
+        status_code = 503  # Service Unavailable
+        user_friendly_message = f"{context_message}: 外部サービスへの接続に失敗しました。しばらくしてから再度お試しください。"
 
-    print(f"!! {context_message}: {error_message}") # サーバーログ
-    return jsonify({"error": f"{context_message}: {error_message}"}), status_code
+    # 特定のライブラリのエラーに対する処理 (例: openai)
+    # try:
+    #     import openai
+    #     if isinstance(e, openai.RateLimitError):
+    #         status_code = 429 # Too Many Requests
+    #         user_friendly_message = f"{context_message}: リクエストがレート制限を超えました。時間をおいて再試行してください。"
+    #     elif isinstance(e, openai.AuthenticationError):
+    #         status_code = 401
+    #         user_friendly_message = f"{context_message}: API認証に失敗しました。設定を確認してください。"
+    #     elif isinstance(e, openai.APIError): # その他のOpenAI APIエラー
+    #         status_code = 502 # Bad Gateway (API側の問題)
+    #         user_friendly_message = f"{context_message}: 外部APIでエラーが発生しました。"
+    # except ImportError:
+    #     pass # openai ライブラリがない場合はスキップ
 
+    # 詳細なエラー情報をログに記録
+    current_app.logger.error(
+        f"Transcription Error Context: {context_message} | "
+        f"Error Type: {error_type_name} | "
+        f"Detail: {error_message_detail} | "
+        f"Responding with Status: {status_code}"
+    )
 
+    # 500番台のエラーの場合、ユーザーにはより汎用的なメッセージを返すことを検討
+    if status_code >= 500:
+        user_friendly_message = "サーバー処理中に予期せぬエラーが発生しました。しばらくしてから再試行してください。"
 
-
-
-
-
+    return api_error_response(user_friendly_message, status_code)
 
 # Basic routes
 @app.route('/__replauthlogout')
