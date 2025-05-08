@@ -827,10 +827,14 @@ def evaluate_shadowing():
     import tempfile
     from wer_utils import calculate_wer
 
+    if 'original_audio' not in request.files or 'recorded_audio' not in request.files:
+        return api_error_response('Audio files are missing')
+
     original_audio = request.files['original_audio']
     recorded_audio = request.files['recorded_audio']
 
-    client = OpenAI()
+    if not original_audio or not recorded_audio:
+        return api_error_response('Invalid audio files')
 
     genre = request.form.get("genre", "")
     level = request.form.get("level", "")
@@ -838,28 +842,23 @@ def evaluate_shadowing():
 
     user_transcribed = ""
     tmp_in_path = None
-    tmp_out_path = None # finally で削除するために定義
+    tmp_out_path = None
 
     try:
-        # --- 文字起こし部分 ---
         with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_in:
             recorded_audio.save(tmp_in.name)
-            tmp_in_path = tmp_in.name # finallyで使うために保持
+            tmp_in_path = tmp_in.name
 
         audio = AudioSegment.from_file(tmp_in_path)
-        trimmed_audio = audio[500:] # 冒頭500msカット (以前のロジック)
+        trimmed_audio = audio[500:]  # Skip first 500ms
         tmp_out_path = tmp_in_path.replace(".webm", "_cut.wav")
         trimmed_audio.export(tmp_out_path, format="wav")
 
-        # 統一された関数を呼び出す
         user_transcribed = transcribe_audio(tmp_out_path)
-        # --- ここまで ---
 
         wer_score = calculate_wer(original_transcribed, user_transcribed)
         diff_user = get_diff_html(original_transcribed, user_transcribed, mode='user')
         diff_original = get_diff_html(original_transcribed, user_transcribed, mode='original')
-
-        # ... (ログ保存処理: save_preset_log) ...
 
         return jsonify({
             "original_transcribed": original_transcribed,
@@ -869,15 +868,19 @@ def evaluate_shadowing():
             "diff_original": diff_original
         })
 
+    except FileNotFoundError as e:
+        return handle_transcription_error(e, "Audio file processing error")
+    except openai.APIError as e:
+        return handle_transcription_error(e, "Speech recognition error")
     except Exception as e:
-        # 統一されたエラーハンドリング
-        return handle_transcription_error(e, "/evaluate_shadowing でのエラー")
+        return handle_transcription_error(e, "Evaluation error")
     finally:
-        # 一時ファイルの削除
-        if tmp_in_path and os.path.exists(tmp_in_path):
-            os.remove(tmp_in_path)
-        if tmp_out_path and os.path.exists(tmp_out_path):
-            os.remove(tmp_out_path)
+        for path in [tmp_in_path, tmp_out_path]:
+            if path and os.path.exists(path):
+                try:
+                    os.remove(path)
+                except OSError as e:
+                    print(f"Error removing temporary file {path}: {e}")
 
 
     
