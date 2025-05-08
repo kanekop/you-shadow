@@ -55,10 +55,16 @@ def auth_required(f):
     def decorated_function(*args, **kwargs):
         user_id = request.headers.get('X-Replit-User-Id')
         if not user_id:
-            return redirect('/')
+            # APIエンドポイント (@app.route('/api/...') など) で使うことが多い場合は、
+            # リダイレクトではなくエラーを返す方がクライアント側で扱いやすいです。
+            # Webページ用のルート (@app.route('/dashboard/...') など) ならリダイレクトでOK。
+            # ここではAPIでの使用を想定し、api_error_response を使う例を示します。
+            # import されていることが前提です: from core.responses import api_error_response
+            return api_error_response("ユーザー認証が必要です。", 401)
+            # もしWebページへのリダイレクトで良いなら元の redirect('/') のままでもOK
+            # return redirect('/')
         return f(*args, **kwargs)
-    return auth_required
-
+    return decorated_function # ★★★ 修正: ラップされた関数を返す ★★★
 # Flask app initialization
 app = Flask(__name__)
 app.config.from_object('config')
@@ -92,7 +98,7 @@ CORS(app)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # OpenAI configuration
-openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"), timeout=180.0)
 
 # Utility functions
 def generate_wer_matrix(username, logs):
@@ -159,56 +165,6 @@ def get_presets_structure(practice_type="shadowing"):
 
     return presets
 
-# 共通のエラーハンドリング用ヘルパー関数 (任意だが推奨)
-def handle_transcription_error(e, context_message="文字起こしエラー"):
-    error_message_detail = str(e)
-    error_type_name = type(e).__name__
-    status_code = 500  # デフォルトはサーバーエラー
-
-    # エラーの型に応じたステータスコードとユーザー向けメッセージの調整
-    user_friendly_message = f"{context_message}: 予期せぬエラーが発生しました。"
-
-    if isinstance(e, FileNotFoundError):
-        status_code = 404
-        user_friendly_message = f"{context_message}: 指定されたファイルが見つかりません。"
-    elif isinstance(e, ValueError):  # 例: ファイルが空、サイズ超過、不正な値など
-        status_code = 400
-        user_friendly_message = f"{context_message}: リクエスト内容が正しくありません ({error_message_detail})。"
-    elif isinstance(e, PermissionError):  # 例: OpenAI APIキー関連など
-        status_code = 401 # または 403 Forbidden
-        user_friendly_message = f"{context_message}: 処理に必要な権限がありません。"
-    elif isinstance(e, ConnectionError):  # 例: OpenAI API接続エラーなど
-        status_code = 503  # Service Unavailable
-        user_friendly_message = f"{context_message}: 外部サービスへの接続に失敗しました。しばらくしてから再度お試しください。"
-
-    # 特定のライブラリのエラーに対する処理 (例: openai)
-    # try:
-    #     import openai
-    #     if isinstance(e, openai.RateLimitError):
-    #         status_code = 429 # Too Many Requests
-    #         user_friendly_message = f"{context_message}: リクエストがレート制限を超えました。時間をおいて再試行してください。"
-    #     elif isinstance(e, openai.AuthenticationError):
-    #         status_code = 401
-    #         user_friendly_message = f"{context_message}: API認証に失敗しました。設定を確認してください。"
-    #     elif isinstance(e, openai.APIError): # その他のOpenAI APIエラー
-    #         status_code = 502 # Bad Gateway (API側の問題)
-    #         user_friendly_message = f"{context_message}: 外部APIでエラーが発生しました。"
-    # except ImportError:
-    #     pass # openai ライブラリがない場合はスキップ
-
-    # 詳細なエラー情報をログに記録
-    current_app.logger.error(
-        f"Transcription Error Context: {context_message} | "
-        f"Error Type: {error_type_name} | "
-        f"Detail: {error_message_detail} | "
-        f"Responding with Status: {status_code}"
-    )
-
-    # 500番台のエラーの場合、ユーザーにはより汎用的なメッセージを返すことを検討
-    if status_code >= 500:
-        user_friendly_message = "サーバー処理中に予期せぬエラーが発生しました。しばらくしてから再試行してください。"
-
-    return api_error_response(user_friendly_message, status_code)
 
 # Basic routes
 @app.route('/__replauthlogout')
@@ -335,18 +291,23 @@ def evaluate_youtube():
             "diff_html": diff_result_html
         })
 
-    except openai.APIError as e: # OpenAI API特有のエラーを先にキャッチ
-        # transcribe_utilsから伝播してきたOpenAIのエラーをここでハンドリング
-        # または、transcribe_utils側でより汎用的な例外にラップして投げる
-        return handle_transcription_error(e, "YouTube音声評価中の文字起こしエラー")
-    except IOError as e:
-        print(f"!! ファイル操作エラー (/evaluate_youtube): {e}")
-        return api_error_response(f"ファイルの読み書き中にエラーが発生しました: {e}", 500)
+    except openai.APIError as e:
+        # OpenAI APIエラーを直接処理
+        # ステータスコードはエラーオブジェクトから取得を試みる (なければ502 Bad Gatewayなど)
+        status_code = getattr(e, 'status_code', 502)
+        user_message = f"文字起こしサービスでエラーが発生しました (Status: {status_code})。"
+        log_prefix = "OpenAI Error in /evaluate_youtube"
+        # api_error_response を呼び出し、詳細をログに記録
+        return api_error_response(user_message, status_code, exception_info=e, log_prefix=log_prefix)
+    except IOError as e: # File I/O エラー
+        log_prefix="IOError in /evaluate_youtube"
+        return api_error_response(f"ファイルの読み書き中にエラーが発生しました: {e}", 500, exception_info=e, log_prefix=log_prefix)
     except Exception as e:
         # その他の予期せぬエラー
-        print(f"!! 予期せぬエラー (/evaluate_youtube): {e}")
-        # handle_transcription_error を使うか、api_error_response を使うかは一貫性を持たせる
-        return api_error_response(f"評価処理中に予期せぬエラーが発生しました。", 500)
+        log_prefix = "Unexpected Error in /evaluate_youtube"
+        # api_error_response が内部で500番台の時に汎用メッセージに置換 & ロギングしてくれる
+        return api_error_response(f"評価処理中に予期せぬエラーが発生しました: {type(e).__name__}", 500, exception_info=e, log_prefix=log_prefix)
+    
     finally:
         # 一時ファイルの削除
         if tmp_path and os.path.exists(tmp_path):
@@ -418,45 +379,75 @@ def api_presets():
 
 
 
-@app.route('/api/recordings/upload', methods=['POST'])
-@auth_required
-def upload_recording():
-    try:
-        user_id = request.headers.get('X-Replit-User-Id')
-        if not user_id:
-            return api_error_response("User not authenticated", 401)
+    @app.route('/api/recordings/upload', methods=['POST'])
+    @auth_required # 修正後の auth_required を想定
+    def upload_recording():
+        try:
+            user_id = request.headers.get('X-Replit-User-Id')
+            # user_id の存在チェックはデコレータで行われるはずだが、念のため残しても良い
+            # if not user_id:
+            #     return api_error_response("User not authenticated", 401)
 
-        if 'audio' not in request.files:
-            return api_error_response("No audio file provided", 400)
+            if 'audio' not in request.files:
+                return api_error_response("No audio file provided", 400)
 
-        audio_file = request.files['audio']
-        if not audio_file.filename:
-            return api_error_response("Invalid file", 400)
+            audio_file = request.files['audio']
+            if not audio_file.filename:
+                return api_error_response("Invalid file", 400)
 
-        filename = secure_filename(audio_file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        audio_file.save(filepath)
-        transcript = transcribe_audio(filepath)
+            filename = secure_filename(audio_file.filename)
+            # ★注意: 同じファイル名で上書きされる可能性がある。一意なファイル名にする推奨。
+            # 例: filename = f"{user_id}_{uuid.uuid4().hex}_{secure_filename(audio_file.filename)}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            audio_file.save(filepath) # ← ここでIOErrorの可能性
 
-        recording = AudioRecording(
-            user_id=user_id,
-            filename=filename,
-            transcript=transcript,
-            file_hash=str(uuid.uuid4())
-        )
+            transcript = transcribe_audio(filepath) # ← ここで様々なエラー(API, File, Value)の可能性
 
-        db.session.add(recording)
-        db.session.commit()
+            # --- DB操作開始 ---
+            recording = AudioRecording(
+                user_id=user_id,
+                filename=filename, # 保存したファイル名
+                transcript=transcript,
+                file_hash=str(uuid.uuid4()) # ★注意: file_hash は通常ファイル内容から生成する
+                                            # uuid4だと毎回異なり、重複チェックにならない
+                                            # hashlib を使う例: calculate_file_hash(filepath)
+            )
 
-        return jsonify({
-            "id": recording.id,
-            "filename": recording.filename,
-            "transcript": recording.transcript
-        })
+            db.session.add(recording)
+            db.session.commit() # ← ここでDBエラーの可能性
+            # --- DB操作完了 ---
 
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+            # 成功時のレスポンス
+            return api_success_response({ # ★api_success_response を使う
+                "id": recording.id,
+                "filename": recording.filename,
+                "transcript": recording.transcript
+            })
+
+        except FileNotFoundError as e: # transcribe_audio などで発生
+            # ロールバックは不要 (commit前なので)
+            log_prefix = "FileNotFound in /api/recordings/upload"
+            return api_error_response(f"必要なファイルが見つかりません: {str(e)}", 404, exception_info=e, log_prefix=log_prefix)
+        except ValueError as e: # transcribe_audio などで発生
+            # ロールバックは不要 (commit前なので)
+            log_prefix = "ValueError in /api/recordings/upload"
+            return api_error_response(f"値またはファイル形式のエラー: {str(e)}", 400, exception_info=e, log_prefix=log_prefix)
+        except IOError as e: # audio_file.save などで発生
+            # ロールバックは不要 (commit前なので)
+            log_prefix = "IOError in /api/recordings/upload"
+            return api_error_response(f"ファイルの読み書きエラー: {str(e)}", 500, exception_info=e, log_prefix=log_prefix)
+        except openai.APIError as e: # transcribe_audio などで発生
+            # ロールバックは不要 (commit前なので)
+            log_prefix = "OpenAI Error in /api/recordings/upload"
+            status_code = getattr(e, 'status_code', 502)
+            return api_error_response(f"文字起こしサービスでエラーが発生しました: {str(e)}", status_code, exception_info=e, log_prefix=log_prefix)
+        except Exception as e: # 予期せぬエラー、DBエラー(commit時)など
+            db.session.rollback() # ★ロールバック (重要！)
+            log_prefix = "Unexpected Error in /api/recordings/upload"
+            # ログには詳細を記録し、ユーザーには汎用メッセージ
+            return api_error_response(f"記録のアップロード中に予期せぬエラーが発生しました。", 500, exception_info=e, log_prefix=log_prefix)
+        # finally ブロックは特に不要 (一時ファイル削除などがあればここに)
+
 
 @app.route('/check_subtitles', methods=["GET"])
 def check_subtitles():
@@ -497,14 +488,18 @@ def evaluate_read_aloud():
         # 音読練習では通常、先頭カットは不要なので cut_head_ms=0 (デフォルト)
         user_transcribed = process_and_transcribe_audio(audio_file)
 
-    except ValueError as ve: # process_and_transcribe_audio が発生させるファイル検証エラーなど
-        return api_error_response(f"入力エラー: {ve}", 400)
-    except AudioProcessingError as ape: # process_and_transcribe_audio が発生させる音声処理エラー
-        # これはサーバー側または入力ファイルの問題の可能性がある
-        return handle_transcription_error(ape, "/evaluate_read_aloud での音声処理エラー")
-    except Exception as e: # transcribe_audio からの例外など
-        return handle_transcription_error(e, "/evaluate_read_aloud での文字起こしエラー")
+    except ValueError as ve:
+        return api_error_response(f"入力エラー: {str(ve)}", 400, exception_info=ve, log_prefix="ValueError in /evaluate_read_aloud")
+    except AudioProcessingError as ape:
+        # AudioProcessingError が発生した場合、500 Internal Server Error とする例
+        return api_error_response(f"音声処理エラー: {str(ape)}", 500, exception_info=ape, log_prefix="AudioProcessingError in /evaluate_read_aloud")
+    except openai.APIError as oai_err: # transcribe_audioから来る可能性のあるOpenAIエラーをキャッチ
+        return api_error_response(f"文字起こしAPIエラー: {str(oai_err)}", getattr(oai_err, 'status_code', 502), exception_info=oai_err, log_prefix="OpenAI Error in /evaluate_read_aloud")
+    except Exception as e:
+        # その他の予期せぬエラー
+        return api_error_response(f"予期せぬエラー ({type(e).__name__})", 500, exception_info=e, log_prefix="Unexpected Error in /evaluate_read_aloud")
 
+    
     # 3. WER計算とDiff生成 (これも共通化可能 -> 提案4)
     try:
         # 注意: calculate_wer, diff_html の第一引数は reference (正解), 第二引数は hypothesis (ユーザー入力)
@@ -686,11 +681,26 @@ def upload_custom_audio():
             "material_id": new_material.id # Material ID を返す
         })
 
+    # except openai.APIError as e: # ← 個別のopenai.APIErrorキャッチを追加するとより丁寧
+    #     db.session.rollback()
+    #     status_code = getattr(e, 'status_code', 502)
+    #     user_message = f"文字起こしサービスでエラーが発生しました (Status: {status_code})。"
+    #     log_prefix = "OpenAI Error in /upload_custom_audio"
+    #     return api_error_response(user_message, status_code, exception_info=e, log_prefix=log_prefix)
+    except ValueError as ve: # ファイル形式エラーやpydubでの処理エラーなど
+         db.session.rollback()
+         log_prefix="ValueError in /upload_custom_audio"
+         return api_error_response(f"入力値またはファイル形式に問題があります: {str(ve)}", 400, exception_info=ve, log_prefix=log_prefix)
+    except FileNotFoundError as fnf_err:
+         db.session.rollback()
+         log_prefix="FileNotFoundError in /upload_custom_audio"
+         return api_error_response(f"処理に必要なファイルが見つかりません: {str(fnf_err)}", 404, exception_info=fnf_err, log_prefix=log_prefix)
     except Exception as e:
-        # 統一されたエラーハンドリング (DBロールバックも考慮)
-        db.session.rollback() # エラー時はDBへの変更を取り消す
-        # transcribe_audio 内で発生した特定のエラーもここで捕捉される
-        return handle_transcription_error(e, "/upload_custom_audio でのエラー")
+        # 上記以外の予期せぬエラー (DB接続エラーなどもここに該当する可能性あり)
+        db.session.rollback()
+        log_prefix = "Unexpected Error in /upload_custom_audio"
+        # api_error_response が内部で500番台の時に汎用メッセージに置換 & 詳細ロギング
+        return api_error_response(f"アップロード処理中に予期せぬエラーが発生しました: {type(e).__name__}", 500, exception_info=e, log_prefix=log_prefix)
 
     finally:
         # チャンク処理で使用した一時ファイルを削除
@@ -711,12 +721,10 @@ def upload_custom_audio():
 # ... (既存のインポート) ...
 # from core.audio_utils import process_and_transcribe_audio, AudioProcessingError # インポート済みのはず
 # from core.responses import api_error_response, api_success_response # インポート済みのはず
-# from app import handle_transcription_error # インポート済みのはず
 # from wer_utils import calculate_wer
 # from diff_viewer import diff_html # カスタムシャドウイングは diff_html で良いか確認
 # from models import db, PracticeLog
 # from datetime import datetime
-# import openai # handle_transcription_error で使う場合
 # -----------------------
 
 @app.route('/evaluate_custom_shadowing', methods=['POST'])
@@ -752,12 +760,15 @@ def evaluate_custom_shadowing():
         full_transcription = process_and_transcribe_audio(recorded_audio_file)
 
     except ValueError as ve:
-        return api_error_response(f"入力エラー: {ve}", 400)
+        return api_error_response(f"入力エラー: {str(ve)}", 400, exception_info=ve, log_prefix="ValueError in /evaluate_custom_shadowing")
     except AudioProcessingError as ape:
-        return handle_transcription_error(ape, "/evaluate_custom_shadowing での音声処理エラー")
+        # AudioProcessingError が発生した場合、500 Internal Server Error とする例
+        return api_error_response(f"音声処理エラー: {str(ape)}", 500, exception_info=ape, log_prefix="AudioProcessingError in /evaluate_custom_shadowing")
+    except openai.APIError as oai_err: # transcribe_audioから来る可能性のあるOpenAIエラーをキャッチ
+        return api_error_response(f"文字起こしAPIエラー: {str(oai_err)}", getattr(oai_err, 'status_code', 502), exception_info=oai_err, log_prefix="OpenAI Error in /evaluate_custom_shadowing")
     except Exception as e:
-        return handle_transcription_error(e, "/evaluate_custom_shadowing での文字起こしエラー")
-
+        # その他の予期せぬエラー
+        return api_error_response(f"予期せぬエラー ({type(e).__name__})", 500, exception_info=e, log_prefix="Unexpected Error in /evaluate_custom_shadowing")
     # 3. ウォームアップ除去処理 (これはこのルート固有のロジックなので残す)
     #    config から WARMUP_TRANSCRIPT を取得するのが望ましい
     warmup_script = current_app.config.get('WARMUP_TRANSCRIPT', "10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0")
@@ -876,13 +887,16 @@ def evaluate_shadowing():
             cut_head_ms=500 # ★冒頭カットを指定
         )
 
-    except ValueError as ve: # ファイル形式エラーなど
-        return api_error_response(f"入力エラー: {ve}", 400)
-    except AudioProcessingError as ape: # 音声処理中のエラー (pydubなど)
-        return handle_transcription_error(ape, f"/evaluate_shadowing での音声処理エラー ({genre}/{level})")
-    except Exception as e: # 文字起こしAPIエラーなど
-        return handle_transcription_error(e, f"/evaluate_shadowing での文字起こしエラー ({genre}/{level})")
-
+    except ValueError as ve:
+        return api_error_response(f"入力エラー: {str(ve)}", 400, exception_info=ve, log_prefix="ValueError in /evaluate_shadowing")
+    except AudioProcessingError as ape:
+        # AudioProcessingError が発生した場合、500 Internal Server Error とする例
+        return api_error_response(f"音声処理エラー: {str(ape)}", 500, exception_info=ape, log_prefix="AudioProcessingError in /evaluate_shadowing")
+    except openai.APIError as oai_err: # transcribe_audioから来る可能性のあるOpenAIエラーをキャッチ
+        return api_error_response(f"文字起こしAPIエラー: {str(oai_err)}", getattr(oai_err, 'status_code', 502), exception_info=oai_err, log_prefix="OpenAI Error in /evaluate_shadowing")
+    except Exception as e:
+        # その他の予期せぬエラー
+        return api_error_response(f"予期せぬエラー ({type(e).__name__})", 500, exception_info=e, log_prefix="Unexpected Error in /evaluate_shadowing")
     # 4. WER計算とDiff生成 (これも共通化可能 -> 提案4)
     try:
         wer_score_val = calculate_wer(original_transcribed, user_transcribed)
@@ -966,33 +980,69 @@ def get_highest_levels(username):
     result = {genre: f"level{num}" for genre, num in genre_max_level.items()}
     return jsonify(result)
 
-
 @app.route("/api/log_attempt", methods=["POST"])
+# @auth_required # 必要に応じて認証を追加
 def log_attempt():
     data = request.json
-    user_id = data.get("user")
+    user_id = data.get("user") # 'user' が存在しない場合の考慮が必要
 
-    if not user_id:
-        return api_error_response("User not authenticated", 401)
+    # ★ 認証: @auth_required を使うか、ここで user_id をヘッダーから取得/検証する
+    # if not user_id:
+    #    user_id = request.headers.get('X-Replit-User-Id')
+    # if not user_id:
+    #     return api_error_response("User not authenticated", 401)
 
+    # ★ データ検証: data が None や dict でない場合の考慮
+    if not data:
+        return api_error_response("Invalid request data", 400)
+
+    # ★ キー存在と型チェック: data['key'] は KeyError のリスク、float(data['wer']) は ValueError/TypeError のリスク
     required_fields = ["user", "genre", "level", "wer", "original_transcribed", "user_transcribed"]
     if not all(field in data for field in required_fields):
-        return api_error_response("Missing required fields")
+        return api_error_response("Missing required fields", 400)
 
-    log_entry = PracticeLog(
-        user_id=data["user"],
-        genre=data["genre"],
-        level=data["level"],
-        wer=float(data["wer"]),
-        original_text=data["original_transcribed"],
-        user_text=data["user_transcribed"],
-        practiced_at=datetime.utcnow()
-    )
+    try:
+        # ★ データ変換時のエラー考慮
+        wer_value = float(data["wer"])
 
-    db.session.add(log_entry)
-    db.session.commit()
+        # genre, level は PracticeLog モデルに存在しない？
+        # もし保存したい場合はモデルにカラム追加が必要。
+        # 現在の PracticeLog モデルには genre, level はないためコメントアウト
+        log_entry = PracticeLog(
+            user_id=data["user"],
+            # practice_type='preset', # preset固定か？データから取るべきか？
+            # recording_id=None, # presetの場合、対応するAudioRecording IDは？
+            # material_id=None,  # presetなので material_id は使わない想定
+            # genre=data["genre"], # モデルにカラム追加が必要
+            # level=data["level"], # モデルにカラム追加が必要
+            wer=wer_value,
+            original_text=data["original_transcribed"],
+            user_text=data["user_transcribed"],
+            practiced_at=datetime.utcnow()
+        )
 
-    return jsonify({"message": "Logged successfully"})
+        db.session.add(log_entry)
+        db.session.commit() # ★ DBエラーはここで発生
+
+        return api_success_response({"message": "Logged successfully", "id": log_entry.id}) # ★ api_success_response を使用
+
+    except (ValueError, TypeError) as e:
+        # float(data["wer"]) などでの型変換エラー
+        db.session.rollback() # 念のためロールバック
+        log_prefix="ValueError/TypeError in /api/log_attempt"
+        return api_error_response(f"データ形式エラー: {str(e)}", 400, exception_info=e, log_prefix=log_prefix)
+    except KeyError as e:
+        # data['key'] で存在しないキーにアクセスした場合
+        db.session.rollback() # 念のためロールバック
+        log_prefix="KeyError in /api/log_attempt"
+        return api_error_response(f"必須フィールドが不足しています: {str(e)}", 400, exception_info=e, log_prefix=log_prefix)
+    except Exception as e: # DBエラー (commit時など) やその他の予期せぬエラー
+        db.session.rollback() # ★ ロールバック (重要！)
+        log_prefix = "Unexpected Error in /api/log_attempt"
+        # ログには詳細を記録し、ユーザーには汎用メッセージ
+        return api_error_response(f"ログの保存中にエラーが発生しました。", 500, exception_info=e, log_prefix=log_prefix)
+
+
 
 @app.route('/api/save_material', methods=['POST'])
 @auth_required
