@@ -34,6 +34,14 @@ from wer_utils import wer, calculate_wer
 from diff_viewer import diff_html, get_diff_html
 from youtube_utils import youtube_bp, check_captions
 
+import os # osモジュールのインポートを確認
+import uuid # uuidモジュールのインポートを確認
+from flask import jsonify, request, session # sessionをインポート
+from pydub import AudioSegment # pydubのインポートを確認
+# (他の必要なインポートも確認してください: app, db, PracticeLog, transcribe_audio, calculate_wer, diff_html, auth_required, handle_transcription_error など)
+
+
+
 # Constants
 TARGET_CHUNK_SIZE_MB = 20
 TARGET_CHUNK_SIZE_BYTES = TARGET_CHUNK_SIZE_MB * 1024 * 1024
@@ -131,6 +139,29 @@ def get_presets_structure(practice_type="shadowing"):
 
     return presets
 
+# 共通のエラーハンドリング用ヘルパー関数 (任意だが推奨)
+def handle_transcription_error(e, context_message="文字起こしエラー"):
+    error_message = str(e)
+    status_code = 500
+    if isinstance(e, FileNotFoundError):
+        status_code = 404 # または 400
+    elif isinstance(e, ValueError):
+        status_code = 400
+    elif isinstance(e, PermissionError):
+         status_code = 401
+    elif isinstance(e, ConnectionError):
+         status_code = 503 # Service Unavailable
+
+    print(f"!! {context_message}: {error_message}") # サーバーログ
+    return jsonify({"error": f"{context_message}: {error_message}"}), status_code
+
+
+
+
+
+
+
+
 # Basic routes
 @app.route('/__replauthlogout')
 def logout():
@@ -223,33 +254,61 @@ def youtube_ui():
 
 @app.route('/evaluate_youtube', methods=['POST'])
 def evaluate_youtube():
-    import tempfile
-    from openai import OpenAI
-    from wer_utils import calculate_wer
+    # openai.OpenAI() の初期化はグローバルスコープで行われているのでここでは不要
+    # from wer_utils import calculate_wer # 関数の先頭またはグローバルでインポート
 
-    audio_file = request.files['audio']
-    transcript_text = request.form['transcript']
+    tmp_path = None # finally で参照できるように初期化
+    try:
+        if 'audio' not in request.files:
+            return api_error_response('音声ファイルが提供されていません。', 400)
+        if 'transcript' not in request.form or not request.form['transcript']:
+            return api_error_response('文字起こしテキストが提供されていません。', 400)
 
-    client = OpenAI()
+        audio_file = request.files['audio']
+        original_transcript_text = request.form['transcript']
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
-        audio_file.save(tmp.name)
-        with open(tmp.name, "rb") as f:
-            response = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=f
-            )
-        transcribed = response.text
+        # 一時ファイルに保存
+        # suffix はファイル形式に合わせて適切に（例: .webm, .mp3など Whisperが受け付けるもの）
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as tmp:
+            audio_file.save(tmp.name)
+            tmp_path = tmp.name
 
-    wer = calculate_wer(transcript_text, transcribed)
+        # 文字起こし (transcribe_utils を利用)
+        user_transcribed_text = transcribe_audio(tmp_path) # transcribe_audio内でエラーハンドリングされている
 
-    diff_result = diff_html(transcript_text, transcribed)
+        # WER計算 (参照テキストと仮説テキストの順序に注意)
+        wer_score_val = calculate_wer(original_transcript_text, user_transcribed_text)
+        # 差分表示 (参照テキストと仮説テキストの順序に注意)
+        diff_result_html = diff_html(original_transcript_text, user_transcribed_text)
 
-    return jsonify({
-        "transcribed": transcribed,
-        "wer": round(wer * 100, 2),
-        "diff_html": diff_result
-    })
+        return jsonify({
+            "transcribed": user_transcribed_text,
+            "wer": round(wer_score_val * 100, 2), # WERは通常%表記
+            "diff_html": diff_result_html
+        })
+
+    except openai.APIError as e: # OpenAI API特有のエラーを先にキャッチ
+        # transcribe_utilsから伝播してきたOpenAIのエラーをここでハンドリング
+        # または、transcribe_utils側でより汎用的な例外にラップして投げる
+        return handle_transcription_error(e, "YouTube音声評価中の文字起こしエラー")
+    except IOError as e:
+        print(f"!! ファイル操作エラー (/evaluate_youtube): {e}")
+        return api_error_response(f"ファイルの読み書き中にエラーが発生しました: {e}", 500)
+    except Exception as e:
+        # その他の予期せぬエラー
+        print(f"!! 予期せぬエラー (/evaluate_youtube): {e}")
+        # handle_transcription_error を使うか、api_error_response を使うかは一貫性を持たせる
+        return api_error_response(f"評価処理中に予期せぬエラーが発生しました。", 500)
+    finally:
+        # 一時ファイルの削除
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except OSError as e:
+                print(f"!! 一時ファイル削除エラー ({tmp_path}): {e}")
+
+
+
 
 @app.route('/presets/<path:filename>')
 def serve_presets(filename):
@@ -478,11 +537,14 @@ def custom_shadowing_ui():
 def serve_upload(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+# --- /upload_custom_audio の修正 ---
 @app.route('/upload_custom_audio', methods=['POST'])
 @auth_required
 def upload_custom_audio():
     user_id = request.headers.get('X-Replit-User-Id')
+    # user_id チェックは @auth_required が担当する想定だが、念のため
     if not user_id:
+        # 通常 @auth_required で処理されるが、明示的に書く場合
         return jsonify({"error": "User not authenticated"}), 401
 
     if 'audio' not in request.files:
@@ -492,80 +554,100 @@ def upload_custom_audio():
     if not audio_file or audio_file.filename == '':
         return jsonify({"error": "無効なファイルです"}), 400
 
+    # ファイル拡張子チェック
     file_ext = os.path.splitext(audio_file.filename)[1].lower()
     allowed_extensions = ['.mp3', '.m4a', '.wav', '.mpga', '.mpeg', '.webm']
     if file_ext not in allowed_extensions:
         return jsonify({"error": f"サポートされていないファイル形式です: {file_ext}"}), 400
 
+    # 一意なファイル名を生成して保存
     filename_base = secure_filename(f"{user_id}_{uuid.uuid4().hex}")
     original_filename = f"{filename_base}_original{file_ext}"
     original_filepath = os.path.join(app.config['UPLOAD_FOLDER'], original_filename)
-    audio_file.save(original_filepath)
-    print(f"一時ファイル保存先: {original_filepath}")
 
-    final_transcription = ""
+    # 一時的なチャンクファイルのパスを保持するリスト
     processed_chunk_paths = []
+    final_transcription = ""
 
     try:
+        audio_file.save(original_filepath)
+        print(f"一時ファイル保存先: {original_filepath}")
+
         file_size = os.path.getsize(original_filepath)
         print(f"ファイルサイズ: {file_size / (1024*1024):.2f} MB")
 
-        if file_size > TARGET_CHUNK_SIZE_BYTES:
+        # Whisperのサイズ制限 (transcribe_audio内でチェックされるが、ここでも事前チェック可能)
+        MAX_WHISPER_SIZE = 25 * 1024 * 1024
+
+        if file_size > MAX_WHISPER_SIZE:
+            # サイズが大きい場合はチャンク処理 (既存ロジック)
             print("ファイルサイズが上限を超えています。分割処理を開始します...")
             audio = AudioSegment.from_file(original_filepath)
             duration_ms = len(audio)
             print(f"音声の長さ: {duration_ms / 1000:.2f} 秒")
 
-            chunk_length_ms = 600 * 1000 # 10分
+            # チャンク設定 (例: 10分ごと、5秒オーバーラップ)
+            TARGET_CHUNK_DURATION_MS = 10 * 60 * 1000
+            CHUNK_OVERLAP_MS = 5000
+
             transcribed_parts = []
-            num_chunks = math.ceil(duration_ms / (chunk_length_ms - CHUNK_OVERLAP_MS))
+            num_chunks = math.ceil(duration_ms / (TARGET_CHUNK_DURATION_MS - CHUNK_OVERLAP_MS)) if (TARGET_CHUNK_DURATION_MS - CHUNK_OVERLAP_MS) > 0 else 1
             print(f"推定チャンク数: {num_chunks}")
 
             current_pos_ms = 0
-            chunk_index = 0
-            while current_pos_ms < duration_ms:
+            for chunk_index in range(num_chunks):
                 start_ms = max(0, current_pos_ms - CHUNK_OVERLAP_MS)
-                end_ms = min(current_pos_ms + chunk_length_ms, duration_ms)
-                print(f"チャンク {chunk_index + 1}/{num_chunks}: {start_ms/1000:.1f}s - {end_ms/1000:.1f}s")
+                end_ms = min(current_pos_ms + TARGET_CHUNK_DURATION_MS, duration_ms)
+                print(f"  チャンク {chunk_index + 1}/{num_chunks}: {start_ms/1000:.1f}s - {end_ms/1000:.1f}s")
 
+                # メモリ上でチャンクを作成
                 chunk = audio[start_ms:end_ms]
 
+                # 一時ファイルにチャンクを書き出し
                 with tempfile.NamedTemporaryFile(
                     prefix=f"{filename_base}_chunk_{chunk_index}_",
-                    suffix=".mp3",
+                    suffix=".mp3", # Whisperが扱いやすい形式で出力
                     dir=app.config['UPLOAD_FOLDER'],
-                    delete=False
+                    delete=False # transcribe_audioに渡すため削除しない
                 ) as tmp_chunk_file:
                     chunk_filepath = tmp_chunk_file.name
-                    print(f"  チャンクファイル書き出し中: {chunk_filepath}")
+                    print(f"    チャンクファイル書き出し中: {chunk_filepath}")
                     chunk.export(chunk_filepath, format="mp3")
-                    processed_chunk_paths.append(chunk_filepath)
+                    processed_chunk_paths.append(chunk_filepath) # 削除リストに追加
 
-                print(f"  チャンク {chunk_index + 1} 文字起こし中...")
+                print(f"    チャンク {chunk_index + 1} 文字起こし中...")
+                # ここで transcribe_audio を呼び出し、エラーハンドリング
                 try:
                     transcript_part = transcribe_audio(chunk_filepath)
                     transcribed_parts.append(transcript_part)
-                    print(f"  チャンク {chunk_index + 1} 文字起こし完了.")
+                    print(f"    チャンク {chunk_index + 1} 文字起こし完了.")
                 except Exception as transcribe_err:
+                    # チャンク処理中のエラーハンドリング
                     print(f"!! チャンク {chunk_index + 1} の文字起こしエラー: {transcribe_err}")
-                    raise transcribe_err
+                    # エラーが発生したら、処理を中断してエラーレスポンスを返す
+                    raise transcribe_err # 上位のtry...exceptで捕捉させる
 
-                current_pos_ms += chunk_length_ms
-                chunk_index += 1
+                # 次のチャンクの開始位置を計算
+                current_pos_ms += TARGET_CHUNK_DURATION_MS
+                # ループの最後で current_pos_ms が duration_ms を超えてもループは終了する
 
+            # 全てのチャンクの文字起こし結果を結合
             final_transcription = " ".join(transcribed_parts).strip()
             print("全てのチャンクの文字起こしを結合しました。")
 
         else:
+            # ファイルサイズが小さい場合は直接文字起こし
             print("ファイルサイズは上限内です。直接文字起こしします...")
+            # ここで transcribe_audio を呼び出し、エラーハンドリング
             final_transcription = transcribe_audio(original_filepath)
             print("直接文字起こし完了。")
 
+        # データベースにMaterialを保存 (成功した場合のみ)
         print("データベースにMaterialを保存します...")
         new_material = Material(
             user_id=user_id,
-            material_name=audio_file.filename,
-            storage_key=original_filepath,
+            material_name=audio_file.filename, # 元のファイル名を使用
+            storage_key=original_filepath, # 保存したファイルのパス
             transcript=final_transcription,
             upload_timestamp=datetime.utcnow()
         )
@@ -573,23 +655,24 @@ def upload_custom_audio():
         db.session.commit()
         print(f"Material ID: {new_material.id} でデータベースに保存しました。")
 
+        # セッションに情報を保存 (ただし、前述の通りIDのみをクライアントに返す方が堅牢)
         session['current_material_id'] = new_material.id
-        session['custom_transcription'] = final_transcription
+        session['custom_transcription'] = final_transcription # 評価時に使うなら保持
 
         return jsonify({
             "audio_url": url_for('serve_upload', filename=original_filename),
             "transcription": final_transcription,
-            "material_id": new_material.id
+            "material_id": new_material.id # Material ID を返す
         })
 
     except Exception as e:
-        db.session.rollback()
-        print(f"!! /upload_custom_audio でエラー発生: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({"error": f"処理中にエラーが発生しました。詳細はサーバーログを確認してください。"}), 500
+        # 統一されたエラーハンドリング (DBロールバックも考慮)
+        db.session.rollback() # エラー時はDBへの変更を取り消す
+        # transcribe_audio 内で発生した特定のエラーもここで捕捉される
+        return handle_transcription_error(e, "/upload_custom_audio でのエラー")
 
     finally:
+        # チャンク処理で使用した一時ファイルを削除
         print("一時チャンクファイルを削除します...")
         for path in processed_chunk_paths:
             if os.path.exists(path):
@@ -598,87 +681,162 @@ def upload_custom_audio():
                     print(f"  削除: {path}")
                 except OSError as del_err:
                     print(f"!! 一時ファイル削除エラー ({path}): {del_err}")
+        # DBセッションのクリーンアップ (リクエスト終了時に自動で行われることが多いが明示的に行う場合)
+        # db.session.remove()
 
-        db.session.remove()
+#AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+# --- /evaluate_custom_shadowing の修正案 ---
 
 @app.route('/evaluate_custom_shadowing', methods=['POST'])
 @auth_required
 def evaluate_custom_shadowing():
     user_id = request.headers.get('X-Replit-User-Id')
-    if not user_id:
+    if not user_id: # @auth_required があれば不要な場合もあるが、念のため
         return jsonify({"error": "User not authenticated"}), 401
 
-    if 'recorded_audio' not in request.files:
-        return jsonify({"error": "No recorded audio provided"}), 400
-
+    # --- 修正箇所：original_transcription と material_id を先に取得 ---
     material_id = session.get('current_material_id')
     original_transcription = session.get('custom_transcription')
 
-    if not material_id or not original_transcription:
-        return jsonify({"error": "Original material information not found in session"}), 400
+    if not material_id:
+        return jsonify({"error": "元の教材IDが見つかりません。再度アップロードからお試しください。"}), 400
+    if not original_transcription:
+        # material_id がある場合、DBから再取得を試みることも可能 (オプション)
+        # current_material = Material.query.get(material_id)
+        # if current_material and current_material.transcript:
+        #    original_transcription = current_material.transcript
+        # else:
+        return jsonify({"error": "元の文字起こし情報が見つかりません。再度アップロードからお試しください。"}), 400
+    # --- 修正箇所ここまで ---
+
+    if 'recorded_audio' not in request.files:
+        return jsonify({"error": "録音された音声ファイルが提供されていません"}), 400
 
     recorded_audio = request.files['recorded_audio']
+    if not recorded_audio or recorded_audio.filename == '':
+        return jsonify({"error": "無効な録音ファイルです"}), 400
 
-    tmp_path = os.path.join(app.config['UPLOAD_FOLDER'], f'tmp_recording_{user_id}_{uuid.uuid4().hex}.webm')
-    processed_path = tmp_path.replace('.webm', '_processed.wav')
+
+    tmp_path = None
+    processed_path = None
+    # user_transcription = "" # tryブロック内で定義されるため、ここでは不要でも良い
+
     try:
+        original_filename_for_log = recorded_audio.filename if recorded_audio.filename else "unknown_custom_audio"
+        tmp_suffix = os.path.splitext(original_filename_for_log)[1].lower()
+        if not tmp_suffix or tmp_suffix not in ['.webm', '.mp3', '.m4a', '.wav']: # 一般的な拡張子を想定
+            tmp_suffix = '.webm' # デフォルト
+
+        base_name = f'tmp_eval_recording_{user_id}_{uuid.uuid4().hex}'
+        tmp_path = os.path.join(app.config['UPLOAD_FOLDER'], f'{base_name}{tmp_suffix}')
         recorded_audio.save(tmp_path)
-        WARMUP_TRANSCRIPT = "10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0"
+        print(f"Saved temporary recorded file to: {tmp_path}")
+
+        processed_path = os.path.join(app.config['UPLOAD_FOLDER'], f'{base_name}_processed.wav')
+        print(f"Intended processed_path for evaluation: {processed_path}")
+
+        print(f"Converting recorded audio {tmp_path} to {processed_path} for transcription")
         audio = AudioSegment.from_file(tmp_path)
+        # ここで pydub の from_file が失敗する可能性も考慮 (例: 非対応フォーマット、壊れたファイル)
+        # from_file が失敗した場合、FileNotFoundError ではなく pydub.exceptions.CouldntDecodeError などが発生する
         audio.export(processed_path, format="wav")
+        print(f"Successfully converted recorded audio to {processed_path}")
+
+        print(f"Transcribing processed recorded audio {processed_path}...")
         full_transcription = transcribe_audio(processed_path)
-        user_transcription = full_transcription
+        # full_transcription が空文字列や予期せぬ値の場合のハンドリングも考慮するとより堅牢
+        print(f"Full transcription of recorded audio (first 100 chars): {full_transcription[:100]}...")
 
+        # ウォームアップ除去ロジック
+        WARMUP_TRANSCRIPT = "10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0" # 定数として定義が良い
+        user_transcription_for_eval = full_transcription # ウォームアップ除去前のものを保持
+
+        # 修正されたウォームアップ除去ロジック (以前の会話で提案されたもの)
         numbers = WARMUP_TRANSCRIPT.split(", ")
-        suffixes = [", ".join(numbers[i:]) for i in range(len(numbers))]
-        suffixes.sort(key=len, reverse=True)
+        possible_warmup_suffixes = [", ".join(numbers[i:]) for i in range(len(numbers))]
+        possible_warmup_suffixes.sort(key=len, reverse=True) # 長いものからマッチさせる
 
-        matched_suffix = None
-        normalized_full_transcription = full_transcription.lower().strip()
+        matched_suffix_found = None
+        normalized_full_recorded_transcription = full_transcription.lower().strip()
 
-        for suffix in suffixes:
-            if normalized_full_transcription.startswith(suffix.lower()):
-                matched_suffix = suffix
+        for suffix_candidate in possible_warmup_suffixes:
+            if normalized_full_recorded_transcription.startswith(suffix_candidate.lower()):
+                # 除去するサフィックスの実際のテキスト (大文字・小文字を保持) を取得
+                # full_transcription の先頭から suffix_candidate と同じ長さの部分文字列を取得
+                actual_removed_part_length = len(suffix_candidate)
+                user_transcription_for_eval = full_transcription[actual_removed_part_length:].lstrip(" ,") # 先頭の空白やコンマも除去
+                matched_suffix_found = suffix_candidate
+                print(f"Warm-up part '{matched_suffix_found}' removed. User transcription for eval: {user_transcription_for_eval[:100]}...")
                 break
 
-        if matched_suffix:
-            start_pos = normalized_full_transcription.find(matched_suffix.lower())
-            if start_pos != -1:
-                user_transcription = full_transcription[start_pos + len(matched_suffix):].strip()
+        if not matched_suffix_found:
+            print("Warm-up part not clearly identified or not present in transcription.")
+            # ウォームアップが見つからなかった場合、そのまま full_transcription を使う
+            user_transcription_for_eval = full_transcription
 
-        wer_score = calculate_wer(user_transcription, original_transcription)
-        diff_result = diff_html(user_transcription, original_transcription)
 
+        wer_score = calculate_wer(original_transcription, user_transcription_for_eval)
+        diff_result_html = diff_html(original_transcription, user_transcription_for_eval) # diff_html にも修正版を渡す
+
+        print(f"WER calculated: {wer_score*100:.2f}%")
+
+        # データベースへの保存
         new_log = PracticeLog(
             user_id=user_id,
-            practice_type='custom',
-            material_id=material_id,
-            recording_id=None,
+            practice_type='custom', # 明示的に 'custom'
+            material_id=material_id, # session から取得した material_id
+            recording_id=None, # カスタム練習では recording_id は通常使わない (使途による)
             wer=round(wer_score * 100, 2),
             original_text=original_transcription,
-            user_text=user_transcription
+            user_text=user_transcription_for_eval, # ウォームアップ除去後
+            practiced_at=datetime.utcnow() # タイムスタンプを追加すると良い
         )
         db.session.add(new_log)
         db.session.commit()
+        print(f"PracticeLog saved with ID: {new_log.id}")
 
         return jsonify({
             "wer": round(wer_score * 100, 2),
-            "diff_html": diff_result,
-            "original_transcription": original_transcription,
-            "user_transcription": user_transcription
+            "diff_html": diff_result_html,
+            "original_transcription": original_transcription, # 教材の文字起こし
+            "user_transcription": user_transcription_for_eval # ユーザーの文字起こし（ウォームアップ除去後）
+            # "full_user_transcription": full_transcription # 参考情報としてウォームアップ除去前のものも返すか検討
         })
 
+    except FileNotFoundError as e:
+        db.session.rollback()
+        error_msg = f"ファイル処理中にエラーが発生しました (ファイルが見つからないか、アクセスできませんでした): {e}"
+        print(f"!! FileNotFoundError in /evaluate_custom_shadowing: {e} (tmp: {tmp_path}, proc: {processed_path})")
+        return jsonify({"error": error_msg }), 404 # or 500
+    except openai.APIError as e: # transcribe_audio から来る可能性のある OpenAI API エラー
+        db.session.rollback()
+        print(f"!! OpenAI API Error in /evaluate_custom_shadowing: {e}")
+        # handle_transcription_error があればそれを使う
+        return handle_transcription_error(e, "文字起こし処理中にAPIエラーが発生しました。")
     except Exception as e:
         db.session.rollback()
-        print(f"Evaluation error: {str(e)}")
-        return jsonify({"error": f"評価処理中にエラーが発生しました: {str(e)}"}), 500
+        # 予期せぬエラーの詳細をログに出力
+        import traceback
+        print(f"!! Unexpected error in /evaluate_custom_shadowing (tmp: {tmp_path}, proc: {processed_path}): {e}\n{traceback.format_exc()}")
+        # クライアントには汎用的なメッセージを返すか、handle_transcription_error を使う
+        return jsonify({"error": f"評価処理中に予期せぬエラーが発生しました。管理者に連絡してください。"}), 500
     finally:
-        if os.path.exists(tmp_path):
-            os.remove(tmp_path)
-        if os.path.exists(processed_path):
-            os.remove(processed_path)
-        db.session.remove()
-
+        # 一時ファイルの削除
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+                print(f"Deleted temporary file: {tmp_path}")
+            except OSError as e_os:
+                print(f"!! Error deleting temporary file {tmp_path}: {e_os}")
+        if processed_path and os.path.exists(processed_path):
+            try:
+                os.remove(processed_path)
+                print(f"Deleted processed file: {processed_path}")
+            except OSError as e_os:
+                print(f"!! Error deleting processed file {processed_path}: {e_os}")
+        # db.session.remove() # Flask-SQLAlchemyでは通常不要
+#ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 @app.route('/evaluate_shadowing', methods=['POST'])
 def evaluate_shadowing():
     from openai import OpenAI
@@ -694,52 +852,54 @@ def evaluate_shadowing():
     level = request.form.get("level", "")
     username = request.form.get("username", "anonymous")
 
-    script_path = os.path.join("presets", "shadowing", genre, level, "script.txt")
-    if not os.path.exists(script_path):
-        return jsonify({"error": f"Script not found at: {script_path}"}), 400
+    user_transcribed = ""
+    tmp_in_path = None
+    tmp_out_path = None # finally で削除するために定義
 
-    with open(script_path, "r", encoding="utf-8") as f:
-        original_transcribed = f.read().strip()
+    try:
+        # --- 文字起こし部分 ---
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_in:
+            recorded_audio.save(tmp_in.name)
+            tmp_in_path = tmp_in.name # finallyで使うために保持
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_in:
-        recorded_audio.save(tmp_in.name)
+        audio = AudioSegment.from_file(tmp_in_path)
+        trimmed_audio = audio[500:] # 冒頭500msカット (以前のロジック)
+        tmp_out_path = tmp_in_path.replace(".webm", "_cut.wav")
+        trimmed_audio.export(tmp_out_path, format="wav")
 
-    audio = AudioSegment.from_file(tmp_in.name)
-    trimmed_audio = audio[500:]
-    tmp_out_path = tmp_in.name.replace(".webm", "_cut.wav")
-    trimmed_audio.export(tmp_out_path, format="wav")
+        # 統一された関数を呼び出す
+        user_transcribed = transcribe_audio(tmp_out_path)
+        # --- ここまで ---
 
-    with open(tmp_out_path, "rb") as f:
-        user_result = client.audio.transcriptions.create(
-            model="whisper-1",
-            file=f
-        )
-    user_transcribed = user_result.text
+        wer_score = calculate_wer(original_transcribed, user_transcribed)
+        diff_user = get_diff_html(original_transcribed, user_transcribed, mode='user')
+        diff_original = get_diff_html(original_transcribed, user_transcribed, mode='original')
 
-    wer_score = calculate_wer(original_transcribed, user_transcribed)
-    diff_user = get_diff_html(original_transcribed, user_transcribed, mode='user')
-    diff_original = get_diff_html(original_transcribed, user_transcribed, mode='original')
+        # ... (ログ保存処理: save_preset_log) ...
 
-    log_entry = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "user": request.form.get("username", "anonymous"),
-        "genre": request.form.get("genre", ""),
-        "level": request.form.get("level", ""),
-        "wer": round(wer_score * 100, 2),
-        "original_transcribed": original_transcribed,
-        "user_transcribed": user_transcribed,
-        "script_excerpt": original_transcribed[:100]
-    }
+        return jsonify({
+            "original_transcribed": original_transcribed,
+            "user_transcribed": user_transcribed,
+            "wer": round(wer_score * 100, 2),
+            "diff_user": diff_user,
+            "diff_original": diff_original
+        })
 
-    save_preset_log(log_entry)
+    except Exception as e:
+        # 統一されたエラーハンドリング
+        return handle_transcription_error(e, "/evaluate_shadowing でのエラー")
+    finally:
+        # 一時ファイルの削除
+        if tmp_in_path and os.path.exists(tmp_in_path):
+            os.remove(tmp_in_path)
+        if tmp_out_path and os.path.exists(tmp_out_path):
+            os.remove(tmp_out_path)
 
-    return jsonify({
-        "original_transcribed": original_transcribed,
-        "user_transcribed": user_transcribed,
-        "wer": round(wer_score * 100, 2),
-        "diff_user": diff_user,
-        "diff_original": diff_original
-    })
+
+    
+    
+
+
 
 @app.route("/api/highest_levels/<username>")
 def get_highest_levels(username):
