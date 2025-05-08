@@ -7,6 +7,7 @@ import math
 import json
 import tempfile
 from datetime import datetime, timedelta
+from collections import defaultdict
 from functools import wraps
 
 # Third-party imports
@@ -14,11 +15,13 @@ import pandas as pd
 import openai
 from pydub import AudioSegment
 from flask import (
-    Flask, render_template, request, url_for, 
+    Flask, render_template, request, redirect, url_for, 
     jsonify, send_from_directory, session, current_app
 )
 from flask_cors import CORS
-from sqlalchemy import desc
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError # DBエラーを具体的に捕捉する場合
+from sqlalchemy import desc # 降順ソート用
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
 
@@ -27,11 +30,13 @@ from models import db, Material, AudioRecording, PracticeLog
 from core.services.transcribe_utils import transcribe_audio
 from core.wer_utils import wer, calculate_wer
 from core.diff_viewer import diff_html, get_diff_html
-from core.services.youtube_utils import youtube_bp
-from routes.api_routes import api_bp
-from config import config_by_name
+from core.services.youtube_utils import youtube_bp, check_captions
+from config import config_by_name # config.pyから設定辞書をインポート
 from core.responses import api_error_response, api_success_response
-from core.audio_utils import process_and_transcribe_audio, AudioProcessingError
+from core.audio_utils import process_and_transcribe_audio, AudioProcessingError # インポート
+#from core.evaluation_utils import generate_evaluation_metrics # 次の提案で使用
+
+
 
 
 # Constants
@@ -45,10 +50,16 @@ def auth_required(f):
     def decorated_function(*args, **kwargs):
         user_id = request.headers.get('X-Replit-User-Id')
         if not user_id:
+            # APIエンドポイント (@app.route('/api/...') など) で使うことが多い場合は、
+            # リダイレクトではなくエラーを返す方がクライアント側で扱いやすいです。
+            # Webページ用のルート (@app.route('/dashboard/...') など) ならリダイレクトでOK。
+            # ここではAPIでの使用を想定し、api_error_response を使う例を示します。
+            # import されていることが前提です: from core.responses import api_error_response
             return api_error_response("ユーザー認証が必要です。", 401)
+            # もしWebページへのリダイレクトで良いなら元の redirect('/') のままでもOK
+            # return redirect('/')
         return f(*args, **kwargs)
-    return decorated_function
-
+    return decorated_function # ★★★ 修正: ラップされた関数を返す ★★★
 # Flask app initialization
 app = Flask(__name__)
 app.config.from_object('config')
@@ -76,7 +87,6 @@ migrate = Migrate(app, db)
 db.init_app(app)
 migrate.init_app(app, db)
 app.register_blueprint(youtube_bp)
-app.register_blueprint(api_bp)
 CORS(app)
 
 # Ensure upload directory exists
@@ -159,7 +169,7 @@ def logout():
 @app.route('/')
 def index():
     user_id = request.headers.get('X-Replit-User-Id')
-    user_name = request.headers.get('X-Replit-User-Name', 'Guest')
+    user_name = request.headers.get('X-Replit-User-Name')
     return render_template('index.html', user_id=user_id, user_name=user_name)
 
 # Dashboard routes
@@ -217,24 +227,13 @@ def read_aloud():
     if request.method == "GET":
         return render_template("read_aloud.html")
 
-    # Get reference text from form or file
     reference_text = request.form.get("reference_text", "").strip()
-    if "reference_file" in request.files:
-        reference_file = request.files["reference_file"]
-        if reference_file and reference_file.filename.endswith(".txt"):
-            reference_text = reference_file.read().decode("utf-8").strip()
+    reference_file = request.files.get("reference_file")
+    if reference_file and reference_file.filename.endswith(".txt"):
+        reference_text = reference_file.read().decode("utf-8").strip()
 
-    # Validate audio file
-    if "audio_file" not in request.files:
-        return api_error_response("音声ファイルが提供されていません。", 400)
-    
     audio_file = request.files["audio_file"]
-    if not audio_file or not audio_file.filename:
-        return api_error_response("無効な音声ファイルです。", 400)
-
-    # Save audio file
-    audio_filename = secure_filename(audio_file.filename)
-    audio_path = os.path.join(app.config["UPLOAD_FOLDER"], audio_filename)
+    audio_path = os.path.join(app.config["UPLOAD_FOLDER"], secure_filename(audio_file.filename))
     audio_file.save(audio_path)
 
     recognized_text = transcribe_audio(audio_path)
@@ -332,6 +331,7 @@ def evaluate_youtube():
             except OSError as e_os:
                 # ファイル削除エラーはログに残すだけで、ユーザーには影響させない
                 current_app.logger.error(f"Error deleting temp file {tmp_path}", exc_info=e_os)
+
 
 
 @app.route('/presets/<path:filename>')
@@ -524,6 +524,20 @@ def upload_recording():
 
 
 
+@app.route('/check_subtitles', methods=["GET"])
+def check_subtitles():
+    video_id = request.args.get("video_id")
+    if not video_id:
+        return api_error_response("Missing video_id", 400)
+
+    result = check_captions(video_id)
+    if result is None:
+        return api_error_response("Failed to check captions", 500)
+
+    return jsonify({
+        "video_id": video_id,
+        "has_subtitles": result
+    })
 
 
 
@@ -624,7 +638,6 @@ def evaluate_read_aloud():
         # 必要であれば reference_text もレスポンスに含める
         # "reference_text": reference_text
     })
-
 @app.route('/shadowing')
 def shadowing_ui():
     return render_template('shadowing.html')
@@ -686,6 +699,7 @@ def custom_shadowing_ui():
 
 
 
+
 @app.route('/uploads/<path:filename>')
 def serve_upload(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
@@ -708,15 +722,7 @@ def upload_custom_audio():
         return api_error_response("無効なファイルです", 400)
 
     # ファイル拡張子チェック
-    filename = audio_file.filename
-    if not filename:
-        return api_error_response("ファイル名が指定されていません", 400)
-        
-    _, file_ext = os.path.splitext(filename)
-    if not file_ext:
-        return api_error_response("ファイル拡張子がありません", 400)
-        
-    file_ext = file_ext.lower()
+    file_ext = os.path.splitext(audio_file.filename)[1].lower()
     allowed_extensions = ['.mp3', '.m4a', '.wav', '.mpga', '.mpeg', '.webm']
     if file_ext not in allowed_extensions:
         return api_error_response(f"サポートされていないファイル形式です: {file_ext}", 400)
@@ -1037,10 +1043,10 @@ def evaluate_shadowing():
         return api_error_response(f"入力エラー: {ve}", 400)
     except AudioProcessingError as ape: # 音声処理中のエラー
         # ★ handle_transcription_error ではなく api_error_response を使う
-        return api_error_response(f"音声処理エラー: {ape}", 500, log_prefix=f"/evaluate_shadowing での音声処理エラー ({genre}/{level})")
+        return handle_transcription_error(ape, f"/evaluate_shadowing での音声処理エラー ({genre}/{level})")
     except Exception as e: # 文字起こしAPIエラーなど
         # ★ handle_transcription_error ではなく api_error_response を使う
-        return api_error_response(f"文字起こしエラー: {e}", 500, log_prefix=f"/evaluate_shadowing での文字起こしエラー ({genre}/{level})")
+        return handle_transcription_error(e, f"/evaluate_shadowing での文字起こしエラー ({genre}/{level})")
 
     # 4. WER計算とDiff生成
     try:
@@ -1085,6 +1091,9 @@ def evaluate_shadowing():
         "diff_user": diff_user, # shadowing.html が期待するキー名に合わせる
         "diff_original": diff_original # shadowing.html が期待するキー名に合わせる
     })
+
+
+
 
 
 
@@ -1150,9 +1159,8 @@ def save_material():
         temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{material_id}{file_ext}")
         audio_file.save(temp_path)
 
-        upload_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{material_id}{file_ext}")
-        os.rename(temp_path, upload_path)
-        object_storage_key = upload_path
+        with open(temp_path, 'rb') as f:
+            storage_client.upload_file(object_storage_key, f)
 
         transcript = transcribe_audio(temp_path)
 
@@ -1186,24 +1194,27 @@ def list_materials():
         if not user_id:
             return api_error_response("User not authenticated", 401)
 
-        # Query materials for the user using SQLAlchemy
-        user_materials = Material.query.filter_by(user_id=user_id)\
-            .order_by(Material.upload_timestamp.desc())\
-            .all()
+        prefix = f"material_{user_id}_"
+        user_materials = []
 
-        # Format the response
-        materials_list = [{
-            "material_id": material.id,
-            "material_name": material.material_name,
-            "upload_timestamp": material.upload_timestamp.isoformat() if material.upload_timestamp else None
-        } for material in user_materials]
+        for key in database.prefix(prefix):
+            material_data = db[key]
+            material_id = key.replace(prefix, '')
+
+            user_materials.append({
+                "material_id": material_id,
+                "material_name": material_data["material_name"],
+                "upload_timestamp": material_data["upload_timestamp"]
+            })
+
+        user_materials.sort(key=lambda x: x["upload_timestamp"], reverse=True)
 
         return jsonify({
-            "materials": materials_list
+            "materials": user_materials
         })
 
     except Exception as e:
-        current_app.logger.error(f"Error listing materials: {str(e)}")
+        print(f"Error listing materials: {str(e)}")
         return api_error_response(str(e), 500)
 
 @app.route('/sentence-practice')
@@ -1272,13 +1283,13 @@ def get_sentences(genre, level):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port)
 
 @app.route('/api/practice/logs', methods=['POST'])
 @auth_required
 def log_practice():
         data = request.json
-        user_id= data.get("user") # 'user' が存在しない場合の考慮が必要な場合
+        user_id = data.get("user") # 'user' が存在しない場合の考慮が必要
 
         # ★ 認証: @auth_required を使うか、ここで user_id をヘッダーから取得/検証する
         # if not user_id:
