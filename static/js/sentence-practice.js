@@ -194,7 +194,7 @@ class SentencePractice {
     formData.append('transcript', sentenceDiv.querySelector('.sentence-text').textContent);
 
     try {
-      const response = await fetch('/evaluate_read_aloud', {
+      const response = await fetch('/api/evaluate_read_aloud', {
         method: 'POST',
         body: formData
       });

@@ -172,10 +172,10 @@ All timestamps default to `CURRENT_TIMESTAMP`; referential integrity enforced vi
 | **POST** `/api/recordings/upload` | Upload & transcribe new recording |
 | **POST** `/api/practice/logs` | Store practice result (WER, diff) |
 | **GET** `/api/presets` | Fetch preset library structure |
-| **POST** `/evaluate_read_aloud` | Evaluate read‑aloud attempt |
-| **POST** `/evaluate_custom_shadowing` | Evaluate custom material attempt |
-| **POST** `/evaluate_shadowing` | Evaluate preset shadowing |
-| **POST** `/evaluate_youtube` | Evaluate YouTube shadowing |
+| **POST** `/api/evaluate_read_aloud` | Evaluate read‑aloud attempt |
+| **POST** `/api/evaluate_custom_shadowing` | Evaluate custom material attempt |
+| **POST** `/api/evaluate_shadowing` | Evaluate preset shadowing |
+| **POST** `/api/evaluate_youtube` | Evaluate YouTube shadowing |
 
 All endpoints return standardized JSON via `core/responses.py`.<br>Authentication uses Replit headers `X‑Replit‑User‑Id` / `X‑Replit‑User‑Name`.
 

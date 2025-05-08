@@ -121,7 +121,7 @@ function submitRecording() {
 
   document.getElementById("resultBox").innerHTML = '<div class="loading">評価中...</div>';
 
-  fetch("/evaluate_read_aloud", {
+  fetch("/api/evaluate_read_aloud", {
     method: "POST",
     body: formData
   })

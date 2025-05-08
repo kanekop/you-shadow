@@ -217,7 +217,7 @@ async function submitRecording() {
   formData.append("level", level);
 
   try {
-    const res = await fetch("/evaluate_shadowing", {
+    const res = await fetch("/api/evaluate_shadowing", {
       method: "POST",
       body: formData
     });

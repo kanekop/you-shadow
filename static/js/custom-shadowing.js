@@ -394,7 +394,7 @@ class CustomShadowing {
 
   // ★ submitRecording メソッドは前回のエラーハンドリング改善版を使用 (モック解除済み) ...
   //    ただし、material_id をどう渡すか確認が必要。
-  //    現状の /evaluate_custom_shadowing はセッションから取得しているので、
+  //    現状の /api/evaluate_custom_shadowing はセッションから取得しているので、
   //    フロントから送る必要はないかもしれない。
   //    もし送る場合は formData に append する。
   async submitRecording() {
@@ -418,7 +418,7 @@ class CustomShadowing {
     this.showSpinner('評価中...');
   
     try {
-      const response = await fetch('/evaluate_custom_shadowing', {
+      const response = await fetch('/api/evaluate_custom_shadowing', {
         method: 'POST',
         headers: this.requestHeaders, // 認証ヘッダー
         body: formData

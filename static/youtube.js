@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append('audio', document.recordedBlob);
     formData.append('transcript', lastTranscript);
 
-    fetch('/evaluate_youtube', {
+    fetch('/api/evaluate_youtube', {
       method: 'POST',
       body: formData
     })
