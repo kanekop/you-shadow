@@ -170,20 +170,15 @@ def log_practice():
 # ... Blueprint定義 ...
 @api_bp.route('/compare_passages', methods=['POST'])
 def compare_passages():
-    # request.json が None かどうかをチェック
-    data = request.json
-    if data is None:
-        # エラーメッセージを返す (400 Bad Request が適切)
-        current_app.logger.warning("Request to /api/compare_passages did not contain valid JSON data or correct Content-Type header.")
-        return api_error_response("リクエストボディにJSONデータが見つからないか、Content-Typeヘッダーが 'application/json' ではありません。", 400)
-
-    # data が None でなければ、安全に .get() を使用できる
+    data = request.get_json()
+    if not data:
+        return api_error_response("Invalid JSON data", 400)
+    
     passage1 = data.get('passage1', '')
     passage2 = data.get('passage2', '')
-
-    # 念のため、passage1 や passage2 が空でないかもチェックするとより丁寧
+    
     if not passage1 or not passage2:
-        return api_error_response("比較する両方の文章を入力してください。", 400)
+        return api_error_response("Both passages are required", 400)
 
     # calculate_wer と diff_html のインポートを確認してください
     # from ..core.wer_utils import calculate_wer
@@ -267,38 +262,7 @@ def get_unlocked_levels(username):
     result = {genre: sorted(list(levels)) for genre, levels in result.items()}
     return jsonify(result)
 
-@api_bp.route('/highest_levels/<username>')
-def get_highest_levels(username):
-    import re
-    from collections import defaultdict
 
-    def level_number(level_name):
-        match = re.match(r"level(\d+)", level_name.lower())
-        return int(match.group(1)) if match else -1
-
-    log_file = "preset_log.json"
-    if not os.path.exists(log_file):
-        return jsonify({})
-
-    with open(log_file, "r", encoding="utf-8") as f:
-        logs = json.load(f)
-
-    genre_max_level = defaultdict(int)
-
-    for entry in logs:
-        if entry["user"].lower() != username.lower():
-            continue
-
-        genre = entry.get("genre", "").strip().lower()
-        level = entry.get("level", "").strip().lower()
-        wer = float(entry.get("wer", 100))
-
-        level_num = level_number(level)
-        if wer < 30.0 and level_num > genre_max_level[genre]:
-            genre_max_level[genre] = level_num
-
-    result = {genre: f"level{num}" for genre, num in genre_max_level.items()}
-    return jsonify(result)
 
 
 
