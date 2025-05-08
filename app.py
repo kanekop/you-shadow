@@ -30,7 +30,7 @@ from wer_utils import wer, calculate_wer
 from diff_viewer import diff_html, get_diff_html
 from youtube_utils import youtube_bp, check_captions
 from config import config_by_name # config.pyから設定辞書をインポート
-from core.responses import api_error_response # core/responses.py を作成した場合
+from core.responses import api_error_response, api_success_response
 from core.audio_utils import process_and_transcribe_audio, AudioProcessingError # インポート
 from core.responses import api_error_response, api_success_response # インポート済みとする
 #from core.evaluation_utils import generate_evaluation_metrics # 次の提案で使用
