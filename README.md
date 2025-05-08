@@ -182,32 +182,50 @@ db.session.commit()
 ## 📦 Project Structure
 ```
 project/
-├── app.py                 # Main application entry point
-├── models.py             # Database models
-├── config.py            # Configuration settings
-├── migrations/         # Database migrations
-├── static/            # Static assets
-│   ├── js/           # JavaScript modules
+├── app.py                    # Main application entry point
+├── models.py                # Database models
+├── config.py               # Configuration settings
+├── wer_utils.py           # Word Error Rate calculation utilities
+├── diff_viewer.py        # Diff generation utilities
+├── transcribe_utils.py  # Audio transcription utilities
+├── youtube_utils.py    # YouTube integration utilities
+├── utils.py           # General utilities
+├── core/             # Core functionality
+│   ├── audio_utils.py    # Audio processing utilities
+│   └── responses.py      # API response handlers
+├── migrations/          # Database migrations
+│   ├── versions/       # Migration versions
+│   └── env.py         # Migration environment
+├── presets/           # Practice materials
+│   ├── sentences/    # Sentence practice content
+│   └── shadowing/   # Shadowing practice content
+├── static/          # Static assets
+│   ├── audio/      # Audio files
+│   ├── js/        # JavaScript modules
 │   │   ├── audio-recorder.js
 │   │   ├── compare.js
 │   │   ├── custom-shadowing.js
+│   │   ├── index.js
 │   │   ├── preset-manager.js
 │   │   ├── ranking.js
+│   │   ├── read_aloud.js
 │   │   ├── recordings.js
+│   │   ├── sentence-practice.js
 │   │   └── shadowing-main.js
 │   └── style.css
-├── templates/        # HTML templates
+├── templates/     # HTML templates
 │   ├── compare.html
 │   ├── custom_shadowing.html
 │   ├── dashboard.html
+│   ├── detail.html
+│   ├── index.html
 │   ├── my-recordings.html
-│   └── other templates
-├── utils/           # Core utilities
-│   ├── audio_utils.py
-│   ├── transcribe_utils.py
-│   ├── wer_utils.py
-│   └── diff_viewer.py
-└── uploads/        # User uploaded files
+│   ├── ranking.html
+│   ├── read_aloud.html
+│   ├── sentence_practice.html
+│   ├── shadowing.html
+│   └── youtube.html
+└── uploads/     # User uploaded files
 ```
 
 ## 🔑 API Endpoints
