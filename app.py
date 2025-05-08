@@ -30,7 +30,7 @@ from core.services.transcribe_utils import transcribe_audio
 from core.wer_utils import wer, calculate_wer
 from core.diff_viewer import diff_html, get_diff_html
 from core.services.youtube_utils import youtube_bp
-from core.routes.api_routes import api_bp, check_captions
+from routes.api_routes import api_bp, check_captions
 from config import config_by_name
 from core.responses import api_error_response, api_success_response
 from core.audio_utils import process_and_transcribe_audio, AudioProcessingError
