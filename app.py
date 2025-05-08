@@ -1166,27 +1166,24 @@ def list_materials():
         if not user_id:
             return api_error_response("User not authenticated", 401)
 
-        prefix = f"material_{user_id}_"
-        user_materials = []
+        # Query materials for the user using SQLAlchemy
+        user_materials = Material.query.filter_by(user_id=user_id)\
+            .order_by(Material.upload_timestamp.desc())\
+            .all()
 
-        for key in database.prefix(prefix):
-            material_data = db[key]
-            material_id = key.replace(prefix, '')
-
-            user_materials.append({
-                "material_id": material_id,
-                "material_name": material_data["material_name"],
-                "upload_timestamp": material_data["upload_timestamp"]
-            })
-
-        user_materials.sort(key=lambda x: x["upload_timestamp"], reverse=True)
+        # Format the response
+        materials_list = [{
+            "material_id": material.id,
+            "material_name": material.material_name,
+            "upload_timestamp": material.upload_timestamp.isoformat() if material.upload_timestamp else None
+        } for material in user_materials]
 
         return jsonify({
-            "materials": user_materials
+            "materials": materials_list
         })
 
     except Exception as e:
-        print(f"Error listing materials: {str(e)}")
+        current_app.logger.error(f"Error listing materials: {str(e)}")
         return api_error_response(str(e), 500)
 
 @app.route('/sentence-practice')
