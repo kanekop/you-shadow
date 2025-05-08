@@ -1131,8 +1131,9 @@ def save_material():
         temp_path = os.path.join(app.config['UPLOAD_FOLDER'], f"temp_{material_id}{file_ext}")
         audio_file.save(temp_path)
 
-        with open(temp_path, 'rb') as f:
-            storage_client.upload_file(object_storage_key, f)
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{material_id}{file_ext}")
+        os.rename(temp_path, upload_path)
+        object_storage_key = upload_path
 
         transcript = transcribe_audio(temp_path)
 
