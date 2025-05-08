@@ -379,7 +379,7 @@ def api_presets():
 
 
 
-    @app.route('/api/recordings/upload', methods=['POST'])
+@app.route('/api/recordings/upload', methods=['POST'])
 @auth_required # 修正後の auth_required を想定
 def upload_recording():
     try:
