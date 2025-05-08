@@ -229,7 +229,7 @@ async function submitRecording() {
     document.getElementById("submitBtn").disabled = true;
 
     // ✅ ログを保存（通常の練習）
-    await logAttempt(username, genre, level, data.wer, data.original_transcribed, data.user_transcribed);
+    await logPractice(username, genre, level, data.wer, data.original_transcribed, data.user_transcribed);
 
     // ✅ WERが30%未満なら次のレベルを自動開放（shadowing.jsと同じロジック）
     if (data.wer < 30) {
@@ -239,7 +239,7 @@ async function submitRecording() {
       const match = level.match(/^level(\d+)$/i);
       if (match) {
         const nextLevel = `level${parseInt(match[1]) + 1}`;
-        await logAttempt(username, genre, nextLevel, 0.0, "(auto-unlocked)", "(auto-unlocked)");
+        await logPractice(username, genre, nextLevel, 0.0, "(auto-unlocked)", "(auto-unlocked)");
         console.log(`🔓 次のレベル ${nextLevel} を自動解放しました`);
       }
     }
@@ -288,7 +288,7 @@ async function handleLevelUnlock(username, genre, level) {
   const match = level.match(/^level(\d+)$/i);
   if (match) {
     const nextLevel = `level${parseInt(match[1]) + 1}`;
-    await logAttempt(username, genre, nextLevel, 0.0, "(auto-unlocked)", "(auto-unlocked)");
+    await logPractice(username, genre, nextLevel, 0.0, "(auto-unlocked)", "(auto-unlocked)");
     console.log(`🔓 次のレベル ${nextLevel} を自動解放しました`);
   }
 }
@@ -307,7 +307,7 @@ async function updateHighestLevels() {
   }
 }
 
-async function logAttempt(username, genre, level, wer, original_transcribed, user_transcribed) {
+async function logPractice(username, genre, level, wer, original_transcribed, user_transcribed) {
   const response = await fetch("/api/practice/logs", {
     method: "POST",
     headers: {
