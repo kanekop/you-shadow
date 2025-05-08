@@ -7,7 +7,12 @@ class Config:
     # SECRET_KEY は Replit の Secrets で設定することを強く推奨
     SECRET_KEY = os.environ.get('FLASK_SECRET_KEY') # Secretsに設定されていなければNoneになる
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
+    # 接続プール設定を追加
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_recycle': 280,  # 例: 280秒 (多くのDBのデフォルトタイムアウト5分=300秒より少し短く)
+        'pool_pre_ping': True # 接続取得前にpingを実行
+    }
+    
     # アプリケーションのディレクトリ構造に関する設定
     UPLOAD_FOLDER = 'uploads'
     PRESET_FOLDER = 'presets'
@@ -53,13 +58,23 @@ class DevelopmentConfig(Config):
     # SQLALCHEMY_DATABASE_URI は Config クラスのものを利用するか、
     # Secretsで DEV_DATABASE_URL を別途設定してそれを参照しても良い
     SQLALCHEMY_ECHO = False # Trueにすると実行SQLがコンソールに出力される（デバッグ用）
-
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_recycle': 3600, # SQLiteなら長めでも良いかも
+        'pool_pre_ping': True
+    }
 class ProductionConfig(Config):
     """本番環境用の設定 (Replitでデプロイ時)"""
     DEBUG = False
     # SQLALCHEMY_DATABASE_URI は Secrets の DATABASE_URL を確実に使用
     # その他、本番環境で必要なセキュリティ設定やログ設定など
-
+    # 本番ではプール設定が特に重要
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_recycle': 280,
+        'pool_pre_ping': True
+        # 'pool_size': 10, # 必要に応じてプールの最大接続数なども調整
+        # 'max_overflow': 20
+    }
+    
 # 使用する設定を辞書で管理
 config_by_name = dict(
     dev=DevelopmentConfig,

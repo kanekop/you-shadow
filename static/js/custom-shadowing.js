@@ -27,20 +27,33 @@ class CustomShadowing {
       progressSpinner: document.getElementById('progressSpinner'),
       spinnerText: document.querySelector('#progressSpinner .spinner-text'),
       userMessageArea: document.getElementById('userMessageArea'),
+      prevMaterialIdInput: document.getElementById('prevMaterialId'),
+      prevMaterialAudioUrlInput: document.getElementById('prevMaterialAudioUrl'),
+      prevMaterialScriptFullTextarea: document.getElementById('prevMaterialScriptFull')
     };
     this.setupEventListeners();
     this.initializePage();
   }
 
   initializePage() {
-    // ReplitユーザーIDをヘッダーにセット
-    const replitUserId = document.body.dataset.replitUserId; // HTML側でセットされている前提
+    // body タグから Replit ユーザーIDを取得してヘッダーにセット
+    const replitUserId = document.body.dataset.replitUserId;
     if (replitUserId) {
         this.requestHeaders.set('X-Replit-User-Id', replitUserId);
+        console.log("User ID set for API requests:", replitUserId);
+    } else {
+        console.warn("Replit User ID not found in body data attribute.");
     }
-
-    // ★ダミーの前回教材情報を表示（実際のロード処理は後で）
-    this.loadPreviousMaterialInfo(); // この関数内でダミー情報を表示するようにする
+  
+    // ★ 隠しフィールドから前回の教材情報があるか確認し、ボタンを有効化
+    if (this.dom.prevMaterialIdInput && this.dom.prevMaterialIdInput.value) {
+      this.dom.usePreviousMaterialBtn.disabled = false;
+      console.log("Previous material info found.");
+    } else {
+      this.dom.usePreviousMaterialBtn.disabled = true;
+      this.dom.previousMaterialInfo.style.display = 'none'; // 情報がなければ表示エリアも隠す
+      console.log("No previous material info found.");
+    }
   }
 
   setupEventListeners() {
@@ -93,26 +106,39 @@ class CustomShadowing {
   }
 
   handleUsePreviousMaterial() {
-    this.showUserAlert('前回の教材を読み込みます... (現在はダミー表示)', 'info');
-    // TODO: 実際のバックエンドから前回の教材データを取得し、this.currentMaterial にセットする
-    // ダミーデータをセット
+    if (!this.dom.prevMaterialIdInput || !this.dom.prevMaterialIdInput.value) {
+        this.showUserAlert('前回の教材データが見つかりません。', 'error');
+        return;
+    }
+  
+    this.showUserAlert('前回の教材を読み込んでいます...', 'info');
+  
+    // ★ 隠しフィールドから実際のデータを取得
+    const materialId = this.dom.prevMaterialIdInput.value;
+    const audioUrl = this.dom.prevMaterialAudioUrlInput.value;
+    const script = this.dom.prevMaterialScriptFullTextarea.value;
+    const filename = this.dom.prevMaterialFilename.textContent; // 表示されているファイル名
+  
+    // currentMaterial に取得した情報をセット
     this.currentMaterial = {
-      id: "prev_dummy_id_123", // バックエンドから取得する教材ID
-      audio_url: this.dom.originalAudio.src || "/static/audio/warm-up.mp3", // ダミーのURLか、infoから取得したURL
-      transcription: this.dom.prevMaterialScriptPreview.textContent + " (これはダミーの全文です)",
-      name: this.dom.prevMaterialFilename.textContent || "前回の教材"
+      id: materialId,
+      audio_url: audioUrl,
+      transcription: script,
+      name: filename // ファイル名も保持
     };
-
+  
+    // UIを更新
     this.dom.practiceMaterialTitle.textContent = `練習中: ${this.currentMaterial.name}`;
     this.dom.originalAudio.src = this.currentMaterial.audio_url;
-    this.dom.originalAudio.load();
+    this.dom.originalAudio.load(); // ★ 音声ファイルをロード
     this.dom.transcriptionText.textContent = this.currentMaterial.transcription;
-    this.dom.transcriptionText.style.display = 'none'; // 初期は非表示
+    this.dom.transcriptionText.style.display = 'none';
     this.dom.toggleTranscriptBtn.textContent = 'スクリプト表示';
-
-
+    // practiceSection の dataset に materialId をセット (評価時に使う場合)
+    this.dom.practiceSection.dataset.materialId = this.currentMaterial.id;
+  
     this.showSection(this.dom.practiceSection);
-    this.resetPracticeUI(); // 録音ボタンなどを初期状態に
+    this.resetPracticeUI();
   }
 
   handleUploadNewMaterialChoice() {
@@ -365,60 +391,61 @@ class CustomShadowing {
   }
 
 
+
+  // ★ submitRecording メソッドは前回のエラーハンドリング改善版を使用 (モック解除済み) ...
+  //    ただし、material_id をどう渡すか確認が必要。
+  //    現状の /evaluate_custom_shadowing はセッションから取得しているので、
+  //    フロントから送る必要はないかもしれない。
+  //    もし送る場合は formData に append する。
   async submitRecording() {
     const recordedBlob = this.recorder.getBlob();
     if (!recordedBlob || recordedBlob.size === 0) {
       this.showUserAlert('評価する録音データがありません。', 'error');
       return;
     }
-    // currentMaterial が設定されているか、または material_id が取得できるかを確認
-    // (前回 material_id をセッションから取得する実装だったので、そちらに合わせるか、
-    //  currentMaterial.id を使うなら、handleUpload や handleUsePreviousMaterial で
-    //  currentMaterial.id が正しくセットされるようにする)
-    // ここでは、前回の方針（セッションからmaterial_idを取得）に沿った形でコメントを残しつつ、
-    // currentMaterial.id があればそれを使う形も想定できるようにしておきます。
-
-    // const materialId = this.dom.practiceSection.dataset.materialId; // もしdatasetに保存していれば
-    // if (!materialId && (!this.currentMaterial || !this.currentMaterial.id)) {
-    //   this.showUserAlert('現在の教材情報が見つかりません。教材の選択からやり直してください。', 'error');
-    //   return;
+  
+    // セッションを使うので material_id は送らない想定
+    // const materialId = this.dom.practiceSection.dataset.materialId;
+    // if (!materialId) {
+    //     this.showUserAlert('現在の教材情報が見つかりません。', 'error');
+    //     return;
     // }
-
+  
     const formData = new FormData();
     formData.append('recorded_audio', recordedBlob, `custom_recording_${Date.now()}.webm`);
-    // formData.append('material_id', materialId || this.currentMaterial.id); // material_idを送信する場合
-
+    // formData.append('material_id', materialId); // 送る場合は追加
+  
     this.showSpinner('評価中...');
-
+  
     try {
       const response = await fetch('/evaluate_custom_shadowing', {
         method: 'POST',
-        headers: this.requestHeaders, // 認証ヘッダー (X-Replit-User-Idなど)
+        headers: this.requestHeaders, // 認証ヘッダー
         body: formData
       });
-
+      // ... (以降のレスポンス処理は変更なし) ...
       const data = await response.json();
       this.hideSpinner();
-
-      if (!response.ok) { // HTTPステータスが2xxでない場合
-        throw new Error(data.error || `評価サーバーエラー (HTTP ${response.status})`);
+      // ... (エラーチェック、結果表示) ...
+      if (!response.ok) {
+          throw new Error(data.error || `評価サーバーエラー (HTTP ${response.status})`);
       }
-      // data.error があっても response.ok な場合もあるので、data.errorもチェック
       if (data.error) {
           throw new Error(data.error);
       }
-
-      this.displayEvaluationResult(data); // 結果表示関数を呼び出す
+      this.displayEvaluationResult(data);
       this.showUserAlert('評価が完了しました。', 'success');
-
+  
     } catch (error) {
+      // ... (エラー処理は変更なし) ...
       console.error('Evaluation error:', error);
       this.hideSpinner();
       this.showUserAlert(error.message || '評価処理中に不明なエラーが発生しました。', 'error');
-      this.dom.resultBox.innerHTML = `<p class="error-message">評価エラー: ${error.message || '不明なエラー'}</p>`; // エラーメッセージ用のクラスを付与
+      this.dom.resultBox.innerHTML = `<p class="error-message">評価エラー: ${error.message || '不明なエラー'}</p>`;
     }
   }
   
+
   
   displayEvaluationResult(data) {
       this.dom.resultBox.innerHTML = `
@@ -440,16 +467,11 @@ class CustomShadowing {
         </div>
       `;
   }
-}
+} // クラス定義の終わり
 
 document.addEventListener('DOMContentLoaded', () => {
-  // HTMLのbodyタグにReplitのユーザーIDをdata属性として埋め込むことを想定
-  // Flaskテンプレート側: <body data-replit-user-id="{{ user_id }}">
-  // JavaScript側でそれを読み取る
-  const bodyData = document.body.dataset;
-  if (bodyData.replitUserId) {
-    // CustomShadowingクラスのインスタンス作成時に渡すか、
-    // クラス内でグローバルな window オブジェクト経由でアクセスするなどの方法がある
-  }
+  // ★ bodyタグの data-* 属性からユーザーIDを取得
+  //    このコードは CustomShadowing クラスの外、またはインスタンス化の直前が良い
+  // new CustomShadowing(); // ★ initializePage 内でID取得するように変更済み
   new CustomShadowing();
 });

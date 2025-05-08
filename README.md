@@ -1,311 +1,188 @@
 # Language Learning Assistant 🌍
 
-A sophisticated Flask-based web application designed to help users improve their language pronunciation and speaking skills through interactive exercises, real-time feedback, and progress tracking.
+A **Flask–based web application** that helps users improve pronunciation and speaking skills through interactive shadowing, read‑aloud practice, and real‑time feedback powered by OpenAI Whisper.
 
-## 🗄️ Database Architecture
+---
 
-### Database Schema and Features
+## 📖 Table of Contents
+1. [Features](#features)
+2. [Tech Stack](#tech-stack)
+3. [Architecture Overview](#architecture-overview)
+4. [Getting Started](#getting-started)
+   1. [Prerequisites](#prerequisites)
+   2. [Installation](#installation)
+   3. [Environment Variables](#environment-variables)
+   4. [Database Migration](#database-migration)
+   5. [Run](#run)
+5. [Directory Structure](#directory-structure)
+6. [Database Schema](#database-schema)
+7. [API Reference](#api-reference)
+8. [Security](#security)
+9. [License](#license)
 
-#### 1. AudioRecording
-Stores user-recorded audio files and their transcripts.
-```sql
-CREATE TABLE audio_recordings (
-    id INTEGER PRIMARY KEY,
-    user_id VARCHAR NOT NULL,           -- User identifier
-    filename VARCHAR NOT NULL,          -- Stored audio file name
-    transcript TEXT NOT NULL,           -- Speech-to-text transcript
-    file_hash VARCHAR UNIQUE NOT NULL,  -- Unique hash for deduplication
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+---
+
+## Features
+
+| Category | Highlights |
+| -------- | ---------- |
+| **Shadowing Practice** | • Preset audio/text library<br>• Custom audio uploads<br>• YouTube transcript shadowing |
+| **Real‑time Feedback** | • Word Error Rate (WER)<br>• Side‑by‑side diff view |
+| **Progress Tracking** | • PostgreSQL / SQLite backend<br>• User practice logs & statistics |
+| **Content Management** | • Upload & store custom materials<br>• Genre / level system for presets |
+| **Auth & Hosting** | • Replit user authentication<br>• Secrets management & persistent storage |
+
+---
+
+## Tech Stack
+
+- **Backend :** Flask 2 · SQLAlchemy · Flask‑Migrate  
+- **Frontend :** HTML · Jinja2 · Vanilla JS (+ fetch API)  
+- **AI Services :** OpenAI Whisper (STT)  
+- **Database :** PostgreSQL (Prod) / SQLite (Dev)  
+- **Tools :** FFmpeg · pydub · Replit deployment
+
+---
+
+## Architecture Overview
+
 ```
-- Features:
-  - Unique file hashing to prevent duplicates
-  - Automatic timestamp tracking
-  - Direct mapping to filesystem storage
-  - Association with user sessions
-
-#### 2. Material
-Manages custom practice materials uploaded by users.
-```sql
-CREATE TABLE materials (
-    id INTEGER PRIMARY KEY,
-    user_id VARCHAR NOT NULL,           -- User identifier
-    material_name VARCHAR NOT NULL,     -- Display name
-    storage_key VARCHAR NOT NULL,       -- Storage location key
-    transcript TEXT,                    -- Optional transcript
-    upload_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
-- Features:
-  - Flexible storage key system
-  - Optional transcript support
-  - Timestamp-based organization
-  - User-specific content management
-
-#### 3. PracticeLog
-Tracks user practice sessions and performance metrics.
-```sql
-CREATE TABLE practice_logs (
-    id INTEGER PRIMARY KEY,
-    user_id VARCHAR NOT NULL,           -- User identifier
-    practice_type VARCHAR NOT NULL,     -- 'preset' or 'custom'
-    recording_id INTEGER,               -- FK to audio_recordings
-    material_id INTEGER,                -- FK to materials
-    wer FLOAT NOT NULL,                -- Word Error Rate score
-    practiced_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    original_text TEXT,                 -- Reference text
-    user_text TEXT,                    -- User's spoken text
-    FOREIGN KEY (recording_id) REFERENCES audio_recordings(id),
-    FOREIGN KEY (material_id) REFERENCES materials(id),
-    CHECK ((recording_id IS NOT NULL AND material_id IS NULL) OR 
-           (recording_id IS NULL AND material_id IS NOT NULL))
-);
-```
-- Features:
-  - Dual practice type support
-  - Performance metrics storage
-  - Text comparison capability
-  - Referential integrity enforcement
-  - Constraint ensuring valid practice source
-
-### Database Implementation
-
-#### Project Structure
-```
-project/
-├── migrations/                     # Database migration files
-│   ├── versions/                  # Version-controlled schema changes
-│   │   └── [migration files].py
-│   └── env.py                     # Migration environment config
-├── models.py                      # SQLAlchemy model definitions
-├── config.py                      # Database configuration
-└── app.py                         # Main application with routes
+Browser → Flask (app.py)
+           ├─ Core modules
+           │   ├─ audio_utils.py      ──► FFmpeg / pydub
+           │   ├─ transcribe_utils.py ──► OpenAI Whisper
+           │   ├─ wer_utils.py        ──► WER calculation
+           │   └─ diff_viewer.py      ──► HTML diff
+           ├─ Models (SQLAlchemy)
+           └─ PostgreSQL / SQLite
 ```
 
-#### Key Database Operations
+---
 
-1. Recording Management
-```python
-# Save new recording
-recording = AudioRecording(
-    user_id=user_id,
-    filename=filename,
-    transcript=transcript,
-    file_hash=unique_hash
-)
-db.session.add(recording)
-db.session.commit()
+## Getting Started
+
+### Prerequisites
+
+- Python ≥ 3.10  
+- pip  
+- PostgreSQL instance **or** SQLite (for local dev)  
+- OpenAI API key  
+- *(Optional)* YouTube Data API key
+
+### Installation
+
+```bash
+# 1 Clone & enter repository
+$ git clone <your‑repo>
+$ cd <repo>
+
+# 2 Install dependencies
+$ pip install -r requirements.txt
 ```
 
-2. Practice Logging
-```python
-# Log practice session
-log = PracticeLog(
-    user_id=user_id,
-    practice_type='preset',
-    recording_id=recording_id,
-    wer=wer_score,
-    original_text=reference_text,
-    user_text=spoken_text
-)
-db.session.add(log)
-db.session.commit()
+### Environment Variables
+
+| Name | Purpose | Example |
+| ---- | ------- | ------- |
+| `FLASK_CONFIG` | Environment (`dev`, `prod`) | dev |
+| `SECRET_KEY` | Session security | super‑secret‑string |
+| `DATABASE_URL` | DB connection URI | postgresql://user:pwd@host/db |
+| `OPENAI_API_KEY` | Whisper transcription | sk‑… |
+| `YOUTUBE_API_KEY` | (Optional) YouTube features | AIza… |
+
+> **Tip :** On Replit use *Secrets* to store these safely.
+
+### Database Migration
+
+```bash
+# Initialise (only once)
+$ flask db upgrade
 ```
 
-3. Custom Material Management
-```python
-# Save custom material
-material = Material(
-    user_id=user_id,
-    material_name=name,
-    storage_key=storage_path,
-    transcript=transcript
-)
-db.session.add(material)
-db.session.commit()
+### Run
+
+```bash
+$ python app.py  # http://localhost:5000
 ```
 
-### Database Usage in Application
+---
 
-1. Shadow Practice Feature
-- Records user attempts in AudioRecording
-- Logs performance in PracticeLog
-- Associates with preset or custom materials
+## Directory Structure
 
-2. Custom Practice Materials
-- Stores user uploads in Material table
-- Links practice sessions to materials
-- Maintains user-specific content
-
-3. Progress Tracking
-- Queries PracticeLog for performance history
-- Calculates improvement metrics
-- Generates user statistics
-
-4. Content Management
-- Manages both preset and custom content
-- Handles file storage references
-- Maintains practice history
-
-## 🌟 Key Features
-
-### 1. Database Integration
-- **SQLite Database**
-  - User practice logs
-  - Audio recordings storage
-  - Custom practice materials
-  - Progression tracking
-  - Relationship management between recordings and practices
-
-### 2. Shadowing Practice System
-- **Preset Content Library**
-  - Multiple genres and progressive difficulty levels
-  - High-quality audio samples with professional recordings
-  - Customizable practice sessions
-  - Real-time performance feedback
-  - Last practice retrieval
-
-### 3. Custom Shadowing
-- **File Support**
-  - Multiple audio formats (MP3, M4A, WAV)
-  - Automatic transcription
-  - Custom practice material creation
-  - Database storage of materials
-
-### 4. Progress Tracking
-- **Database-Driven Analytics**
-  - Practice history
-  - Performance metrics
-  - WER scores
-  - Custom material usage
-
-## 📦 Project Structure
 ```
 project/
-├── app.py                    # Main application entry point
-├── models.py                # Database models
-├── config.py               # Configuration settings
-├── wer_utils.py           # Word Error Rate calculation utilities
-├── diff_viewer.py        # Diff generation utilities
-├── transcribe_utils.py  # Audio transcription utilities
-├── youtube_utils.py    # YouTube integration utilities
-├── utils.py           # General utilities
-├── test.py          # Test suite
-├── core/             # Core functionality
-│   ├── audio_utils.py    # Audio processing utilities
-│   └── responses.py      # API response handlers
-├── instance/         # Instance-specific files
-├── migrations/          # Database migrations
-│   ├── versions/       # Migration versions
-│   ├── README
-│   ├── alembic.ini
-│   ├── env.py         # Migration environment
-│   └── script.py.mako
-├── presets/           # Practice materials
-│   ├── sentences/    # Sentence practice content
-│   │   └── genre1/
-│   └── shadowing/   # Shadowing practice content
-│       ├── genre1/
-│       ├── genre2/
-│       ├── genre3/
-│       └── genre4/
-├── static/          # Static assets
-│   ├── audio/      # Audio files
-│   ├── js/        # JavaScript modules
-│   │   ├── audio-recorder.js
-│   │   ├── compare.js
-│   │   ├── custom-shadowing.js
-│   │   ├── index.js
-│   │   ├── preset-manager.js
-│   │   ├── ranking.js
-│   │   ├── read_aloud.js
-│   │   ├── recordings.js
-│   │   ├── sentence-practice.js
-│   │   └── shadowing-main.js
-│   ├── style.css
-│   └── youtube.js
-├── templates/     # HTML templates
-│   ├── compare.html
-│   ├── custom_shadowing.html
-│   ├── dashboard.html
-│   ├── detail.html
-│   ├── index.html
-│   ├── my-recordings.html
-│   ├── ranking.html
-│   ├── read_aloud.html
-│   ├── sentence_practice.html
-│   ├── shadowing.html
-│   └── youtube.html
-├── unused/        # Unused utilities
-│   └── upload_to_sheet.py
-├── uploads/     # User uploaded files
-└── wer/        # WER-related files
+├── app.py                    # Main application file (Flask routes, initialization)
+├── config.py               # Configuration classes (Dev, Prod, etc.)
+├── models.py                # SQLAlchemy database models (AudioRecording, Material, PracticeLog)
+├── requirements.txt         # Python dependencies
+├── transcribe_utils.py    # Handles OpenAI Whisper API calls and related logic
+├── wer_utils.py             # Calculates Word Error Rate (WER)
+├── diff_viewer.py          # Generates HTML diffs between texts
+├── youtube_utils.py      # Handles YouTube API interactions (transcript fetching)
+├── utils.py                 # General utility functions (e.g., remove_fillers)
+├── core/                    # Core application modules
+│   ├── audio_utils.py       # Audio processing helpers (e.g., process_and_transcribe_audio)
+│   └── responses.py         # Standardized API response functions (success/error)
+├── instance/                # Instance folder (e.g., for SQLite DB in dev)
+│   └── dev.db               # Example development database location
+├── migrations/              # Flask-Migrate database migration scripts
+│   ├── versions/
+│   └── ...
+├── presets/                 # Default practice materials
+│   ├── sentences/
+│   └── shadowing/
+├── static/                  # Frontend assets (CSS, JS, Audio)
+│   ├── audio/               # Static audio files (e.g., warm-up)
+│   ├── js/                  # JavaScript files for different pages/features
+│   └── style.css            # Main CSS stylesheet
+├── templates/               # Jinja2 HTML templates for web pages
+├── uploads/                 # Directory for user-uploaded audio files
+└── README.md                # This file
 ```
 
-## 🔑 API Endpoints
+---
 
-### Recordings
-- `GET /api/recordings` - List user's recordings
-- `GET /api/recordings/last` - Get user's most recent practice
-- `POST /api/recordings/upload` - Upload new recording
+## Database Schema
 
-### Practice
-- `POST /api/practice/logs` - Log a practice session
-- `GET /api/presets` - Get available practice presets
+> Full DDL lives in **`migrations/versions/`**. Below is a high‑level view.
 
-### Materials
-- `POST /api/save_material` - Save custom practice material
-- `GET /api/my_materials` - List user's custom materials
+| Table | Purpose | Key Columns |
+| ----- | ------- | ---------- |
+| `audio_recordings` | Stores user recordings & transcripts | `id`, `user_id`, `file_hash`, `transcript` |
+| `materials` | Custom practice materials | `id`, `user_id`, `storage_key` |
+| `practice_logs` | Performance history | `id`, `user_id`, `wer`, `recording_id ↔ audio_recordings` |
 
-## 🚀 Getting Started
+All timestamps default to `CURRENT_TIMESTAMP`; referential integrity enforced via FKs.
 
-1. **Setup Database**
-   ```bash
-   flask db upgrade
-   ```
+---
 
-2. **Run Application**
-   ```bash
-   python app.py
-   ```
+## API Reference
 
-## 📊 Database Operations
+| Method & Path | Description |
+| ------------- | ----------- |
+| **GET** `/api/recordings` | List authenticated user recordings |
+| **GET** `/api/recordings/last` | Latest practice log summary |
+| **POST** `/api/recordings/upload` | Upload & transcribe new recording |
+| **POST** `/api/practice/logs` | Store practice result (WER, diff) |
+| **GET** `/api/presets` | Fetch preset library structure |
+| **POST** `/evaluate_read_aloud` | Evaluate read‑aloud attempt |
+| **POST** `/evaluate_custom_shadowing` | Evaluate custom material attempt |
+| **POST** `/evaluate_shadowing` | Evaluate preset shadowing |
+| **POST** `/evaluate_youtube` | Evaluate YouTube shadowing |
 
-### Recording Management
-```python
-# Save new recording
-recording = AudioRecording(
-    user_id=user_id,
-    filename=filename,
-    transcript=transcript,
-    file_hash=str(uuid.uuid4())
-)
-db.session.add(recording)
-db.session.commit()
+All endpoints return standardized JSON via `core/responses.py`.<br>Authentication uses Replit headers `X‑Replit‑User‑Id` / `X‑Replit‑User‑Name`.
 
-# Get user's recordings
-recordings = AudioRecording.query.filter_by(user_id=user_id).all()
-```
+---
 
-### Practice Logging
-```python
-# Log practice
-log = PracticeLog(
-    user_id=user_id,
-    recording_id=recording_id,
-    wer=wer_score
-)
-db.session.add(log)
-db.session.commit()
-```
+## Security
 
-## 🔒 Security Features
+- Replit OAuth headers secure user identity.  
+- `SECRET_KEY` protects session cookies.  
+- Always run behind **HTTPS** in production.  
+- Rotate API keys regularly.
 
-- **Replit Authentication**
-  - Secure user sessions
-  - Progress persistence
-  - User-specific content
+---
 
-## 📄 License
+## License
 
-This project is proprietary and confidential. All rights reserved.
+© 2025 Your Name. All rights reserved. Commercial use requires explicit permission.

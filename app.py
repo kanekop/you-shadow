@@ -21,6 +21,7 @@ from flask import (
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError # DBエラーを具体的に捕捉する場合
+from sqlalchemy import desc # 降順ソート用
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
 
@@ -33,15 +34,8 @@ from youtube_utils import youtube_bp, check_captions
 from config import config_by_name # config.pyから設定辞書をインポート
 from core.responses import api_error_response, api_success_response
 from core.audio_utils import process_and_transcribe_audio, AudioProcessingError # インポート
-from core.responses import api_error_response, api_success_response # インポート済みとする
 #from core.evaluation_utils import generate_evaluation_metrics # 次の提案で使用
 
-import os # osモジュールのインポートを確認
-import uuid # uuidモジュールのインポートを確認
-from flask import jsonify, request, session # sessionをインポート
-from pydub import AudioSegment # pydubのインポートを確認
-import tempfile
-from wer_utils import calculate_wer
 
 
 
@@ -648,9 +642,63 @@ def evaluate_read_aloud():
 def shadowing_ui():
     return render_template('shadowing.html')
 
+
 @app.route('/custom-shadowing')
+@auth_required # カスタムシャドウイングは認証必須と想定
 def custom_shadowing_ui():
-    return render_template('custom_shadowing.html')
+    user_id = request.headers.get('X-Replit-User-Id')
+    last_material_info = None
+
+    try:
+        # ユーザーの最後のカスタム練習ログを取得
+        last_custom_log = PracticeLog.query.filter_by(
+            user_id=user_id,
+            practice_type='custom'
+        ).order_by(desc(PracticeLog.practiced_at)).first()
+
+        if last_custom_log and last_custom_log.material_id:
+            # 対応する Material 情報を取得
+            last_material = Material.query.get(last_custom_log.material_id)
+            if last_material:
+                # ★ storage_key からファイル名を抽出する処理が必要な場合がある
+                #    storage_key が 'uploads/user_id_uuid_original_filename.mp3' のような形式の場合
+                #    元のファイル名 (material_name) を使うのが良い
+                material_display_name = last_material.material_name
+
+                # ★ storage_key からアクセス可能なURLを生成
+                #    現状の実装では uploads/<filename> でアクセス可能？
+                #    storage_key が 'uploads/...' で始まっているか確認
+                audio_url = None
+                if last_material.storage_key and last_material.storage_key.startswith(current_app.config['UPLOAD_FOLDER'] + os.path.sep):
+                     filename_for_url = os.path.basename(last_material.storage_key)
+                     audio_url = url_for('serve_upload', filename=filename_for_url)
+                elif last_material.storage_key: # storage_key がURLの場合など（将来的な拡張）
+                     audio_url = last_material.storage_key # そのまま使う
+
+                if audio_url:
+                    last_material_info = {
+                        "material_id": last_material.id,
+                        "filename": material_display_name, # 表示用のファイル名
+                        "script": last_material.transcript or "", # スクリプトがない場合は空文字
+                        "audio_url": audio_url,
+                        "last_practiced": last_custom_log.practiced_at.isoformat() # 参考情報
+                    }
+                    current_app.logger.info(f"Found last custom material for user {user_id}: Material ID {last_material.id}")
+                else:
+                    current_app.logger.warning(f"Could not generate audio URL from storage_key for Material ID {last_material.id}")
+
+    except Exception as e:
+        current_app.logger.error(f"Error fetching last custom material for user {user_id}", exc_info=e)
+        # エラーが発生してもページの表示は試みる
+
+    # ReplitユーザーIDをテンプレートに渡す
+    # (JavaScriptからヘッダーを読むより、テンプレート経由の方が確実な場合がある)
+    return render_template('custom_shadowing.html',
+                           last_material_info=last_material_info,
+                           replit_user_id=user_id) # ★ replit_user_id を渡す
+
+
+
 
 @app.route('/uploads/<path:filename>')
 def serve_upload(filename):
