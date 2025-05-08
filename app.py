@@ -57,7 +57,7 @@ def auth_required(f):
         if not user_id:
             return redirect('/')
         return f(*args, **kwargs)
-    return decorated_function
+    return auth_required
 
 # Flask app initialization
 app = Flask(__name__)
@@ -424,14 +424,14 @@ def upload_recording():
     try:
         user_id = request.headers.get('X-Replit-User-Id')
         if not user_id:
-            return jsonify({"error": "User not authenticated"}), 401
+            return api_error_response("User not authenticated", 401)
 
         if 'audio' not in request.files:
-            return jsonify({"error": "No audio file provided"}), 400
+            return api_error_response("No audio file provided", 400)
 
         audio_file = request.files['audio']
         if not audio_file.filename:
-            return jsonify({"error": "Invalid file"}), 400
+            return api_error_response("Invalid file", 400)
 
         filename = secure_filename(audio_file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -462,11 +462,11 @@ def upload_recording():
 def check_subtitles():
     video_id = request.args.get("video_id")
     if not video_id:
-        return jsonify({"error": "Missing video_id"}), 400
+        return api_error_response("Missing video_id", 400)
 
     result = check_captions(video_id)
     if result is None:
-        return jsonify({"error": "Failed to check captions"}), 500
+        return api_error_response("Failed to check captions", 500)
 
     return jsonify({
         "video_id": video_id,
@@ -566,20 +566,20 @@ def upload_custom_audio():
     # user_id チェックは @auth_required が担当する想定だが、念のため
     if not user_id:
         # 通常 @auth_required で処理されるが、明示的に書く場合
-        return jsonify({"error": "User not authenticated"}), 401
+        return api_error_response("User not authenticated", 401)
 
     if 'audio' not in request.files:
-        return jsonify({"error": "音声ファイルが選択されていません"}), 400
+        return api_error_response("音声ファイルが選択されていません", 400)
 
     audio_file = request.files['audio']
     if not audio_file or audio_file.filename == '':
-        return jsonify({"error": "無効なファイルです"}), 400
+        return api_error_response("無効なファイルです", 400)
 
     # ファイル拡張子チェック
     file_ext = os.path.splitext(audio_file.filename)[1].lower()
     allowed_extensions = ['.mp3', '.m4a', '.wav', '.mpga', '.mpeg', '.webm']
     if file_ext not in allowed_extensions:
-        return jsonify({"error": f"サポートされていないファイル形式です: {file_ext}"}), 400
+        return api_error_response(f"サポートされていないファイル形式です: {file_ext}", 400)
 
     # 一意なファイル名を生成して保存
     filename_base = secure_filename(f"{user_id}_{uuid.uuid4().hex}")
@@ -730,7 +730,7 @@ def evaluate_custom_shadowing():
     original_transcription = session.get('custom_transcription')
 
     if not material_id:
-        return api_error_response("元の教材IDが見つかりません。セッションが切れたか、アップロードからやり直してください。", 400)
+        return apierror_response("元の教材IDが見つかりません。セッションが切れたか、アップロードからやり直してください。", 400)
     if not original_transcription:
         # 念のためDBからも取得試行 (オプション)
         material = Material.query.get(material_id)
@@ -927,8 +927,8 @@ def evaluate_shadowing():
         "diff_original": diff_original # shadowing.html が期待するキー名に合わせる
     })
 
-    
-    
+
+
 
 
 
@@ -970,10 +970,14 @@ def get_highest_levels(username):
 @app.route("/api/log_attempt", methods=["POST"])
 def log_attempt():
     data = request.json
+    user_id = data.get("user")
+
+    if not user_id:
+        return api_error_response("User not authenticated", 401)
 
     required_fields = ["user", "genre", "level", "wer", "original_transcribed", "user_transcribed"]
     if not all(field in data for field in required_fields):
-        return jsonify({"error": "Missing required fields"}), 400
+        return api_error_response("Missing required fields")
 
     log_entry = PracticeLog(
         user_id=data["user"],
@@ -996,19 +1000,19 @@ def save_material():
     try:
         user_id = request.headers.get('X-Replit-User-Id')
         if not user_id:
-            return jsonify({"error": "User not authenticated"}), 401
+            return api_error_response("User not authenticated", 401)
 
         if 'audio' not in request.files:
-            return jsonify({"error": "No audio file provided"}), 400
+            return api_error_response("No audio file provided", 400)
 
         audio_file = request.files['audio']
         material_name = request.form.get('material_name', '').strip()
 
         if not material_name:
-            return jsonify({"error": "Material name is required"}), 400
+            return api_error_response("Material name is required", 400)
 
         if not audio_file.filename:
-            return jsonify({"error": "No audio file selected"}), 400
+            return api_error_response("No audio file selected", 400)
 
         material_id = uuid.uuid4().hex
         file_ext = os.path.splitext(audio_file.filename)[1].lower()
@@ -1042,7 +1046,7 @@ def save_material():
 
     except Exception as e:
         print(f"Error saving material: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        return api_error_response(str(e), 500)
 
 @app.route('/api/my_materials', methods=['GET'])
 @auth_required
@@ -1050,7 +1054,7 @@ def list_materials():
     try:
         user_id = request.headers.get('X-Replit-User-Id')
         if not user_id:
-            return jsonify({"error": "User not authenticated"}), 401
+            return api_error_response("User not authenticated", 401)
 
         prefix = f"material_{user_id}_"
         user_materials = []
@@ -1073,7 +1077,7 @@ def list_materials():
 
     except Exception as e:
         print(f"Error listing materials: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        return api_error_response(str(e), 500)
 
 @app.route('/sentence-practice')
 def sentence_practice():
@@ -1149,11 +1153,11 @@ def log_practice():
     try:
         user_id = request.headers.get('X-Replit-User-Id')
         if not user_id:
-            return jsonify({"error": "User not authenticated"}), 401
+            return api_error_response("User not authenticated", 401)
 
         data = request.json
         if not data or 'recording_id' not in data or 'wer' not in data:
-            return jsonify({"error": "Missing required fields"}), 400
+            return api_error_response("Missing required fields", 400)
 
         log = PracticeLog(
             user_id=user_id,
@@ -1171,7 +1175,7 @@ def log_practice():
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+        return api_error_response(str(e), 500)
 
 @app.route('/api/recordings', methods=['GET'])
 @auth_required
