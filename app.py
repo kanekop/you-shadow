@@ -30,7 +30,7 @@ from core.services.transcribe_utils import transcribe_audio
 from core.wer_utils import wer, calculate_wer
 from core.diff_viewer import diff_html, get_diff_html
 from core.services.youtube_utils import youtube_bp
-from routes.api_routes import api_bp, check_captions
+from routes.api_routes import api_bp
 from config import config_by_name
 from core.responses import api_error_response, api_success_response
 from core.audio_utils import process_and_transcribe_audio, AudioProcessingError
@@ -514,20 +514,7 @@ def upload_recording():
         pass
 
 
-@app.route('/check_subtitles', methods=["GET"])
-def check_subtitles():
-    video_id = request.args.get("video_id")
-    if not video_id:
-        return api_error_response("Missing video_id", 400)
 
-    result = check_captions(video_id)
-    if result is None:
-        return api_error_response("Failed to check captions", 500)
-
-    return jsonify({
-        "video_id": video_id,
-        "has_subtitles": result
-    })
 
 
 

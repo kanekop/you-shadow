@@ -12,6 +12,7 @@ from core.responses import api_error_response, api_success_response
 from core.audio_utils import process_and_transcribe_audio, AudioProcessingError
 from werkzeug.utils import secure_filename
 from functools import wraps
+from core.services.youtube_utils import check_captions
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -264,3 +265,20 @@ def get_highest_levels(username):
 
     result = {genre: f"level{num}" for genre, num in genre_max_level.items()}
     return jsonify(result)
+
+
+
+@api_bp.route('/check_subtitles', methods=["GET"])
+def check_subtitles():
+    video_id = request.args.get("video_id")
+    if not video_id:
+        return api_error_response("Missing video_id", 400)
+
+    result = check_captions(video_id)
+    if result is None:
+        return api_error_response("Failed to check captions", 500)
+
+    return jsonify({
+        "video_id": video_id,
+        "has_subtitles": result
+    })
