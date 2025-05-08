@@ -1,3 +1,5 @@
+# app.py
+
 # Standard library imports
 import os
 import uuid
@@ -29,12 +31,18 @@ from diff_viewer import diff_html, get_diff_html
 from youtube_utils import youtube_bp, check_captions
 from config import config_by_name # config.pyから設定辞書をインポート
 from core.responses import api_error_response # core/responses.py を作成した場合
+from core.audio_utils import process_and_transcribe_audio, AudioProcessingError # インポート
+from core.responses import api_error_response, api_success_response # インポート済みとする
+#from core.evaluation_utils import generate_evaluation_metrics # 次の提案で使用
 
 import os # osモジュールのインポートを確認
 import uuid # uuidモジュールのインポートを確認
 from flask import jsonify, request, session # sessionをインポート
 from pydub import AudioSegment # pydubのインポートを確認
-# (他の必要なインポートも確認してください: app, db, PracticeLog, transcribe_audio, calculate_wer, diff_html, auth_required, handle_transcription_error など)
+import tempfile
+from wer_utils import calculate_wer
+
+
 
 # Constants
 TARGET_CHUNK_SIZE_MB = 20
@@ -465,50 +473,79 @@ def check_subtitles():
         "has_subtitles": result
     })
 
+# app.py (修正後)
+
+
 @app.route('/evaluate_read_aloud', methods=['POST'])
 def evaluate_read_aloud():
-    import tempfile
-    from openai import OpenAI
-    from wer_utils import calculate_wer
+    # 1. リクエストデータの検証
+    if 'audio' not in request.files:
+        return api_error_response("録音された音声ファイルが提供されていません。", 400)
 
+    audio_file = request.files['audio']
+    # FileStorage オブジェクト自体のチェックも行う
+    if not audio_file or not audio_file.filename:
+        return api_error_response("無効な音声ファイルです。", 400)
+
+    # 正解テキストを取得
+    reference_text = request.form.get('transcript')
+    if not reference_text:
+        return api_error_response("比較対象のテキストが提供されていません。", 400)
+
+    # 2. 音声処理と文字起こし (共通関数を利用)
     try:
-        if 'audio' not in request.files:
-            return jsonify({"error": "No audio file provided"}), 400
+        # 音読練習では通常、先頭カットは不要なので cut_head_ms=0 (デフォルト)
+        user_transcribed = process_and_transcribe_audio(audio_file)
 
-        audio_file = request.files['audio']
-        if not audio_file:
-            return jsonify({"error": "Invalid audio file"}), 400
+    except ValueError as ve: # process_and_transcribe_audio が発生させるファイル検証エラーなど
+        return api_error_response(f"入力エラー: {ve}", 400)
+    except AudioProcessingError as ape: # process_and_transcribe_audio が発生させる音声処理エラー
+        # これはサーバー側または入力ファイルの問題の可能性がある
+        return handle_transcription_error(ape, "/evaluate_read_aloud での音声処理エラー")
+    except Exception as e: # transcribe_audio からの例外など
+        return handle_transcription_error(e, "/evaluate_read_aloud での文字起こしエラー")
 
-        transcript_text = request.form.get('transcript')
-        if not transcript_text:
-            return jsonify({"error": "No transcript provided"}), 400
+    # 3. WER計算とDiff生成 (これも共通化可能 -> 提案4)
+    try:
+        # 注意: calculate_wer, diff_html の第一引数は reference (正解), 第二引数は hypothesis (ユーザー入力)
+        wer_score_val = calculate_wer(reference_text, user_transcribed)
+        diff_result_html = diff_html(reference_text, user_transcribed)
+    except Exception as eval_err:
+        # WER計算やDiff生成でのエラーも考慮
+        current_app.logger.error(f"WER/Diff計算エラー: {eval_err}")
+        return api_error_response("評価結果の計算中にエラーが発生しました。", 500)
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as tmp:
-            audio_file.save(tmp.name)
-            try:
-                transcribed = transcribe_audio(tmp.name)
-            except ValueError as e:
-                return jsonify({"error": str(e)}), 500
-            except Exception as e:
-                print(f"Transcription error: {str(e)}")
-                return jsonify({"error": "Failed to transcribe audio"}), 500
-            finally:
-                import os
-                if os.path.exists(tmp.name):
-                    os.remove(tmp.name)
+    # 4. (任意) データベースへのログ保存
+    # 必要であれば、ここで PracticeLog に結果を保存するロジックを追加
+    # 例:
+    # try:
+    #     user_id = request.headers.get('X-Replit-User-Id') # 認証が必要な場合
+    #     if user_id:
+    #         log = PracticeLog(
+    #             user_id=user_id,
+    #             practice_type='read_aloud', # 練習タイプを区別
+    #             material_id=None, # Read Aloud は特定の教材IDがない場合
+    #             recording_id=None, # 保存した録音IDがない場合
+    #             wer=round(wer_score_val * 100, 2),
+    #             original_text=reference_text,
+    #             user_text=user_transcribed,
+    #             practiced_at=datetime.utcnow()
+    #         )
+    #         db.session.add(log)
+    #         db.session.commit()
+    # except Exception as db_err:
+    #     db.session.rollback()
+    #     current_app.logger.error(f"Read Aloud ログ保存エラー: {db_err}")
+    #     # ログ保存エラーは致命的ではない場合、ここではエラーレスポンスを返さない選択肢もある
 
-        wer_score = calculate_wer(transcribed, transcript_text)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-    diff_result = diff_html(transcribed, transcript_text)
-
-    return jsonify({
-        "transcribed": transcribed,
-        "wer": round(wer_score * 100, 2),
-        "diff_html": diff_result
+    # 5. 成功レスポンス
+    return api_success_response({
+        "transcribed": user_transcribed,
+        "wer": round(wer_score_val * 100, 2),
+        "diff_html": diff_result_html
+        # 必要であれば reference_text もレスポンスに含める
+        # "reference_text": reference_text
     })
-
 @app.route('/shadowing')
 def shadowing_ui():
     return render_template('shadowing.html')
@@ -668,220 +705,227 @@ def upload_custom_audio():
         # DBセッションのクリーンアップ (リクエスト終了時に自動で行われることが多いが明示的に行う場合)
         # db.session.remove()
 
-#AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+# app.py (修正後)
 
-# --- /evaluate_custom_shadowing の修正案 ---
+# --- 必要なインポート ---
+# ... (既存のインポート) ...
+# from core.audio_utils import process_and_transcribe_audio, AudioProcessingError # インポート済みのはず
+# from core.responses import api_error_response, api_success_response # インポート済みのはず
+# from app import handle_transcription_error # インポート済みのはず
+# from wer_utils import calculate_wer
+# from diff_viewer import diff_html # カスタムシャドウイングは diff_html で良いか確認
+# from models import db, PracticeLog
+# from datetime import datetime
+# import openai # handle_transcription_error で使う場合
+# -----------------------
 
 @app.route('/evaluate_custom_shadowing', methods=['POST'])
 @auth_required
 def evaluate_custom_shadowing():
     user_id = request.headers.get('X-Replit-User-Id')
-    if not user_id: # @auth_required があれば不要な場合もあるが、念のため
-        return jsonify({"error": "User not authenticated"}), 401
+    # user_id のチェックは @auth_required に任せる
 
-    # --- 修正箇所：original_transcription と material_id を先に取得 ---
+    # 1. セッションとリクエストデータの検証
     material_id = session.get('current_material_id')
     original_transcription = session.get('custom_transcription')
 
     if not material_id:
-        return jsonify({"error": "元の教材IDが見つかりません。再度アップロードからお試しください。"}), 400
+        return api_error_response("元の教材IDが見つかりません。セッションが切れたか、アップロードからやり直してください。", 400)
     if not original_transcription:
-        # material_id がある場合、DBから再取得を試みることも可能 (オプション)
-        # current_material = Material.query.get(material_id)
-        # if current_material and current_material.transcript:
-        #    original_transcription = current_material.transcript
-        # else:
-        return jsonify({"error": "元の文字起こし情報が見つかりません。再度アップロードからお試しください。"}), 400
-    # --- 修正箇所ここまで ---
+        # 念のためDBからも取得試行 (オプション)
+        material = Material.query.get(material_id)
+        if material and material.transcript:
+            original_transcription = material.transcript
+        else:
+            return api_error_response("元の文字起こし情報が見つかりません。セッションが切れたか、アップロードからやり直してください。", 400)
 
     if 'recorded_audio' not in request.files:
-        return jsonify({"error": "録音された音声ファイルが提供されていません"}), 400
+        return api_error_response("録音された音声ファイルが提供されていません", 400)
 
-    recorded_audio = request.files['recorded_audio']
-    if not recorded_audio or recorded_audio.filename == '':
-        return jsonify({"error": "無効な録音ファイルです"}), 400
+    recorded_audio_file = request.files['recorded_audio']
+    if not recorded_audio_file or not recorded_audio_file.filename:
+        return api_error_response("無効な録音ファイルです。", 400)
 
-
-    tmp_path = None
-    processed_path = None
-    # user_transcription = "" # tryブロック内で定義されるため、ここでは不要でも良い
-
+    # 2. 録音音声の文字起こし (共通関数を利用)
     try:
-        original_filename_for_log = recorded_audio.filename if recorded_audio.filename else "unknown_custom_audio"
-        tmp_suffix = os.path.splitext(original_filename_for_log)[1].lower()
-        if not tmp_suffix or tmp_suffix not in ['.webm', '.mp3', '.m4a', '.wav']: # 一般的な拡張子を想定
-            tmp_suffix = '.webm' # デフォルト
+        # カスタムシャドウイングでは冒頭カットは不要 (cut_head_ms=0)
+        full_transcription = process_and_transcribe_audio(recorded_audio_file)
 
-        base_name = f'tmp_eval_recording_{user_id}_{uuid.uuid4().hex}'
-        tmp_path = os.path.join(app.config['UPLOAD_FOLDER'], f'{base_name}{tmp_suffix}')
-        recorded_audio.save(tmp_path)
-        print(f"Saved temporary recorded file to: {tmp_path}")
+    except ValueError as ve:
+        return api_error_response(f"入力エラー: {ve}", 400)
+    except AudioProcessingError as ape:
+        return handle_transcription_error(ape, "/evaluate_custom_shadowing での音声処理エラー")
+    except Exception as e:
+        return handle_transcription_error(e, "/evaluate_custom_shadowing での文字起こしエラー")
 
-        processed_path = os.path.join(app.config['UPLOAD_FOLDER'], f'{base_name}_processed.wav')
-        print(f"Intended processed_path for evaluation: {processed_path}")
+    # 3. ウォームアップ除去処理 (これはこのルート固有のロジックなので残す)
+    #    config から WARMUP_TRANSCRIPT を取得するのが望ましい
+    warmup_script = current_app.config.get('WARMUP_TRANSCRIPT', "10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0")
+    user_transcription_for_eval = full_transcription # デフォルトは除去前
 
-        print(f"Converting recorded audio {tmp_path} to {processed_path} for transcription")
-        audio = AudioSegment.from_file(tmp_path)
-        # ここで pydub の from_file が失敗する可能性も考慮 (例: 非対応フォーマット、壊れたファイル)
-        # from_file が失敗した場合、FileNotFoundError ではなく pydub.exceptions.CouldntDecodeError などが発生する
-        audio.export(processed_path, format="wav")
-        print(f"Successfully converted recorded audio to {processed_path}")
+    numbers = warmup_script.split(", ")
+    possible_warmup_suffixes = [", ".join(numbers[i:]) for i in range(len(numbers))]
+    possible_warmup_suffixes.sort(key=len, reverse=True) # 長いものからマッチ
 
-        print(f"Transcribing processed recorded audio {processed_path}...")
-        full_transcription = transcribe_audio(processed_path)
-        # full_transcription が空文字列や予期せぬ値の場合のハンドリングも考慮するとより堅牢
-        print(f"Full transcription of recorded audio (first 100 chars): {full_transcription[:100]}...")
+    matched_suffix_found = None
+    normalized_full_recorded = full_transcription.lower().strip() # 比較用に正規化
 
-        # ウォームアップ除去ロジック
-        WARMUP_TRANSCRIPT = "10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0" # 定数として定義が良い
-        user_transcription_for_eval = full_transcription # ウォームアップ除去前のものを保持
+    for suffix_candidate in possible_warmup_suffixes:
+        if normalized_full_recorded.startswith(suffix_candidate.lower()):
+            actual_removed_part_length = len(suffix_candidate)
+            user_transcription_for_eval = full_transcription[actual_removed_part_length:].lstrip(" ,")
+            matched_suffix_found = suffix_candidate
+            current_app.logger.info(f"Warm-up part '{matched_suffix_found}' removed.")
+            break
 
-        # 修正されたウォームアップ除去ロジック (以前の会話で提案されたもの)
-        numbers = WARMUP_TRANSCRIPT.split(", ")
-        possible_warmup_suffixes = [", ".join(numbers[i:]) for i in range(len(numbers))]
-        possible_warmup_suffixes.sort(key=len, reverse=True) # 長いものからマッチさせる
+    if not matched_suffix_found:
+        current_app.logger.info("Warm-up part not identified in transcription.")
+        # ウォームアップが見つからなくても、エラーにはせずそのまま評価に進む
 
-        matched_suffix_found = None
-        normalized_full_recorded_transcription = full_transcription.lower().strip()
+    # 4. WER計算とDiff生成
+    try:
+        wer_score_val = calculate_wer(original_transcription, user_transcription_for_eval)
+        # カスタムシャドウイングの画面で diff_user/diff_original 両方が必要か確認
+        # とりあえず diff_html (simple diff) を使う例
+        diff_result_html = diff_html(original_transcription, user_transcription_for_eval)
+    except Exception as eval_err:
+        current_app.logger.error(f"WER/Diff計算エラー (Material ID: {material_id}): {eval_err}")
+        return api_error_response("評価結果の計算中にエラーが発生しました。", 500)
 
-        for suffix_candidate in possible_warmup_suffixes:
-            if normalized_full_recorded_transcription.startswith(suffix_candidate.lower()):
-                # 除去するサフィックスの実際のテキスト (大文字・小文字を保持) を取得
-                # full_transcription の先頭から suffix_candidate と同じ長さの部分文字列を取得
-                actual_removed_part_length = len(suffix_candidate)
-                user_transcription_for_eval = full_transcription[actual_removed_part_length:].lstrip(" ,") # 先頭の空白やコンマも除去
-                matched_suffix_found = suffix_candidate
-                print(f"Warm-up part '{matched_suffix_found}' removed. User transcription for eval: {user_transcription_for_eval[:100]}...")
-                break
-
-        if not matched_suffix_found:
-            print("Warm-up part not clearly identified or not present in transcription.")
-            # ウォームアップが見つからなかった場合、そのまま full_transcription を使う
-            user_transcription_for_eval = full_transcription
-
-
-        wer_score = calculate_wer(original_transcription, user_transcription_for_eval)
-        diff_result_html = diff_html(original_transcription, user_transcription_for_eval) # diff_html にも修正版を渡す
-
-        print(f"WER calculated: {wer_score*100:.2f}%")
-
-        # データベースへの保存
+    # 5. データベースへのログ保存
+    try:
         new_log = PracticeLog(
             user_id=user_id,
-            practice_type='custom', # 明示的に 'custom'
-            material_id=material_id, # session から取得した material_id
-            recording_id=None, # カスタム練習では recording_id は通常使わない (使途による)
-            wer=round(wer_score * 100, 2),
+            practice_type='custom', # タイプを 'custom' に
+            material_id=material_id, # セッションから取得した教材ID
+            recording_id=None, # 通常、カスタム練習では録音ファイル自体のIDは別途管理しない
+            wer=round(wer_score_val * 100, 2),
             original_text=original_transcription,
             user_text=user_transcription_for_eval, # ウォームアップ除去後
-            practiced_at=datetime.utcnow() # タイムスタンプを追加すると良い
+            practiced_at=datetime.utcnow()
         )
         db.session.add(new_log)
         db.session.commit()
-        print(f"PracticeLog saved with ID: {new_log.id}")
+        current_app.logger.info(f"Custom shadowing log saved (ID: {new_log.id}) for user {user_id}, material {material_id}")
+    except Exception as db_err:
+        db.session.rollback()
+        current_app.logger.error(f"Custom Shadowing ログ保存エラー (Material ID: {material_id}): {db_err}")
+        # ログ保存エラーは致命的ではないかもしれないが、ユーザーに通知する方が親切な場合もある
+        # return api_error_response("評価は完了しましたが、結果の保存に失敗しました。", 500)
 
-        return jsonify({
-            "wer": round(wer_score * 100, 2),
-            "diff_html": diff_result_html,
-            "original_transcription": original_transcription, # 教材の文字起こし
-            "user_transcription": user_transcription_for_eval # ユーザーの文字起こし（ウォームアップ除去後）
-            # "full_user_transcription": full_transcription # 参考情報としてウォームアップ除去前のものも返すか検討
-        })
+    # 6. 成功レスポンス
+    return api_success_response({
+        "wer": round(wer_score_val * 100, 2),
+        "diff_html": diff_result_html,
+        "original_transcription": original_transcription, # 参考用に返す
+        "user_transcription": user_transcription_for_eval # 参考用に返す
+        # "full_user_transcription": full_transcription # 必要ならウォームアップ除去前も返す
+    })
 
-    except FileNotFoundError as e:
-        db.session.rollback()
-        error_msg = f"ファイル処理中にエラーが発生しました (ファイルが見つからないか、アクセスできませんでした): {e}"
-        print(f"!! FileNotFoundError in /evaluate_custom_shadowing: {e} (tmp: {tmp_path}, proc: {processed_path})")
-        return jsonify({"error": error_msg }), 404 # or 500
-    except openai.APIError as e: # transcribe_audio から来る可能性のある OpenAI API エラー
-        db.session.rollback()
-        print(f"!! OpenAI API Error in /evaluate_custom_shadowing: {e}")
-        # handle_transcription_error があればそれを使う
-        return handle_transcription_error(e, "文字起こし処理中にAPIエラーが発生しました。")
-    except Exception as e:
-        db.session.rollback()
-        # 予期せぬエラーの詳細をログに出力
-        import traceback
-        print(f"!! Unexpected error in /evaluate_custom_shadowing (tmp: {tmp_path}, proc: {processed_path}): {e}\n{traceback.format_exc()}")
-        # クライアントには汎用的なメッセージを返すか、handle_transcription_error を使う
-        return jsonify({"error": f"評価処理中に予期せぬエラーが発生しました。管理者に連絡してください。"}), 500
-    finally:
-        # 一時ファイルの削除
-        if tmp_path and os.path.exists(tmp_path):
-            try:
-                os.remove(tmp_path)
-                print(f"Deleted temporary file: {tmp_path}")
-            except OSError as e_os:
-                print(f"!! Error deleting temporary file {tmp_path}: {e_os}")
-        if processed_path and os.path.exists(processed_path):
-            try:
-                os.remove(processed_path)
-                print(f"Deleted processed file: {processed_path}")
-            except OSError as e_os:
-                print(f"!! Error deleting processed file {processed_path}: {e_os}")
-        # db.session.remove() # Flask-SQLAlchemyでは通常不要
-#ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
 @app.route('/evaluate_shadowing', methods=['POST'])
+# @auth_required # 必要に応じて認証デコレータを追加
 def evaluate_shadowing():
-    from openai import OpenAI
-    import tempfile
-    from wer_utils import calculate_wer
-
+    # 1. リクエストデータの検証
+    #    - 'original_audio' は文字起こしには不要だが、存在チェックはしておく
     if 'original_audio' not in request.files or 'recorded_audio' not in request.files:
-        return api_error_response('Audio files are missing')
+        return api_error_response("教材音声または録音音声ファイルが不足しています。", 400)
 
-    original_audio = request.files['original_audio']
-    recorded_audio = request.files['recorded_audio']
+    # original_audio_file = request.files['original_audio'] # 必要なら変数に保持
+    recorded_audio_file = request.files['recorded_audio']
 
-    if not original_audio or not recorded_audio:
-        return api_error_response('Invalid audio files')
+    # FileStorage オブジェクト自体のチェック
+    if not recorded_audio_file or not recorded_audio_file.filename:
+        return api_error_response("無効な録音音声ファイルです。", 400)
 
+    # フォームから他の情報を取得
     genre = request.form.get("genre", "")
     level = request.form.get("level", "")
-    username = request.form.get("username", "anonymous")
+    username = request.form.get("username", "anonymous") # 認証を使う場合はヘッダーから取得推奨
 
-    user_transcribed = ""
-    tmp_in_path = None
-    tmp_out_path = None
+    # 2. 正解テキストの取得 (プリセット教材から)
+    original_transcribed = ""
+    # config から PRESET_FOLDER を取得
+    preset_base = current_app.config.get('PRESET_FOLDER', 'presets')
+    script_path = os.path.join(preset_base, 'shadowing', genre, level, 'script.txt')
 
+    if not genre or not level:
+        return api_error_response("ジャンルまたはレベルが指定されていません。", 400)
+
+    if os.path.exists(script_path):
+        try:
+            with open(script_path, 'r', encoding='utf-8') as f:
+                original_transcribed = f.read().strip()
+            if not original_transcribed:
+                 current_app.logger.warning(f"スクリプトファイルが空です: {script_path}")
+                 # 空のスクリプトを許容するか、エラーにするか要件次第
+                 # return api_error_response("正解スクリプトが空です。", 500)
+        except Exception as e:
+            current_app.logger.error(f"スクリプトファイルの読み込みエラー ({script_path}): {e}")
+            # ここはサーバー側の問題なので500エラー
+            return api_error_response("正解スクリプトの読み込み中にエラーが発生しました。", 500)
+    else:
+        current_app.logger.error(f"スクリプトファイルが見つかりません: {script_path}")
+        return api_error_response(f"指定された教材が見つかりません: {genre}/{level}", 404)
+
+    # 3. 録音音声の処理と文字起こし (共通関数を利用)
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_in:
-            recorded_audio.save(tmp_in.name)
-            tmp_in_path = tmp_in.name
+        # シャドウイング練習では、録音開始時のラグを考慮して先頭500msをカット
+        user_transcribed = process_and_transcribe_audio(
+            recorded_audio_file,
+            cut_head_ms=500 # ★冒頭カットを指定
+        )
 
-        audio = AudioSegment.from_file(tmp_in_path)
-        trimmed_audio = audio[500:]  # Skip first 500ms
-        tmp_out_path = tmp_in_path.replace(".webm", "_cut.wav")
-        trimmed_audio.export(tmp_out_path, format="wav")
+    except ValueError as ve: # ファイル形式エラーなど
+        return api_error_response(f"入力エラー: {ve}", 400)
+    except AudioProcessingError as ape: # 音声処理中のエラー (pydubなど)
+        return handle_transcription_error(ape, f"/evaluate_shadowing での音声処理エラー ({genre}/{level})")
+    except Exception as e: # 文字起こしAPIエラーなど
+        return handle_transcription_error(e, f"/evaluate_shadowing での文字起こしエラー ({genre}/{level})")
 
-        user_transcribed = transcribe_audio(tmp_out_path)
-
-        wer_score = calculate_wer(original_transcribed, user_transcribed)
+    # 4. WER計算とDiff生成 (これも共通化可能 -> 提案4)
+    try:
+        wer_score_val = calculate_wer(original_transcribed, user_transcribed)
+        # shadowing.html は diff_user と diff_original の両方を表示する可能性があるため get_diff_html を使用
         diff_user = get_diff_html(original_transcribed, user_transcribed, mode='user')
         diff_original = get_diff_html(original_transcribed, user_transcribed, mode='original')
+    except Exception as eval_err:
+        current_app.logger.error(f"WER/Diff計算エラー ({genre}/{level}): {eval_err}")
+        return api_error_response("評価結果の計算中にエラーが発生しました。", 500)
 
-        return jsonify({
-            "original_transcribed": original_transcribed,
-            "user_transcribed": user_transcribed,
-            "wer": round(wer_score * 100, 2),
-            "diff_user": diff_user,
-            "diff_original": diff_original
-        })
+    # 5. (任意) データベースへのログ保存
+    #    - shadowing-main.js は /api/practice/logs を呼び出す logAttempt 関数を持っている。
+    #    - バックエンドで直接ログを保存するか、フロントエンドに任せるか方針を決める。
+    #    - ここで直接保存する場合の例：
+    # try:
+    #     user_id_from_header = request.headers.get('X-Replit-User-Id') # 認証利用時
+    #     log = PracticeLog(
+    #         user_id=user_id_from_header or username, # 認証があればヘッダー優先
+    #         practice_type='preset', # プリセットシャドウイング
+    #         # recording_id や material_id は、この時点で特定できる情報に基づいて設定
+    #         # recording_id を保存するには、録音ファイルを永続化し、AudioRecordingに登録する必要がある
+    #         # もし genre/level で管理するなら、PracticeLogモデルにカラム追加が必要
+    #         wer=round(wer_score_val * 100, 2),
+    #         original_text=original_transcribed,
+    #         user_text=user_transcribed,
+    #         practiced_at=datetime.utcnow()
+    #     )
+    #     db.session.add(log)
+    #     db.session.commit()
+    #     current_app.logger.info(f"Preset shadowing log saved for user {log.user_id}, {genre}/{level}")
+    # except Exception as db_err:
+    #     db.session.rollback()
+    #     current_app.logger.error(f"Shadowing ログ保存エラー ({genre}/{level}): {db_err}")
+    #     # ログ保存エラーはレスポンスに影響させない場合もある
 
-    except FileNotFoundError as e:
-        return handle_transcription_error(e, "Audio file processing error")
-    except openai.APIError as e:
-        return handle_transcription_error(e, "Speech recognition error")
-    except Exception as e:
-        return handle_transcription_error(e, "Evaluation error")
-    finally:
-        for path in [tmp_in_path, tmp_out_path]:
-            if path and os.path.exists(path):
-                try:
-                    os.remove(path)
-                except OSError as e:
-                    print(f"Error removing temporary file {path}: {e}")
-
+    # 6. 成功レスポンス (共通関数を使用)
+    return api_success_response({
+        "original_transcribed": original_transcribed,
+        "user_transcribed": user_transcribed,
+        "wer": round(wer_score_val * 100, 2),
+        "diff_user": diff_user, # shadowing.html が期待するキー名に合わせる
+        "diff_original": diff_original # shadowing.html が期待するキー名に合わせる
+    })
 
     
     
