@@ -217,13 +217,24 @@ def read_aloud():
     if request.method == "GET":
         return render_template("read_aloud.html")
 
+    # Get reference text from form or file
     reference_text = request.form.get("reference_text", "").strip()
-    reference_file = request.files.get("reference_file")
-    if reference_file and reference_file.filename.endswith(".txt"):
-        reference_text = reference_file.read().decode("utf-8").strip()
+    if "reference_file" in request.files:
+        reference_file = request.files["reference_file"]
+        if reference_file and reference_file.filename.endswith(".txt"):
+            reference_text = reference_file.read().decode("utf-8").strip()
 
+    # Validate audio file
+    if "audio_file" not in request.files:
+        return api_error_response("音声ファイルが提供されていません。", 400)
+    
     audio_file = request.files["audio_file"]
-    audio_path = os.path.join(app.config["UPLOAD_FOLDER"], secure_filename(audio_file.filename))
+    if not audio_file or not audio_file.filename:
+        return api_error_response("無効な音声ファイルです。", 400)
+
+    # Save audio file
+    audio_filename = secure_filename(audio_file.filename)
+    audio_path = os.path.join(app.config["UPLOAD_FOLDER"], audio_filename)
     audio_file.save(audio_path)
 
     recognized_text = transcribe_audio(audio_path)
