@@ -380,10 +380,10 @@ def api_presets():
 
 
     @app.route('/api/recordings/upload', methods=['POST'])
-    @auth_required # 修正後の auth_required を想定
-    def upload_recording():
-        try:
-            user_id = request.headers.get('X-Replit-User-Id')
+@auth_required # 修正後の auth_required を想定
+def upload_recording():
+    try:
+        user_id = request.headers.get('X-Replit-User-Id')
             # user_id の存在チェックはデコレータで行われるはずだが、念のため残しても良い
             # if not user_id:
             #     return api_error_response("User not authenticated", 401)
