@@ -190,15 +190,25 @@ project/
 ├── transcribe_utils.py  # Audio transcription utilities
 ├── youtube_utils.py    # YouTube integration utilities
 ├── utils.py           # General utilities
+├── test.py          # Test suite
 ├── core/             # Core functionality
 │   ├── audio_utils.py    # Audio processing utilities
 │   └── responses.py      # API response handlers
+├── instance/         # Instance-specific files
 ├── migrations/          # Database migrations
 │   ├── versions/       # Migration versions
-│   └── env.py         # Migration environment
+│   ├── README
+│   ├── alembic.ini
+│   ├── env.py         # Migration environment
+│   └── script.py.mako
 ├── presets/           # Practice materials
 │   ├── sentences/    # Sentence practice content
+│   │   └── genre1/
 │   └── shadowing/   # Shadowing practice content
+│       ├── genre1/
+│       ├── genre2/
+│       ├── genre3/
+│       └── genre4/
 ├── static/          # Static assets
 │   ├── audio/      # Audio files
 │   ├── js/        # JavaScript modules
@@ -212,7 +222,8 @@ project/
 │   │   ├── recordings.js
 │   │   ├── sentence-practice.js
 │   │   └── shadowing-main.js
-│   └── style.css
+│   ├── style.css
+│   └── youtube.js
 ├── templates/     # HTML templates
 │   ├── compare.html
 │   ├── custom_shadowing.html
@@ -225,7 +236,10 @@ project/
 │   ├── sentence_practice.html
 │   ├── shadowing.html
 │   └── youtube.html
-└── uploads/     # User uploaded files
+├── unused/        # Unused utilities
+│   └── upload_to_sheet.py
+├── uploads/     # User uploaded files
+└── wer/        # WER-related files
 ```
 
 ## 🔑 API Endpoints
