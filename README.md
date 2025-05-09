@@ -115,36 +115,56 @@ $ python app.py  # http://localhost:5000
 
 ---
 
-## Directory Structure
+## Directory Structure
 
 ```
 project/
-├── app.py                # Main Flask application & routes
+├── app.py                # Main Flask application
 ├── config.py             # Environment configurations
 ├── models.py             # SQLAlchemy database models
-├── utils.py             # Common utility functions
 ├── core/                # Core application modules
-│   ├── audio_utils.py   # Audio processing & FFmpeg operations
-│   └── responses.py     # API response standardization
-├── static/              # Frontend assets
-│   ├── audio/          # System audio files (warm-up.mp3, etc.)
-│   ├── js/             # Frontend JavaScript modules
-│   │   ├── audio-recorder.js    # Audio recording functionality
-│   │   ├── preset-manager.js    # Practice material management
-│   │   ├── shadowing-main.js    # Main shadowing feature
-│   │   └── [feature].js         # Feature-specific modules
-│   └── style.css        # Global stylesheet
-├── templates/           # Jinja2 HTML templates
-│   ├── shadowing.html   # Shadowing practice view
-│   ├── custom_shadowing.html    # Custom practice view
-│   └── [feature].html   # Feature-specific views
-├── presets/             # Practice materials
-│   ├── sentences/       # Read-aloud materials
-│   └── shadowing/       # Shadowing materials by genre/level
-├── migrations/          # Database migration scripts
-├── instance/           # Instance-specific files (SQLite, etc.)
-├── uploads/            # User-uploaded audio files
-└── requirements.txt    # Python dependencies
+│   ├── services/       # Service layer modules
+│   │   ├── transcribe_utils.py  # Speech-to-text service
+│   │   └── youtube_utils.py     # YouTube API integration
+│   ├── audio_utils.py   # Audio processing operations
+│   ├── auth.py         # Authentication utilities
+│   ├── diff_viewer.py  # Text difference visualization
+│   ├── responses.py    # API response standardization
+│   ├── text_utils.py   # Text processing utilities
+│   └── wer_utils.py    # Word Error Rate calculation
+├── routes/             # Route modules
+│   ├── __init__.py
+│   └── api_routes.py   # API endpoint definitions
+├── static/             # Frontend assets
+│   ├── audio/         # System audio files
+│   │   ├── ah.mp3
+│   │   └── warm-up.mp3
+│   ├── js/            # Frontend JavaScript modules
+│   │   ├── audio-recorder.js
+│   │   ├── compare.js
+│   │   ├── custom-shadowing.js
+│   │   ├── preset-manager.js
+│   │   ├── shadowing-main.js
+│   │   └── [feature].js
+│   ├── style.css      # Global stylesheet
+│   └── youtube.js     # YouTube integration
+├── templates/          # Jinja2 HTML templates
+│   ├── compare.html
+│   ├── custom_shadowing.html
+│   ├── dashboard.html
+│   ├── index.html
+│   ├── ranking.html
+│   ├── read_aloud.html
+│   ├── shadowing.html
+│   └── youtube.html
+├── presets/            # Practice materials
+│   ├── sentences/     # Read-aloud materials by genre/level
+│   └── shadowing/     # Shadowing materials by genre/level
+├── migrations/         # Database migration scripts
+├── instance/          # Instance-specific files
+├── uploads/           # User-uploaded audio files
+├── tests/             # Test suite
+└── requirements.txt   # Python dependencies
 ```
 
 ---
