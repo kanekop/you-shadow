@@ -31,6 +31,7 @@ from config import config_by_name # config.pyから設定辞書をインポー�
 from core.responses import api_error_response
 from core.auth import auth_required # ← これを追加
 from routes.api_routes import api_bp
+from routes.stripe_routes import stripe_bp
 # (既存のimport)
 from flask import jsonify, current_app, json # json をインポート
 from sqlalchemy.exc import SQLAlchemyError
@@ -50,6 +51,7 @@ CHUNK_OVERLAP_MS = 5000
 # Flask app initialization
 app = Flask(__name__)
 app.register_blueprint(api_bp)
+app.register_blueprint(stripe_bp)
 app.config.from_object('config')
 # 環境変数 FLASK_CONFIG (ReplitのSecretsで設定) に基づいて設定を読み込む
 # Secretsに FLASK_CONFIG がなければ 'dev' (開発モード) をデフォルトとする

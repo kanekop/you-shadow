@@ -24,6 +24,8 @@ class Config:
     # APIキー (ReplitのSecretsで設定)
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
     YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
+    STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+    STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
 
     # データベース設定 (ReplitのSecretsでDATABASE_URLを設定)
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///data.db' # Secrets未設定時のフォールバック(開発用)
