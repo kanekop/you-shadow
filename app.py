@@ -7,33 +7,28 @@ import math
 import json
 import tempfile
 from datetime import datetime, timedelta
-from collections import defaultdict
-from functools import wraps
 
 # Third-party imports
 import pandas as pd
 import openai
 from pydub import AudioSegment
 from flask import (
-    Flask, render_template, request, redirect, url_for, 
+    Flask, render_template, request, url_for, 
     jsonify, send_from_directory, session, current_app
 )
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import SQLAlchemyError # DBエラーを具体的に捕捉する場合
 from sqlalchemy import desc # 降順ソート用
 from flask_migrate import Migrate
 from werkzeug.utils import secure_filename
 
 # Local imports
-from models import db, Material, AudioRecording, PracticeLog
+from models import db, Material, PracticeLog
 from core.services.transcribe_utils import transcribe_audio
-from core.wer_utils import wer, calculate_wer
-from core.diff_viewer import diff_html, get_diff_html
+from core.wer_utils import wer
+from core.diff_viewer import diff_html
 from core.services.youtube_utils import youtube_bp, check_captions
 from config import config_by_name # config.pyから設定辞書をインポート
-from core.responses import api_error_response, api_success_response
-from core.audio_utils import process_and_transcribe_audio, AudioProcessingError # インポート
+from core.responses import api_error_response
 from core.auth import auth_required # ← これを追加
 from routes.api_routes import api_bp
 
