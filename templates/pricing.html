@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>料金プラン - you-shadow</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>料金プラン</h1>
+    <div id="products-container">
+        </div>
+    <div id="message-container"></div>
+
+    <script>
+        const stripe = Stripe("{{ current_app.config.STRIPE_PUBLIC_KEY }}"); // Flaskから公開鍵を渡す
+        const productsContainer = document.getElementById('products-container');
+        const messageContainer = document.getElementById('message-container');
+
+        async function fetchProducts() {
+            try {
+                const response = await fetch('/billing/products', {
+                    method: 'GET',
+                    headers: {
+                        'X-Replit-User-Id': "{{ request.headers.get('X-Replit-User-Id') }}", // ReplitユーザーIDをヘッダーに
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'プランの取得に失敗しました。');
+                }
+                const products = await response.json();
+                renderProducts(products);
+            } catch (error) {
+                messageContainer.textContent = 'エラー: ' + error.message;
+                console.error('プラン取得エラー:', error);
+            }
+        }
+
+        function renderProducts(products) {
+            productsContainer.innerHTML = ''; // コンテナをクリア
+            products.forEach(product => {
+                const productDiv = document.createElement('div');
+                productDiv.classList.add('product-card'); // CSSでスタイル付け
+                productDiv.innerHTML = `
+                    <h2>${product.name}</h2>
+                    <p>${product.description || ''}</p>
+                    <p>価格: ${product.price_amount / 100} ${product.currency.toUpperCase()}</p>
+                    ${product.api_call_limit ? `<p>APIコール上限: ${product.api_call_limit}回` : ''}
+                    ${product.plan_type === 'subscription' ? '/月</p>' : '</p>'}
+                    ${product.duration_hours ? `<p>有効期間: ${product.duration_hours}時間</p>` : ''}
+                    <button class="purchase-btn" data-price-id="${product.stripe_price_id}">
+                        ${product.plan_type === 'subscription' ? '登録する' : '購入する'}
+                    </button>
+                `;
+                productsContainer.appendChild(productDiv);
+            });
+
+            document.querySelectorAll('.purchase-btn').forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    const priceId = event.target.dataset.priceId;
+                    await createCheckoutSession(priceId);
+                });
+            });
+        }
+
+        async function createCheckoutSession(priceId) {
+            try {
+                const response = await fetch('/billing/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'X-Replit-User-Id': "{{ request.headers.get('X-Replit-User-Id') }}",
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ priceId: priceId })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'チェックアウトセッションの作成に失敗しました。');
+                }
+                const sessionData = await response.json();
+                // Stripe Checkoutにリダイレクト (sessionData.checkoutUrl を使う方法もある)
+                const result = await stripe.redirectToCheckout({ sessionId: sessionData.sessionId });
+                if (result.error) {
+                    messageContainer.textContent = 'リダイレクトエラー: ' + result.error.message;
+                    console.error('Stripeリダイレクトエラー:', result.error);
+                }
+            } catch (error) {
+                messageContainer.textContent = 'エラー: ' + error.message;
+                console.error('セッション作成エラー:', error);
+            }
+        }
+
+        // ページ読み込み時にプランを取得して表示
+        fetchProducts();
+    </script>
+</body>
+</html>

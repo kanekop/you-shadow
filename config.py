@@ -26,16 +26,22 @@ class Config:
     YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
     STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
     STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
-
+    STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET')
+    STRIPE_SUCCESS_URL = os.environ.get('STRIPE_SUCCESS_URL', 'http://localhost:5000/payment-success') # 適切なURLに変更
+    STRIPE_CANCEL_URL = os.environ.get('STRIPE_CANCEL_URL', 'http://localhost:5000/payment-cancel')   # 適切なURLに変更
+    STRIPE_CUSTOMER_PORTAL_RETURN_URL = os.environ.get('STRIPE_CUSTOMER_PORTAL_RETURN_URL', 'http://localhost:5000/account') # 適切なURLに変更
     # データベース設定 (ReplitのSecretsでDATABASE_URLを設定)
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///data.db' # Secrets未設定時のフォールバック(開発用)
 
     # ログファイル (JSONベースのログを使用している場合)
     LOG_FILE = 'preset_log.json'
 
-
+    #トライアル
+    TRIAL_PERIOD_DAYS = 7  # 新規ユーザーのトライアル日数
+    TRIAL_API_CALL_LIMIT = 50 # トライアル中のAPIコール上限
+    
     # シャドウイング機能関連の定数
-    WARMUP_TRANSCRIPT = "10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0"
+    WARMUP_TRANSCRIPT = "5, 4, 3, 2, 1, 0"
     # WARMUP_AUDIO_PATH は static/audio フォルダ内のファイル名を指定
     WARMUP_AUDIO_FILENAME = 'warm-up.mp3' # config.pyでファイル名だけ定義
                                        # app.py で url_for や os.path.join でフルパスを生成

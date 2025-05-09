@@ -62,6 +62,13 @@ app.config.from_object(config_by_name[config_name])
 # この呼び出しは、app.configに設定がロードされた後に行う
 config_by_name[config_name].init_app(app)
 
+# Stripe APIキーは stripe_routes.py の before_request で設定する形にしたので、
+# ここでの明示的な stripe.api_key = ... は不要かもしれません。
+# ただし、アプリ起動時にキーの存在チェックはしておくと良いでしょう。
+if not app.config.get('STRIPE_SECRET_KEY'):
+    app.logger.critical("STRIPE_SECRET_KEY is not configured. Billing will not work.")
+if not app.config.get('STRIPE_WEBHOOK_SECRET'):
+    app.logger.warning("STRIPE_WEBHOOK_SECRET is not configured. Webhook processing may fail.")
 
 # APIキーの存在チェック (特に本番環境で重要)
 if config_name == 'prod':
