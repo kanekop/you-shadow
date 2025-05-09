@@ -31,6 +31,13 @@ from config import config_by_name # config.pyから設定辞書をインポー�
 from core.responses import api_error_response
 from core.auth import auth_required # ← これを追加
 from routes.api_routes import api_bp
+# (既存のimport)
+from flask import jsonify, current_app, json # json をインポート
+from sqlalchemy.exc import SQLAlchemyError
+import openai
+from werkzeug.exceptions import HTTPException
+from models import db # db をインポート (SQLAlchemyErrorハンドラで使うため)
+from core.audio_utils import AudioProcessingError # import を追加
 
 
 
@@ -140,6 +147,114 @@ def get_presets_structure(practice_type="shadowing"):
             presets[genre] = levels
 
     return presets
+
+
+# --- エラーハンドラの定義 ---
+
+@app.errorhandler(SQLAlchemyError)
+def handle_database_error(error):
+    db.session.rollback()
+    log_prefix = "Database Error (Global Handler)"
+    user_message = "データベース処理中にエラーが発生しました。管理者にご連絡ください。" # 少し変更
+    current_app.logger.error(f"{log_prefix}: {str(error)}", exc_info=error)
+    return api_error_response(user_message, 500, exception_info=error, log_prefix=log_prefix)
+
+@app.errorhandler(openai.APITimeoutError)
+def handle_openai_timeout_error(error):
+    log_prefix = "OpenAI API Timeout (Global Handler)"
+    user_message = "文字起こしサービスが時間内に応答しませんでした。しばらくしてから再試行してください。"
+    current_app.logger.error(f"{log_prefix}: {str(error)}", exc_info=error)
+    return api_error_response(user_message, 504, exception_info=error, log_prefix=log_prefix)
+
+@app.errorhandler(openai.APIConnectionError)
+def handle_openai_connection_error(error):
+    log_prefix = "OpenAI API Connection Error (Global Handler)"
+    user_message = "文字起こしサービスへの接続に失敗しました。ネットワーク環境を確認するか、しばらくしてから再試行してください。"
+    current_app.logger.error(f"{log_prefix}: {str(error)}", exc_info=error)
+    return api_error_response(user_message, 503, exception_info=error, log_prefix=log_prefix)
+
+@app.errorhandler(ValueError)
+def handle_value_error(error):
+    log_prefix = "ValueError (Global Handler)"
+    current_app.logger.warning(f"{log_prefix}: {str(error)}", exc_info=True) # exc_info=True でスタックトレースも記録
+    # ユーザーにエラー詳細をそのまま見せるのはセキュリティリスクやUX低下の可能性があるため、慎重に。
+    # 特定のValueErrorメッセージに基づいてユーザーフレンドリーなメッセージに振り分けるのが理想。
+    user_message = "リクエストの内容に誤りがあります。"
+    # 例: transcribe_audio からの具体的なメッセージはそのまま使っても良いかもしれない
+    if "ファイルサイズが上限" in str(error) or \
+       "音声ファイルが空です" in str(error) or \
+       "サポートされていないファイル形式です" in str(error) or \
+       "音声ファイルが無効です" in str(error): # audio_utils.py からの例外も考慮
+        user_message = str(error)
+    return api_error_response(user_message, 400, log_error=False, exception_info=error, log_prefix=log_prefix) # log_error=False で重複ログを避ける
+
+
+
+@app.errorhandler(openai.RateLimitError)
+def handle_openai_rate_limit_error(error):
+    log_prefix = "OpenAI API Rate Limit (Global Handler)"
+    user_message = "文字起こしサービスの利用が一時的に制限されています。しばらくしてから再試行してください。"
+    current_app.logger.warning(f"{log_prefix}: {str(error)}", exc_info=error) # warningレベルでよいかも
+    return api_error_response(user_message, 429, exception_info=error, log_prefix=log_prefix)
+
+@app.errorhandler(openai.AuthenticationError)
+def handle_openai_auth_error(error):
+    log_prefix = "OpenAI API Authentication Error (Global Handler)"
+    user_message = "文字起こしサービスの設定に誤りがあります。管理者にご連絡ください。" # ユーザーには詳細を伝えない
+    current_app.logger.error(f"{log_prefix}: {str(error)}", exc_info=error)
+    return api_error_response(user_message, 500, exception_info=error, log_prefix=log_prefix) # サーバー側の設定不備なので500
+
+@app.errorhandler(openai.APIStatusError) # transcribe_utils で RuntimeError にラップする前のものを捕捉する場合
+def handle_openai_status_error(error):
+    log_prefix = f"OpenAI API Status Error {error.status_code} (Global Handler)"
+    user_message = f"文字起こしサービスでエラーが発生しました(コード: {error.status_code})。管理者にご連絡ください。"
+    current_app.logger.error(f"{log_prefix}: {error.message}", exc_info=error)
+    # ステータスコードに応じてユーザーメッセージやHTTPステータスを調整可能
+    return api_error_response(user_message, error.status_code if error.status_code else 500, exception_info=error, log_prefix=log_prefix)
+
+
+@app.errorhandler(FileNotFoundError)
+def handle_file_not_found_error(error):
+    log_prefix = "FileNotFoundError (Global Handler)"
+    current_app.logger.error(f"{log_prefix}: {str(error)}", exc_info=True)
+    return api_error_response("必要なファイルが見つかりませんでした。", 404, log_error=False, exception_info=error, log_prefix=log_prefix)
+
+@app.errorhandler(IOError) # ファイル保存時のエラーなど
+def handle_io_error(error):
+    log_prefix = "IOError (Global Handler)"
+    current_app.logger.error(f"{log_prefix}: {str(error)}", exc_info=True)
+    return api_error_response("ファイルの読み書き中にエラーが発生しました。", 500, log_error=False, exception_info=error, log_prefix=log_prefix)
+
+# core.audio_utils.AudioProcessingError のハンドラ
+@app.errorhandler(AudioProcessingError)
+def handle_audio_processing_error(error):
+    log_prefix = "AudioProcessingError (Global Handler)"
+    current_app.logger.error(f"{log_prefix}: {str(error)}", exc_info=True)
+    # エラーメッセージはユーザーに分かりやすいものになっている想定
+    return api_error_response(f"音声ファイルの処理中にエラーが発生しました: {str(error)}", 500, log_error=False, exception_info=error, log_prefix=log_prefix)
+
+
+@app.errorhandler(HTTPException) # Flask (Werkzeug) が投げるHTTPエラー
+def handle_http_exception(error):
+    log_prefix = f"HTTP Exception {error.code} (Global Handler)"
+    current_app.logger.warning(f"{log_prefix}: {error.name} - {error.description}", exc_info=True) # ここも exc_info=True
+    response = error.get_response()
+    response.data = json.dumps({"error": error.description or error.name}) # よりシンプルなエラーメッセージ
+    response.content_type = "application/json"
+    return response
+
+@app.errorhandler(Exception) # 全てのキャッチされなかった例外
+def handle_generic_exception(error):
+    # SQLAlchemyError など、より具体的なハンドラでキャッチされるべきだったものが
+    # ここに来た場合、ロールバック漏れを防ぐ
+    if isinstance(error, SQLAlchemyError):
+        db.session.rollback()
+
+    log_prefix = "Unhandled Exception (Global Handler)"
+    current_app.logger.critical(f"{log_prefix}: {str(error)}", exc_info=True) # 重大なエラーなので critical
+    return api_error_response("サーバー内部で重大なエラーが発生しました。管理者にご連絡ください。", 500, log_error=False, exception_info=error, log_prefix=log_prefix)
+
+
 
 
 # Basic routes
