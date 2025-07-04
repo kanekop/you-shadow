@@ -645,6 +645,23 @@ def sentence_practice():
 def compare():
     return render_template('compare.html')
 
+@app.route('/pricing')
+# @auth_required # 必要に応じて
+def pricing_page():
+    replit_user_id = request.headers.get('X-Replit-User-Id')
+    stripe_publishable_key = current_app.config.get('STRIPE_PUBLISHABLE_KEY') # ここで取得
+
+    if not stripe_publishable_key:
+        # 万が一、公開鍵が設定されていなかった場合のエラーハンドリング
+        # (本番では Secrets に設定されているはず)
+        current_app.logger.error("STRIPE_PUBLISHABLE_KEY is not configured!")
+        # 適切なエラーページを表示するか、エラーメッセージを返す
+        return "Stripe configuration error: Publishable key missing.", 500
+
+    return render_template('pricing.html',
+                           replit_user_id=replit_user_id,
+                           stripe_publishable_key=stripe_publishable_key) # テンプレートに渡す
+
 
 #############################
 # app.pyの記述

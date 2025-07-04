@@ -5,95 +5,319 @@
     <title>料金プラン - you-shadow</title>
     <script src="https://js.stripe.com/v3/"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* pricing.html固有のスタイル */
+        .products-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            width: 300px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .product-card h2 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+        .product-card .price {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .purchase-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .purchase-btn:hover {
+            background-color: #367c39;
+        }
+        #message-container {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .message-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
+        .message-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
+    </style>
 </head>
 <body>
-    <h1>料金プラン</h1>
-    <div id="products-container">
+    <div class="nav-header">
+        <div class="container">
+            <a href="/" class="back-button">← ホームに戻る</a>
+            <h1>💎 料金プラン</h1>
         </div>
-    <div id="message-container"></div>
+    </div>
+
+    <div class="container">
+        <div id="user-status-container" style="margin-bottom: 20px; padding: 15px; background-color: #f0f8ff; border-radius: 5px; border: 1px solid #b0e0e6;">
+            <p>現在のステータスを読み込み中です...</p>
+        </div>
+
+        <div id="products-container" class="products-container">
+            </div>
+        <div id="message-container"></div>
+
+        <div id="customer-portal-section" style="margin-top: 30px; text-align: center; display: none;">
+            <button id="customer-portal-btn" class="secondary-btn">サブスクリプション管理</button>
+        </div>
+    </div>
 
     <script>
-        const stripe = Stripe("{{ current_app.config.STRIPE_PUBLIC_KEY }}"); // Flaskから公開鍵を渡す
+        <script>
+        const stripe = Stripe("{{ stripe_publishable_key }}"); // ここでテンプレート変数から受け取る
+//        const stripe = Stripe("{{ current_app.config.STRIPE_PUBLISHABLE_KEY }}");
         const productsContainer = document.getElementById('products-container');
         const messageContainer = document.getElementById('message-container');
+        const userStatusContainer = document.getElementById('user-status-container');
+        const customerPortalSection = document.getElementById('customer-portal-section');
+        const customerPortalBtn = document.getElementById('customer-portal-btn');
+        let replitUserId = ""; // ReplitユーザーIDを保持
+
+        // Replitユーザー情報を取得 (index.htmlと同様のロジックでヘッダーから取得するのが望ましいが、ここでは仮)
+        // 実際には、サーバーサイドでレンダリング時にユーザーIDを渡すか、
+        // 認証済みであることを前提にヘッダーを付与する。
+        // この例では、親HTMLから渡されることを期待。
+        // もし Flask テンプレート内で `request.headers.get('X-Replit-User-Id')` が確実に取れるなら、
+        // それを script タグ内に直接埋め込むのが簡単。
+        const userMeta = document.querySelector('meta[name="replit-user-id"]');
+        if (userMeta) {
+            replitUserId = userMeta.content;
+        } else {
+            // バックアップとして、index.html で localStorage に保存したものを読む試み
+            replitUserId = localStorage.getItem('replitUserId'); // 仮。X-Replit-User-Id を使うのが本筋
+        }
+        // さらに堅牢にするには、サーバーからユーザーIDをテンプレート経由で渡すのがベスト。
+        // 例: <body data-replit-user-id="{{ request.headers.get('X-Replit-User-Id') }}">
+        const bodyReplitUserId = document.body.dataset.replitUserId;
+        if (bodyReplitUserId) {
+            replitUserId = bodyReplitUserId;
+        }
+
+
+        async function fetchUserStatus() {
+            if (!replitUserId) {
+                userStatusContainer.innerHTML = '<p style="color: red;">ユーザーIDが取得できません。ログイン状態を確認してください。</p>';
+                // プラン表示や購入ボタンを無効化するなどの処理も考慮
+                return;
+            }
+            try {
+                const response = await fetch('/api/stripe/user-status', {
+                    method: 'GET',
+                    headers: { 'X-Replit-User-Id': replitUserId }
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'ユーザーステータスの取得に失敗しました。');
+                }
+                const status = await response.json();
+                renderUserStatus(status.data); // api_success_response は data プロパティに実データを持つ
+            } catch (error) {
+                userStatusContainer.innerHTML = `<p style="color: red;">ステータス取得エラー: ${error.message}</p>`;
+                console.error('ユーザーステータス取得エラー:', error);
+            }
+        }
+
+        function renderUserStatus(status) {
+            let statusHtml = `<h4>現在のプラン: `;
+            let planDetails = "";
+            if (status.is_special_free_account) {
+                statusHtml += "特別無料アカウント ✨";
+                planDetails = `<p>APIコール: 無制限</p>`;
+            } else if (status.active_plan_type === 'trial') {
+                statusHtml += "無料トライアル 🚀";
+                planDetails = `<p>APIコール残り: ${status.api_calls_remaining}回</p>`;
+                if (status.plan_expires_at) {
+                    planDetails += `<p>トライアル終了日: ${new Date(status.plan_expires_at).toLocaleDateString()}</p>`;
+                }
+            } else if (status.active_plan_type === 'subscription') {
+                statusHtml += "サブスクリプション契約中 💳";
+                planDetails = `<p>APIコール残り (今月): ${status.api_calls_remaining}回</p>`;
+                if (status.plan_expires_at) {
+                    planDetails += `<p>現在の請求期間終了日: ${new Date(status.plan_expires_at).toLocaleDateString()}</p>`;
+                }
+            } else if (status.active_plan_type === 'one_time') {
+                statusHtml += "ワンタイムパス有効 ⏳";
+                planDetails = `<p>APIコール残り: ${status.api_calls_remaining}回</p>`;
+                if (status.plan_expires_at) {
+                    planDetails += `<p>有効期限: ${new Date(status.plan_expires_at).toLocaleString()}</p>`;
+                }
+            } else {
+                statusHtml += "なし (または期限切れ)";
+                planDetails = `<p>新しいプランの購入をご検討ください。</p>`;
+            }
+            statusHtml += `</h4>${planDetails}`;
+            userStatusContainer.innerHTML = statusHtml;
+
+            if (status.manage_subscription_url_available) {
+                customerPortalSection.style.display = 'block';
+            } else {
+                customerPortalSection.style.display = 'none';
+            }
+        }
 
         async function fetchProducts() {
+            if (!replitUserId) {
+                 // ユーザーIDがない場合はプラン表示もしない（またはログインを促す）
+                productsContainer.innerHTML = '<p>プランを表示するにはログインが必要です。</p>';
+                return;
+            }
             try {
-                const response = await fetch('/billing/products', {
+                const response = await fetch('/api/stripe/products', {
                     method: 'GET',
-                    headers: {
-                        'X-Replit-User-Id': "{{ request.headers.get('X-Replit-User-Id') }}", // ReplitユーザーIDをヘッダーに
-                        'Content-Type': 'application/json'
-                    }
+                    headers: { 'X-Replit-User-Id': replitUserId } // 認証ヘッダー
                 });
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.error || 'プランの取得に失敗しました。');
                 }
-                const products = await response.json();
-                renderProducts(products);
+                const products = await response.json(); // productsResponse.data ではなく、直接 products を取得
+                renderProducts(products); // そのまま渡す
             } catch (error) {
                 messageContainer.textContent = 'エラー: ' + error.message;
+                messageContainer.className = 'message-error';
                 console.error('プラン取得エラー:', error);
             }
         }
 
         function renderProducts(products) {
-            productsContainer.innerHTML = ''; // コンテナをクリア
+            productsContainer.innerHTML = '';
+            if (!products || products.length === 0) {
+                productsContainer.innerHTML = '<p>現在提供中のプランはありません。</p>';
+                return;
+            }
             products.forEach(product => {
                 const productDiv = document.createElement('div');
-                productDiv.classList.add('product-card'); // CSSでスタイル付け
+                productDiv.classList.add('product-card');
                 productDiv.innerHTML = `
-                    <h2>${product.name}</h2>
-                    <p>${product.description || ''}</p>
-                    <p>価格: ${product.price_amount / 100} ${product.currency.toUpperCase()}</p>
-                    ${product.api_call_limit ? `<p>APIコール上限: ${product.api_call_limit}回` : ''}
-                    ${product.plan_type === 'subscription' ? '/月</p>' : '</p>'}
-                    ${product.duration_hours ? `<p>有効期間: ${product.duration_hours}時間</p>` : ''}
-                    <button class="purchase-btn" data-price-id="${product.stripe_price_id}">
-                        ${product.plan_type === 'subscription' ? '登録する' : '購入する'}
-                    </button>
-                `;
-                productsContainer.appendChild(productDiv);
-            });
+                    <h2><span class="math-inline">\{produc</5\>t\.name\}</h2\>
+<p>{product.description || ''}</p>
+<p class="price">${(product.price_amount / 100).toLocaleString('ja-JP', { style: 'currency', currency: product.currency.toUpperCase() })}</p>
+${product.api_call_limit ? <p>APIコール: ${product.api_call_limit}回 : ''}
+${product.plan_type === 'subscription' ? ' / 月</p>' : '</p>'}
+${product.duration_hours ? <p>有効期間: ${product.duration_hours}時間</p> : ''}
+<button class="purchase-btn" data-price-id="product.stripe 
+p
+​
+ rice 
+i
+​
+ d"data−plan−type="{product.plan_type}">
+${product.plan_type === 'subscription' ? 'サブスクリプション登録' : '購入する'}
+</button>
+`;
+productsContainer.appendChild(productDiv);
+});   
 
-            document.querySelectorAll('.purchase-btn').forEach(button => {
-                button.addEventListener('click', async (event) => {
-                    const priceId = event.target.dataset.priceId;
-                    await createCheckoutSession(priceId);
+                document.querySelectorAll('.purchase-btn').forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        if (!replitUserId) {
+                            messageContainer.textContent = 'エラー: ログインしていません。';
+                            messageContainer.className = 'message-error';
+                            return;
+                        }
+                        const priceId = event.target.dataset.priceId;
+                        messageContainer.textContent = 'チェックアウトセッションを作成中...';
+                        messageContainer.className = '';
+                        await createCheckoutSession(priceId);
+                    });
                 });
-            });
-        }
-
-        async function createCheckoutSession(priceId) {
-            try {
-                const response = await fetch('/billing/create-checkout-session', {
-                    method: 'POST',
-                    headers: {
-                        'X-Replit-User-Id': "{{ request.headers.get('X-Replit-User-Id') }}",
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ priceId: priceId })
-                });
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'チェックアウトセッションの作成に失敗しました。');
-                }
-                const sessionData = await response.json();
-                // Stripe Checkoutにリダイレクト (sessionData.checkoutUrl を使う方法もある)
-                const result = await stripe.redirectToCheckout({ sessionId: sessionData.sessionId });
-                if (result.error) {
-                    messageContainer.textContent = 'リダイレクトエラー: ' + result.error.message;
-                    console.error('Stripeリダイレクトエラー:', result.error);
-                }
-            } catch (error) {
-                messageContainer.textContent = 'エラー: ' + error.message;
-                console.error('セッション作成エラー:', error);
             }
-        }
 
-        // ページ読み込み時にプランを取得して表示
-        fetchProducts();
-    </script>
-</body>
+            async function createCheckoutSession(stripePriceId) {
+                try {
+                    const response = await fetch('/api/stripe/create-checkout-session', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Replit-User-Id': replitUserId // 認証ヘッダー
+                        },
+                        body: JSON.stringify({ stripePriceId: stripePriceId })
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'チェックアウトセッションの作成に失敗しました。');
+                    }
+                    const sessionDataResponse = await response.json();
+                    const session = sessionDataResponse.data; // api_success_response
+
+                    // Stripe Checkoutページにリダイレクト
+                    const result = await stripe.redirectToCheckout({ sessionId: session.sessionId });
+                    if (result.error) {
+                        messageContainer.textContent = 'リダイレクトエラー: ' + result.error.message;
+                        messageContainer.className = 'message-error';
+                        console.error('Stripeリダイレクトエラー:', result.error);
+                    }
+                } catch (error) {
+                    messageContainer.textContent = 'エラー: ' + error.message;
+                    messageContainer.className = 'message-error';
+                    console.error('セッション作成エラー:', error);
+                }
+            }
+
+            customerPortalBtn.addEventListener('click', async () => {
+                if (!replitUserId) {
+                    messageContainer.textContent = 'エラー: ログインしていません。';
+                    messageContainer.className = 'message-error';
+                    return;
+                }
+                messageContainer.textContent = '顧客ポータルにリダイレクト中...';
+                messageContainer.className = '';
+                try {
+                    const response = await fetch('/api/stripe/customer-portal', {
+                        method: 'POST', // または GET, エンドポイント定義による
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Replit-User-Id': replitUserId
+                        }
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || '顧客ポータルの起動に失敗しました。');
+                    }
+                    const portalDataResponse = await response.json();
+                    const portalData = portalDataResponse.data; // api_success_response
+                    window.location.href = portalData.portalUrl;
+                } catch (error) {
+                    messageContainer.textContent = 'エラー: ' + error.message;
+                    messageContainer.className = 'message-error';
+                    console.error('顧客ポータルエラー:', error);
+                }
+            });
+
+            // ページ読み込み時に実行
+            async function initializePricingPage() {
+                // Replitの認証ヘッダーからユーザーIDを取得する処理をここに入れる
+                // Flaskテンプレートから直接JavaScript変数に渡すのが最も確実
+                // const userIdFromBody = document.body.dataset.replitUserId;
+                // if (userIdFromBody) {
+                //     replitUserId = userIdFromBody;
+                // } else {
+                //     console.warn("Replit User ID not found on body data attribute for pricing page.");
+                //     // 必要に応じてログインを促す処理
+                // }
+
+                await fetchUserStatus(); // 最初にユーザーステータスを取得・表示
+                await fetchProducts();   // 次に商品リストを取得・表示
+            }
+
+            // DOMContentLoadedではなく、必要な情報が揃ってから初期化
+             window.onload = initializePricingPage;
+             // もしReplitのユーザーIDを確実に取得する方法があるなら、その後に呼び出す
+             // 例: if (replitUserId) { initializePricingPage(); }
+
+        </script>
+    </body>
 </html>
