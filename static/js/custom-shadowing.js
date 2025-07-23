@@ -44,7 +44,7 @@ class CustomShadowing {
     } else {
         console.warn("Replit User ID not found in body data attribute.");
     }
-  
+
     // ★ 隠しフィールドから前回の教材情報があるか確認し、ボタンを有効化
     if (this.dom.prevMaterialIdInput && this.dom.prevMaterialIdInput.value) {
       this.dom.usePreviousMaterialBtn.disabled = false;
@@ -110,15 +110,15 @@ class CustomShadowing {
         this.showUserAlert('前回の教材データが見つかりません。', 'error');
         return;
     }
-  
+
     this.showUserAlert('前回の教材を読み込んでいます...', 'info');
-  
+
     // ★ 隠しフィールドから実際のデータを取得
     const materialId = this.dom.prevMaterialIdInput.value;
     const audioUrl = this.dom.prevMaterialAudioUrlInput.value;
     const script = this.dom.prevMaterialScriptFullTextarea.value;
     const filename = this.dom.prevMaterialFilename.textContent; // 表示されているファイル名
-  
+
     // currentMaterial に取得した情報をセット
     this.currentMaterial = {
       id: materialId,
@@ -126,7 +126,7 @@ class CustomShadowing {
       transcription: script,
       name: filename // ファイル名も保持
     };
-  
+
     // UIを更新
     this.dom.practiceMaterialTitle.textContent = `練習中: ${this.currentMaterial.name}`;
     this.dom.originalAudio.src = this.currentMaterial.audio_url;
@@ -136,7 +136,7 @@ class CustomShadowing {
     this.dom.toggleTranscriptBtn.textContent = 'スクリプト表示';
     // practiceSection の dataset に materialId をセット (評価時に使う場合)
     this.dom.practiceSection.dataset.materialId = this.currentMaterial.id;
-  
+
     this.showSection(this.dom.practiceSection);
     this.resetPracticeUI();
   }
@@ -242,7 +242,7 @@ class CustomShadowing {
         this.showUserAlert(`サポートされていないファイル形式です: ${file.type}。MP3, M4A, WAV, WebM等でお願いします。`, 'error');
         return;
     }
-    const MAX_UPLOAD_SIZE_MB = 25;
+    const MAX_UPLOAD_SIZE_MB = 100;
     if (file.size > MAX_UPLOAD_SIZE_MB * 1024 * 1024) {
         this.showUserAlert(`ファイルサイズが大きすぎます。${MAX_UPLOAD_SIZE_MB}MB以下のファイルを選択してください。`, 'error');
         return;
@@ -333,7 +333,7 @@ class CustomShadowing {
     }
   }
 
-  
+
   async startRecording() {
     if (!this.currentMaterial || !this.dom.originalAudio.src || this.dom.originalAudio.src === window.location.href) { // srcが空か、ベースURLのままの場合
         this.showUserAlert('練習用の音声が読み込まれていません。教材を選択またはアップロードしてください。', 'error');
@@ -403,20 +403,20 @@ class CustomShadowing {
       this.showUserAlert('評価する録音データがありません。', 'error');
       return;
     }
-  
+
     // セッションを使うので material_id は送らない想定
     // const materialId = this.dom.practiceSection.dataset.materialId;
     // if (!materialId) {
     //     this.showUserAlert('現在の教材情報が見つかりません。', 'error');
     //     return;
     // }
-  
+
     const formData = new FormData();
     formData.append('recorded_audio', recordedBlob, `custom_recording_${Date.now()}.webm`);
     // formData.append('material_id', materialId); // 送る場合は追加
-  
+
     this.showSpinner('評価中...');
-  
+
     try {
       const response = await fetch('/api/evaluate_custom_shadowing', {
         method: 'POST',
@@ -435,7 +435,7 @@ class CustomShadowing {
       }
       this.displayEvaluationResult(data);
       this.showUserAlert('評価が完了しました。', 'success');
-  
+
     } catch (error) {
       // ... (エラー処理は変更なし) ...
       console.error('Evaluation error:', error);
@@ -444,9 +444,9 @@ class CustomShadowing {
       this.dom.resultBox.innerHTML = `<p class="error-message">評価エラー: ${error.message || '不明なエラー'}</p>`;
     }
   }
-  
 
-  
+
+
   displayEvaluationResult(data) {
       this.dom.resultBox.innerHTML = `
         <h3>✅ WER: ${data.wer}%</h3>
@@ -466,6 +466,15 @@ class CustomShadowing {
             <div class="display-text" style="white-space: pre-wrap; max-height: 150px; overflow-y: auto;">${data.user_transcription}</div>
         </div>
       `;
+  }
+
+  validateFileSize(file) {
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    if (file.size > maxSize) {
+      this.showUserAlert('ファイルサイズが大きすぎます。100MB以下のファイルを選択してください。', 'error');
+      return false;
+    }
+    return true;
   }
 } // クラス定義の終わり
 

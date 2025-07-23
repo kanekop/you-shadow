@@ -41,7 +41,7 @@ class AudioRecorder {
         }
       };
 
-      
+
       this.mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           this.audioChunks.push(event.data);
@@ -67,14 +67,15 @@ class AudioRecorder {
 
   getBlob(cutHeadMs = 500) {
     const fullBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-  
+
     if (cutHeadMs === 0) {
       return fullBlob;
     }
-  
+
     // 💡 カット処理は後段で行うため、ここではそのまま返す
     return fullBlob;
   }
 }
 
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 window.AudioRecorder = AudioRecorder;
