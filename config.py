@@ -19,7 +19,7 @@ class Config:
     STATIC_AUDIO_FOLDER = os.path.join('static', 'audio') # static/audio へのパス
 
     # ファイルアップロードの制限
-    MAX_CONTENT_LENGTH = 25 * 1024 * 1024  # 25MB
+    MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB
 
     # APIキー (ReplitのSecretsで設定)
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')

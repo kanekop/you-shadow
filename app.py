@@ -510,7 +510,7 @@ def upload_custom_audio():
         print(f"ファイルサイズ: {file_size / (1024*1024):.2f} MB")
 
         # Whisperのサイズ制限 (transcribe_audio内でチェックされるが、ここでも事前チェック可能)
-        MAX_WHISPER_SIZE = 25 * 1024 * 1024
+        MAX_WHISPER_SIZE = 100 * 1024 * 1024
 
         if file_size > MAX_WHISPER_SIZE:
             # サイズが大きい場合はチャンク処理 (既存ロジック)
