@@ -509,10 +509,10 @@ def upload_custom_audio():
         file_size = os.path.getsize(original_filepath)
         print(f"ファイルサイズ: {file_size / (1024*1024):.2f} MB")
 
-        # Whisperのサイズ制限 (transcribe_audio内でチェックされるが、ここでも事前チェック可能)
-        MAX_WHISPER_SIZE = 100 * 1024 * 1024
+        # OpenAI Whisperの実際のサイズ制限 (25MB)
+        OPENAI_WHISPER_LIMIT = 25 * 1024 * 1024
 
-        if file_size > MAX_WHISPER_SIZE:
+        if file_size > OPENAI_WHISPER_LIMIT:
             # サイズが大きい場合はチャンク処理 (既存ロジック)
             print("ファイルサイズが上限を超えています。分割処理を開始します...")
             audio = AudioSegment.from_file(original_filepath)

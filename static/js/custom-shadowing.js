@@ -291,7 +291,7 @@ class CustomShadowing {
             resolve(xhr.response);
           } else {
             let errorMsg = `アップロードまたは処理に失敗しました (HTTP ${xhr.status})。`;
-            if (xhr.response && xhr.response.error) {
+            if (xhr.response && typeof xhr.response === 'object' && xhr.response.error) {
               errorMsg = xhr.response.error;
             } else if (xhr.statusText) {
               errorMsg += ` ${xhr.statusText}`;
