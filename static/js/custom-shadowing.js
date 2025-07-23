@@ -19,6 +19,7 @@ class CustomShadowing {
       originalAudio: document.getElementById('originalAudio'),
       transcriptionText: document.getElementById('transcriptionText'),
       toggleTranscriptBtn: document.getElementById('toggleTranscript'),
+      copyTranscriptBtn: document.getElementById('copyTranscriptBtn'),
       startBtn: document.getElementById('startBtn'),
       stopBtn: document.getElementById('stopBtn'),
       submitBtn: document.getElementById('submitBtn'),
@@ -64,6 +65,7 @@ class CustomShadowing {
     this.dom.stopBtn.addEventListener('click', () => this.stopRecording());
     this.dom.submitBtn.addEventListener('click', () => this.submitRecording());
     this.dom.toggleTranscriptBtn.addEventListener('click', () => this.toggleTranscript());
+    this.dom.copyTranscriptBtn.addEventListener('click', () => this.copyTranscript());
     this.dom.audioFileInput.addEventListener('change', () => { // ファイル選択時に即アップロードボタンを有効化する例
         if (this.dom.audioFileInput.files.length > 0) {
             this.dom.uploadBtn.disabled = false;
@@ -388,6 +390,34 @@ class CustomShadowing {
     const isHidden = this.dom.transcriptionText.style.display === 'none';
     this.dom.transcriptionText.style.display = isHidden ? 'block' : 'none';
     this.dom.toggleTranscriptBtn.textContent = isHidden ? 'スクリプト非表示' : 'スクリプト表示';
+    this.dom.copyTranscriptBtn.style.display = isHidden ? 'inline-block' : 'none';
+  }
+
+  copyTranscript() {
+    if (!this.dom.transcriptionText.textContent) {
+      this.showUserAlert('コピーするスクリプトがありません。', 'error');
+      return;
+    }
+
+    navigator.clipboard.writeText(this.dom.transcriptionText.textContent)
+      .then(() => {
+        this.showUserAlert('スクリプトをクリップボードにコピーしました！', 'success');
+      })
+      .catch(err => {
+        console.error('Copy failed:', err);
+        // フォールバック: テキストエリアを作成してコピー
+        const textArea = document.createElement('textarea');
+        textArea.value = this.dom.transcriptionText.textContent;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          this.showUserAlert('スクリプトをクリップボードにコピーしました！', 'success');
+        } catch (fallbackErr) {
+          this.showUserAlert('コピーに失敗しました。手動でコピーしてください。', 'error');
+        }
+        document.body.removeChild(textArea);
+      });
   }
 
 
