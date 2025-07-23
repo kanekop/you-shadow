@@ -484,3 +484,4 @@ document.addEventListener('DOMContentLoaded', () => {
   // new CustomShadowing(); // ★ initializePage 内でID取得するように変更済み
   new CustomShadowing();
 });
+```
