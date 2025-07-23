@@ -36,7 +36,7 @@ def get_openai_client():
     return _client
 
 # --- 定数 ---
-MAX_WHISPER_SIZE_MB = 100
+MAX_WHISPER_SIZE_MB = 25
 MAX_WHISPER_SIZE_BYTES = MAX_WHISPER_SIZE_MB * 1024 * 1024
 
 
